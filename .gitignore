@@ -1,0 +1,68 @@
+# Maven output
+target/
+**/target/
+
+# Eclipse
+.project
+.classpath
+.settings/
+.factorypath
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+out/
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# VSCode
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Package files
+*.jar
+*.war
+*.zip
+
+# Environment/config secrets
+.env
+
+# Build artifacts
+build/
+
+# Generated module file
+**/*.omod
+omod/target/
+api/target/
+
+# Java backup files
+*~
+*.bak
+*.swp
+*.swo
+*.rej
+
+# Coverage/test reports
+coverage/
+test-output/
+.surefire-*
+
+# Temporary files
+tmp/
+*.tmp
+
+# SDK generated files
+openmrs.properties
