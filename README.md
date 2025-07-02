@@ -1,2 +1,2 @@
-# sesp-ct
-Developed by C-Saúde in collaboration with MISAU and ITECH, the module enables automatic integration of FT case submissions and therapeutic recommendations into SESP.
+# SESP-CT
+This OpenMRS module extends the SESP (Sistema Electrónico de Seguimento de Pacientes) platform to support interoperability with the National Therapeutic Committee System (SCT) for managing suspected HIV treatment failure (FT) cases in Mozambique. Developed by C-Saúde in collaboration with MISAU and ITECH, the module enables automatic integration of FT case submissions and therapeutic recommendations into SESP, improving clinical follow-up, minimizing manual tasks, and enhancing national HIV care monitoring.
