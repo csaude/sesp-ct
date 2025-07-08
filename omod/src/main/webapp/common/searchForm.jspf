@@ -1,0 +1,81 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<form method="GET" id="searchForm" name="searchForm">
+	<div class="searchFields">
+		<div>
+			<label for="startDate"><openmrs:message code="sespct.search.startDate" /></label>
+			<div class="input-wrapper">
+				<input type="text" size="10" id="startDate" onclick="showCalendar(this);" autocomplete="off" placeholder="" />
+				<div class="clear">&#10005;</div>
+			</div>
+		</div>
+
+		<div>
+			<label for="endDate"><openmrs:message code="sespct.search.endDate" /></label>
+			<div class="input-wrapper">
+				<input type="text" size="10" id="endDate" onclick="showCalendar(this);" autocomplete="off" placeholder="" />
+				<div class="clear">&#10005;</div>
+			</div>
+		</div>
+
+		<div class="divider"></div>
+
+		<div>
+			<label for="estado"><openmrs:message code="sespct.search.status" /></label>
+			<select id="estado" name="estado">
+				<option value="ALL"><openmrs:message code="sespct.search.status.ALL" /></option>
+				<option value="SEM_RESPOSTA"><openmrs:message code="sespct.search.status.SEM_RESPOSTA" /></option>
+				<option value="APROVADO"><openmrs:message code="sespct.search.status.APROVADO" /></option>
+				<option value="ADIADO"><openmrs:message code="sespct.search.status.ADIADO" /></option>
+				<option value="NAO_PROCESSADO"><openmrs:message code="sespct.search.status.NAO_PROCESSADO" /></option>
+			</select>
+		</div>
+
+		<div>
+			<label for="ncft"><openmrs:message code="sespct.search.ncft" /></label>
+			<div class="input-wrapper">
+				<input type="text" size="22" maxlength="30" id="ncft" name="ncft" placeholder="" />
+				<div class="clear">&#10005;</div>
+			</div>
+		</div>
+
+		<div>
+			<label for="nid"><openmrs:message code="sespct.search.nid" /></label>
+			<div class="input-wrapper">
+				<input type="text" size="22" maxlength="31" id="nid" name="nid" placeholder="" />
+				<div class="clear">&#10005;</div>
+			</div>
+		</div>
+
+		<div>
+			<label for="us"><openmrs:message code="sespct.search.us" /></label>
+			<select id="us" name="usCode">
+				<option value="ALL"><openmrs:message code="sespct.search.us.ALL" /></option>
+				<option value="US001">Centro de Saúde Xai-Xai (US001)</option>
+				<option value="US002">Hospital Provincial Quelimane (US002)</option>
+				<option value="US003">Centro de Saúde Nampula (US003)</option>
+				<option value="US004">Hospital Central Maputo (US004)</option>
+				<option value="US005">Centro de Saúde Pemba (US005)</option>
+			</select>
+		</div>
+
+		<div>
+			<button type="submit"><openmrs:message code="sespct.search.submit" /></button>
+		</div>
+	</div>
+</form>
+
+<script>
+	window.addEventListener('DOMContentLoaded', function () {
+		const clearButtons = document.querySelectorAll('.input-wrapper .clear');
+		clearButtons.forEach(function (clearButton) {
+			clearButton.addEventListener('click', function () {
+				const inputElement = clearButton.parentElement.querySelector("input");
+				if (inputElement) {
+					inputElement.value = '';
+				}
+			});
+		});
+	});
+</script>
+
+<openmrs:htmlInclude file="${pageContext.request.contextPath}/moduleResources/sespct/calendar.js" />

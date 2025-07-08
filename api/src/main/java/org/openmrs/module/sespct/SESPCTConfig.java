@@ -18,4 +18,6 @@ import org.springframework.stereotype.Component;
 public class SESPCTConfig {
 	
 	public final static String MODULE_PRIVILEGE = "SESPCT Privilege";
+	
+	public static final String SESPCT_GP = "sespct.gp";
 }

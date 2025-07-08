@@ -6,7 +6,7 @@ public class GutterListExt extends LinkExt {
 	
 	@Override
 	public String getLabel() {
-		return "SESP-CT";
+		return "CT-Interoperabilidade";
 	}
 	
 	@Override

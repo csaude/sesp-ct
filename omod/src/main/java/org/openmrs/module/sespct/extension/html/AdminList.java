@@ -42,7 +42,7 @@ public class AdminList extends AdministrationSectionExt {
 		Map<String, String> map = new HashMap<String, String>();
 		
 		// Only keep the UI Framework page link
-		map.put("sespct/sespct.page", "SESP-CT Interoperabilidade");
+		map.put("sespct/sespct.page", "CT-Interoperabilidade");
 		
 		return map;
 	}

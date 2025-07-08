@@ -46,11 +46,6 @@ table.disa-table.disa-table-clear th {
   margin: 5px 0 10px;
 }
 
-.disa-table-results tr th:first-child,
-.disa-table-results tr td:first-child {
-  display: none;
-}
-
 .disa-table-results .actions {
   cursor: pointer;
 }
