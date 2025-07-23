@@ -20,17 +20,10 @@
 	<require_version>${openmrsPlatformVersion}</require_version>
 
 	<!-- Extensions -->
-
 	<extension>
 		<id>sespct.header.navigation</id>
 		<point>org.openmrs.gutter.tools</point>
 		<class>org.openmrs.module.sespct.extension.html.GutterListExt</class>
-	</extension>
-
-	<extension>
-		<id>sespct.banner.link</id>
-		<point>org.openmrs.admin.list</point>
-		<class>org.openmrs.module.sespct.extension.html.AdminList</class>
 	</extension>
 
 	<aware_of_modules>

@@ -15,7 +15,10 @@ import org.springframework.stereotype.Component;
  * Contains module's config.
  */
 @Component("sespct.SESPCTConfig")
-public class SESPCTConfig {
+public final class SESPCTConfig {
+	
+	private SESPCTConfig() {
+	}
 	
 	public final static String MODULE_PRIVILEGE = "SESPCT Privilege";
 	

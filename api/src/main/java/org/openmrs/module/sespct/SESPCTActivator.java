@@ -9,25 +9,17 @@
  */
 package org.openmrs.module.sespct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.openmrs.GlobalProperty;
-import org.openmrs.api.AdministrationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.BaseModuleActivator;
-import org.openmrs.module.Module;
-import org.openmrs.module.ModuleClassLoader;
-import org.openmrs.module.ModuleFactory;
-
-import javax.servlet.ServletContext;
-import java.util.Enumeration;
 
 /**
  * This class contains the logic that is run every time this module is either started or shutdown
  */
 public class SESPCTActivator extends BaseModuleActivator {
 	
-	private Log log = LogFactory.getLog(this.getClass());
+	private static final Logger log = LoggerFactory.getLogger(SESPCTActivator.class);
 	
 	@Override
 	public void willStart() {
