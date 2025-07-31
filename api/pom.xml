@@ -1,22 +1,106 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.openmrs.module</groupId>
-		<artifactId>sespct</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
-	</parent>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.openmrs.module</groupId>
+        <artifactId>sespct</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>sespct-api</artifactId>
-	<packaging>jar</packaging>
-	<name>SESPCT API</name>
-	<description>API project for SESPCT</description>
+    <artifactId>sespct-api</artifactId>
+    <packaging>jar</packaging>
+    <name>SESPCT API</name>
+    <description>API project for SESPCT</description>
     <dependencies>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-			<scope>provided</scope>
+            <groupId>org.openmrs.api</groupId>
+            <artifactId>openmrs-api</artifactId>
+            <type>jar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openmrs.web</groupId>
+            <artifactId>openmrs-web</artifactId>
+            <type>jar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openmrs.api</groupId>
+            <artifactId>openmrs-api</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openmrs.web</groupId>
+            <artifactId>openmrs-web</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openmrs.test</groupId>
+            <artifactId>openmrs-test</artifactId>
+            <type>pom</type>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- End OpenMRS core -->
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>fluent-hc</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient-cache</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore-ab</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore-nio</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
         </dependency>
     </dependencies>
 </project>

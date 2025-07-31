@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <module configVersion="1.2">
-	
 	<!-- Base Module Properties -->
 	<id>${project.parent.artifactId}</id>
 	<name>${project.parent.name}</name>
@@ -29,24 +27,36 @@
 	<aware_of_modules>
 		<aware_of_module>org.openmrs.module.legacyui</aware_of_module>
 	</aware_of_modules>
-	
-	
-	<!-- AOP
+
+	<!-- Privileges -->
+	<privilege>
+		<name>App: sespct.app</name>
+		<description>Permite acesso à aplicação SESP-CT</description>
+	</privilege>
+
+	<!-- Hibernate Annotated Classes -->
+	<packagesWithMappedClasses>
+		org.openmrs.module.sespct.api.model
+	</packagesWithMappedClasses>
+
+	<!-- Required Modules -->
+	<require_modules>
+		<require_module version="${openmrsPlatformVersion}">org.openmrs.module.webservices.rest</require_module>
+	</require_modules>
+
+	<!-- AOP -->
+	<!--
 	<advice>
 		<point>org.openmrs.api.FormService</point>
 		<class>@MODULE_PACKAGE@.advice.DuplicateFormAdvisor</class>
 	</advice>
-	 /AOP -->
-	
-	<privilege>
-			<name>App: sespct.app</name>
-			<description>Permite acesso à aplicação SESP-CT</description>
-	</privilege>
+	-->
 
 
 
 
-	<!-- Required Global Properties 
+	<!-- Required Global Properties -->
+	<!--
 	<globalProperty>
 		<property>@MODULE_ID@.someProperty</property>
 		<defaultValue></defaultValue>
@@ -56,7 +66,8 @@
 			and possible values for the global property.
 		</description>
 	</globalProperty>
-	/Required Global Properties -->
+	-->
+	<!-- /Required Global Properties -->
 	
 	<!--
 	<dwr>

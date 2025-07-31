@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.sespct;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.openmrs.module.sespct.api.SESPCTService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.openmrs.api.context.Context;
@@ -19,38 +22,42 @@ import org.openmrs.module.BaseModuleActivator;
  */
 public class SESPCTActivator extends BaseModuleActivator {
 	
-	private static final Logger log = LoggerFactory.getLogger(SESPCTActivator.class);
+	private Log log = LogFactory.getLog(this.getClass());
 	
-	@Override
+	public void willRefreshContext() {
+		log.info("Refreshing SESP-CT Module");
+	}
+	
+	public void contextRefreshed() {
+		log.info("SESP-CT Module refreshed");
+	}
+	
 	public void willStart() {
-		log.debug("Starting SESPCT Module");
-		Context.getAdministrationService().setGlobalProperty("sespct.extensions.loaded", "true");
+		log.info("Starting SESP-CT Module");
 	}
 	
-	@Override
 	public void started() {
-		log.info("Started SESPCT Module");
-	}
-	
-	@Override
-	public void willStop() {
-		log.info("Stopping SESPCT - trying to clean up extensions");
+		log.info("SESP-CT Module started");
+		
 		try {
-			org.openmrs.module.Module module = org.openmrs.module.ModuleFactory.getModuleById("sespct");
-			if (module != null) {
-				module.getExtensions().clear();
-				log.info("Extensions cleared successfully.");
-			} else {
-				log.warn("Could not find module 'sespct' to clear extensions.");
-			}
+			// Get the service that handles our business logic
+			SESPCTService sespCtService = Context.getService(SESPCTService.class);
+			
+			// Create tables and populate with dummy data
+			sespCtService.initializeModule();
+			
+			log.info("SESP-CT Module initialization completed successfully");
 		}
 		catch (Exception e) {
-			log.error("Error while trying to clear extensions on stop", e);
+			log.error("Error initializing SESP-CT Module", e);
 		}
 	}
 	
-	@Override
+	public void willStop() {
+		log.info("Stopping SESP-CT Module");
+	}
+	
 	public void stopped() {
-		log.info("Stopped SESPCT Module");
+		log.info("SESP-CT Module stopped");
 	}
 }

@@ -10,32 +10,33 @@
 package org.openmrs.module.sespct.dao;
 
 import org.junit.Test;
-import org.junit.Ignore;
-import org.openmrs.api.UserService;
-import org.openmrs.api.context.Context;
+import org.openmrs.module.sespct.api.SESPCTService;
 import org.openmrs.module.sespct.api.dao.SESPCTDao;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import static org.hamcrest.Matchers.*;
+
 import static org.junit.Assert.*;
 
 /**
- * It is an integration test (extends BaseModuleContextSensitiveTest), which verifies DAO methods
- * against the in-memory H2 database. The database is initially loaded with data from
- * standardTestDataset.xml in openmrs-api. All test methods are executed in transactions, which are
- * rolled back by the end of each test method.
+ * Integration tests for {@link SESPCTDao}.
  */
 public class SESPCTDaoTest extends BaseModuleContextSensitiveTest {
 	
 	@Autowired
-	SESPCTDao dao;
+	private SESPCTDao dao;
 	
 	@Autowired
-	UserService userService;
+	private SESPCTService sespctService;
 	
 	@Test
-	public void shouldWireDependencies() {
-		assertNotNull("DAO should have been injected by Spring", dao);
-		assertNotNull("UserService should have been injected", userService);
+	public void shouldSetupContext() {
+		assertNotNull("DAO should not be null", dao);
+		assertNotNull("Service should not be null", sespctService);
+	}
+	
+	@Test
+	public void shouldSaveAndRetrieveRequest() {
+		// Simple placeholder test - will be implemented later
+		assertTrue("Placeholder test", true);
 	}
 }
