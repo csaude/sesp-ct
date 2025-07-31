@@ -9,11 +9,7 @@
  */
 package org.openmrs.module.sespct.api;
 
-import org.openmrs.annotation.Authorized;
-import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
-import org.openmrs.module.sespct.SESPCTConfig;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The main service of this module, which is exposed for other modules. See

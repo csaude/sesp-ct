@@ -1,5 +1,9 @@
 package org.openmrs.module.sespct.web.controller;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -18,6 +22,18 @@ public class SespctController {
 		model.addAttribute("user", "Hello Shaquil Hanif!");
 		
 		return "/module/sespct/sespct/index";
+	}
+	
+	@RequestMapping(value = "manageftcases/export.form", method = RequestMethod.POST)
+	public void String(HttpServletRequest request, HttpServletResponse response) {
+		String startDate = request.getParameter("startDate");
+		String endDate = request.getParameter("endDate");
+		
+		if (StringUtils.isEmpty(startDate) || StringUtils.isEmpty(endDate)) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Start Date and End Date are required.");
+			return;
+		}
+		log.info("Start Date: " + startDate + " End Date " + endDate);
 	}
 	
 	@RequestMapping(value = "test", method = RequestMethod.GET)
