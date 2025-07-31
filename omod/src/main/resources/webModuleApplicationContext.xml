@@ -20,7 +20,7 @@
   		    http://www.springframework.org/schema/util
   		    http://www.springframework.org/schema/util/spring-util-3.0.xsd">
 
-<!--	<context:component-scan base-package="org.openmrs.module.sespct.web.controller" />-->
+	<context:component-scan base-package="org.openmrs.module.sespct.web.controller" />
 
 	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"/>
 </beans>

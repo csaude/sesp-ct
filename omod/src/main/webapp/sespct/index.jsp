@@ -1,6 +1,8 @@
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/template/include.jsp" %>
 <%@ include file="/WEB-INF/template/header.jsp" %>
+<jsp:useBean id="currentDate" class="java.util.Date" />
 
 <openmrs:require privilege="Permite acesso à aplicação SESP-CT" otherwise="/login.htm"
                  redirect="/module/sespct/sespct.form" />
@@ -11,18 +13,17 @@
 
 <h2><openmrs:message code="sespct.title"/></h2>
 
-<p>
-    <small>
-        <small>
-            <fmt:message key="sespct.lastSync">
-                <fmt:param value="8 de Julho de 2025" />
-                <fmt:param value="11:36h" />
-                <fmt:param value="10 minutos" />
-            </fmt:message>
-        </small>
-    </small>
-</p>
-
+<%--<p>--%>
+<%--    <small>--%>
+<%--        <small>--%>
+<%--            <fmt:message key="sespct.lastSync">--%>
+<%--                <fmt:param value="<fmt:formatDate value='${currentDate}' pattern='dd \'de\' MMMM \'de\' yyyy' />" />--%>
+<%--                <fmt:param value="<fmt:formatDate value='${currentDate}' pattern='HH:mm\'h\'' />" />--%>
+<%--                <fmt:param value="10 mins" />--%>
+<%--            </fmt:message>--%>
+<%--        </small>--%>
+<%--    </small>--%>
+<%--</p>--%>
 
 <div>
     <b class="boxHeader"><openmrs:message code="sespct.search.header"/></b>
@@ -30,6 +31,13 @@
         <%@ include file="../common/searchForm.jspf" %>
     </div>
 </div>
+
+<c:if test="${not empty errorMessage}">
+    <div class="error">
+        <strong>Error:</strong> ${errorMessage}
+    </div>
+    <br/>
+</c:if>
 
 <div class="box">
     <table id="ftResultsTable" class="disa-table disa-table-results" style="width:100%; font-size:12px;">
@@ -50,81 +58,79 @@
         </tr>
         </thead>
         <tbody>
-        <tr>
-            <td>US Maputo (001)</td>
-            <td>123456789</td>
-            <td><a href="#">NCFT001</a></td>
-            <td>AJ</td>
-            <td>M</td>
-            <td>32</td>
-            <td>01/07/2025</td>
-            <td>05/07/2025</td>
-            <td>06/07/2025</td>
-            <td>Aprovado</td>
-            <td>-</td>
-            <td>-</td>
-        </tr>
-        <tr>
-            <td>US Beira (002)</td>
-            <td>987654321</td>
-            <td><a href="#">NCFT002</a></td>
-            <td>BN</td>
-            <td>F</td>
-            <td>28</td>
-            <td>15/06/2025</td>
-            <td>20/06/2025</td>
-            <td>21/06/2025</td>
-            <td>Não processado</td>
-            <td>NID não encontrado</td>
-            <td><a href="#"><openmrs:message code="sespct.mapNid"/></a></td>
-        </tr>
-        <tr>
-            <td>US Nampula (003)</td>
-            <td>111222333</td>
-            <td><a href="#">NCFT003</a></td>
-            <td>CL</td>
-            <td>M</td>
-            <td>45</td>
-            <td>02/06/2025</td>
-            <td>-</td>
-            <td>04/06/2025</td>
-            <td>Sem resposta</td>
-            <td>-</td>
-            <td>-</td>
-        </tr>
-        <tr>
-            <td>US Xai-Xai (004)</td>
-            <td>444555666</td>
-            <td><a href="#">NCFT004</a></td>
-            <td>DM</td>
-            <td>F</td>
-            <td>39</td>
-            <td>10/05/2025</td>
-            <td>12/05/2025</td>
-            <td>13/05/2025</td>
-            <td>Adiado</td>
-            <td>-</td>
-            <td>-</td>
-        </tr>
-        <tr>
-            <td>US Chimoio (005)</td>
-            <td>777888999</td>
-            <td><a href="#">NCFT005</a></td>
-            <td>EP</td>
-            <td>M</td>
-            <td>50</td>
-            <td>03/05/2025</td>
-            <td>06/05/2025</td>
-            <td>07/05/2025</td>
-            <td>Aprovado</td>
-            <td>-</td>
-            <td>-</td>
-        </tr>
+        <c:choose>
+            <c:when test="${empty sespctRequests}">
+                <tr>
+                    <td colspan="12" style="text-align: center; font-style: italic;">
+                        Nenhum caso encontrado com os critérios selecionados.
+                    </td>
+                </tr>
+            </c:when>
+            <c:otherwise>
+                <c:forEach var="request" items="${sespctRequests}">
+                    <tr>
+                        <td>${request.unidadeSanitaria} (${request.codigoUnidadeSanitaria})</td>
+                        <td>${request.nid}</td>
+                        <td>
+                            <a href="${pageContext.request.contextPath}/module/sespct/viewRequest.form?pedidoId=${request.pedidoId}">
+                                    ${request.pedidoId}
+                            </a>
+                        </td>
+                        <td>${request.iniciais}</td>
+                        <td>
+                            <c:choose>
+                                <c:when test="${request.sexo == 'masculino'}">M</c:when>
+                                <c:when test="${request.sexo == 'feminino'}">F</c:when>
+                                <c:otherwise>${request.sexo}</c:otherwise>
+                            </c:choose>
+                        </td>
+                        <td>
+                            <fmt:formatNumber value="${request.idade}" maxFractionDigits="0" />
+                        </td>
+                        <td>
+                            <fmt:formatDate value="${request.dataSubmissao}" pattern="dd/MM/yyyy" />
+                        </td>
+                        <td>
+                            <c:choose>
+                                <c:when test="${request.estado == 'Sem resposta'}">-</c:when>
+                                <c:otherwise>
+                                    <fmt:formatDate value="${request.dateChanged}" pattern="dd/MM/yyyy" />
+                                </c:otherwise>
+                            </c:choose>
+                        </td>
+                        <td>
+                            <fmt:formatDate value="${request.dateChanged}" pattern="dd/MM/yyyy" />
+                        </td>
+                        <td>
+                            <span class="status-${fn:replace(request.estado, ' ', '-')}">
+                                    ${request.estado}
+                            </span>
+                        </td>
+                        <td>
+                            <c:choose>
+                                <c:when test="${request.estado == 'Não processado'}">
+                                    NID não encontrado
+                                </c:when>
+                                <c:otherwise>-</c:otherwise>
+                            </c:choose>
+                        </td>
+                        <td>
+                            <c:if test="${request.estado == 'Não processado'}">
+                                <a href="#" onclick="mapNid('${request.nid}')">
+                                    <openmrs:message code="sespct.mapNid"/>
+                                </a>
+                            </c:if>
+                            <c:if test="${request.estado != 'Não processado'}">-</c:if>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </c:otherwise>
+        </c:choose>
         </tbody>
     </table>
     <br />
     <div class="submit-btn center">
-        <button onclick="window.location.href = '/openmrs/module/sespct/manageftcases/export.form'">
+        <button onclick="window.location.href = '${pageContext.request.contextPath}/module/sespct/manageftcases/export.form'">
             <openmrs:message code="sespct.export.button"/>
         </button>
     </div>
@@ -136,13 +142,21 @@
 
 <script type="text/javascript">
     window.addEventListener("DOMContentLoaded", () => {
-        $("#ftResultsTable").DataTable({
-            pageLength: 20,
-            lengthMenu: [20, 50, 75, 100],
-            language: {
-                emptyTable: "Nenhum caso encontrado com os critérios selecionados."
-            }
-        });
+        // Check what's available and use it
+        var $ = window.jQuery || window.jq || window.$;
+
+        if ($) {
+            $("#ftResultsTable").DataTable({
+                pageLength: 20,
+                lengthMenu: [20, 50, 75, 100],
+                order: [[6, 'desc']],
+                language: {
+                    emptyTable: "Nenhum caso encontrado com os critérios selecionados."
+                }
+            });
+        } else {
+            console.error("No jQuery available!");
+        }
     });
 </script>
 

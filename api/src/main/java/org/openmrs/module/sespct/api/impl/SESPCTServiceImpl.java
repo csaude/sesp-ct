@@ -78,151 +78,110 @@ public class SESPCTServiceImpl extends BaseOpenmrsService implements SESPCTServi
 	@Override
 	public void createDummyData() {
 		try {
-			log.info("Creating dummy SESP-CT data...");
-			
+			log.info("Creating 50 dummy SESP-CT records...");
+
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-			
-			// Create the main request based on your JSON sample
-			SESPCTRequest request = new SESPCTRequest();
-			
-			// Set UUID and standard OpenMRS fields
-			request.setUuid(UUID.randomUUID().toString());
-			request.setCreator(Context.getAuthenticatedUser());
-			request.setDateCreated(new Date());
-			
-			// Metadados
-			request.setPedidoId("15151");
-			request.setDataSubmissao(dateTimeFormat.parse("2024-03-15T10:30:00Z"));
-			request.setVersao("2.0");
-			request.setOrigem("SESP_MOZAMBIQUE");
-			request.setTipoFormulario("e-FT");
-			request.setSolicitadoPor("user_sesp_123");
-			request.setEstado("Sem resposta");
-			
-			// Dados do Utente
-			request.setNomeCompleto("João Manuel Santos");
-			request.setIniciais("JMS");
-			request.setNid("0109010701/2007/00399");
-			request.setIdade(35.50);
-			request.setEstadioOms("Estadio III");
-			request.setEstadioOmsMotivo("Perda de peso significativa e infecções recorrentes");
-			request.setProvincia("Maputo");
-			request.setDistrito("Maputo Cidade");
-			request.setUnidadeSanitaria("Hospital Central de Maputo");
-			request.setCodigoUnidadeSanitaria("HCM001");
-			request.setPeso(65.50);
-			request.setSexo("masculino");
-			request.setGestante("nao");
-			request.setDataProvavelParto(null);
-			request.setLactante("nao");
-			request.setDataParto(null);
-			
-			// Reportar Falencia
-			request.setHistoriaClinica("Paciente com histórico de boa adesão inicial, apresentando sinais de falência terapêutica nos últimos 6 meses. Observado perda de peso progressiva e aumento de infecções oportunistas.");
-			request.setHistoriaAdesao("Adesão inicial excelente (>95%) nos primeiros 2 anos. Declínio gradual observado a partir de 2022 devido a fatores socioeconômicos. Adesão atual estimada em 70-80%.");
-			request.setTratamentoTbAtivo("nao");
-			
-			// Dados Clinico
-			request.setClinicoNome("Dr. Maria Santos");
-			request.setClinicoCategoria("Medico");
-			request.setClinicoTelefone("+258823456789");
-			request.setClinicoEmail("maria.santos@misau.gov.mz");
-			
-			// Linha Solicitada
-			request.setLinhaSolicitada("2 Linha");
-			request.setAnexo("[BASE64_ENCODED_ATTACHMENT]");
-			
-			// Save the main request first
-			request = dao.saveSESPCTRequest(request);
-			
-			// Create TARV History
-			List<SESPCTTarvHistory> tarvHistory = new ArrayList<SESPCTTarvHistory>();
-			
-			SESPCTTarvHistory tarv1 = new SESPCTTarvHistory();
-			tarv1.setUuid(UUID.randomUUID().toString());
-			tarv1.setCreator(Context.getAuthenticatedUser());
-			tarv1.setDateCreated(new Date());
-			tarv1.setSespRequest(request);
-			tarv1.setDataInicio(dateFormat.parse("2020-01-15"));
-			tarv1.setDataTermino(dateFormat.parse("2022-06-30"));
-			tarv1.setEsquemaTarv("AZT+3TC+EFV");
-			tarvHistory.add(tarv1);
-			
-			SESPCTTarvHistory tarv2 = new SESPCTTarvHistory();
-			tarv2.setUuid(UUID.randomUUID().toString());
-			tarv2.setCreator(Context.getAuthenticatedUser());
-			tarv2.setDateCreated(new Date());
-			tarv2.setSespRequest(request);
-			tarv2.setDataInicio(dateFormat.parse("2022-07-01"));
-			tarv2.setDataTermino(dateFormat.parse("2024-03-10"));
-			tarv2.setEsquemaTarv("TDF+3TC+EFV");
-			tarvHistory.add(tarv2);
-			
-			request.setHistoriaTarv(tarvHistory);
-			
-			// Create CD4 Data
-			List<SESPCTCd4Data> cd4Data = new ArrayList<SESPCTCd4Data>();
-			
-			SESPCTCd4Data cd4_1 = new SESPCTCd4Data();
-			cd4_1.setUuid(UUID.randomUUID().toString());
-			cd4_1.setCreator(Context.getAuthenticatedUser());
-			cd4_1.setDateCreated(new Date());
-			cd4_1.setSespRequest(request);
-			cd4_1.setDataExame(dateFormat.parse("2024-01-15"));
-			cd4_1.setCd4(250);
-			cd4_1.setCd4Percentagem(12.5);
-			cd4Data.add(cd4_1);
-			
-			SESPCTCd4Data cd4_2 = new SESPCTCd4Data();
-			cd4_2.setUuid(UUID.randomUUID().toString());
-			cd4_2.setCreator(Context.getAuthenticatedUser());
-			cd4_2.setDateCreated(new Date());
-			cd4_2.setSespRequest(request);
-			cd4_2.setDataExame(dateFormat.parse("2024-02-20"));
-			cd4_2.setCd4(180);
-			cd4_2.setCd4Percentagem(8.2);
-			cd4Data.add(cd4_2);
-			
-			request.setDadosLaboratorioCD4(cd4Data);
-			
-			// Create Viral Load Data
-			List<SESPCTViralLoadData> viralLoadData = new ArrayList<SESPCTViralLoadData>();
-			
-			SESPCTViralLoadData vl1 = new SESPCTViralLoadData();
-			vl1.setUuid(UUID.randomUUID().toString());
-			vl1.setCreator(Context.getAuthenticatedUser());
-			vl1.setDateCreated(new Date());
-			vl1.setSespRequest(request);
-			vl1.setDataExame(dateFormat.parse("2024-01-15"));
-			vl1.setCargaViral(15000);
-			viralLoadData.add(vl1);
-			
-			SESPCTViralLoadData vl2 = new SESPCTViralLoadData();
-			vl2.setUuid(UUID.randomUUID().toString());
-			vl2.setCreator(Context.getAuthenticatedUser());
-			vl2.setDateCreated(new Date());
-			vl2.setSespRequest(request);
-			vl2.setDataExame(dateFormat.parse("2024-02-20"));
-			vl2.setCargaViral(25000);
-			viralLoadData.add(vl2);
-			
-			request.setDadosLaboratorioCargaViral(viralLoadData);
-			
-			// Save the complete request with all related data
-			dao.saveSESPCTRequest(request);
-			
-			// Create a second dummy request for variety
-			createSecondDummyRequest(dateFormat, dateTimeFormat);
-			
-			log.info("Dummy SESP-CT data created successfully");
-			
-		}
-		catch (ParseException e) {
-			log.error("Error parsing dates while creating dummy data", e);
-		}
-		catch (Exception e) {
-			log.error("Error creating dummy SESP-CT data", e);
+
+			for (int i = 1; i <= 50; i++) {
+				SESPCTRequest request = new SESPCTRequest();
+				request.setUuid(UUID.randomUUID().toString());
+				request.setCreator(Context.getAuthenticatedUser());
+				request.setDateCreated(new Date());
+
+				// Generate dynamic values
+				String nid = String.format("0109010701/2007/%05d", i);
+				String initials = "PT" + i;
+				int idade = 20 + (i % 30); // range 20-49
+				String sexo = (i % 2 == 0) ? "masculino" : "feminino";
+				String estado = (i % 5 == 0) ? "Não processado" : "Sem resposta";
+				String causa = estado.equals("Não processado") ? "NID não encontrado" : "-";
+
+				request.setPedidoId(""+i);
+				request.setDataSubmissao(dateTimeFormat.parse("2025-07-31T10:30:00Z"));
+				request.setVersao("2.0");
+				request.setOrigem("SESP_MOZAMBIQUE");
+				request.setTipoFormulario("e-FT");
+				request.setSolicitadoPor("user_sesp_" + i);
+				request.setEstado(estado);
+
+				request.setNomeCompleto("Paciente Teste " + i);
+				request.setIniciais(initials);
+				request.setNid(nid);
+				request.setIdade((double) idade);
+				request.setEstadioOms("Estadio I");
+				request.setEstadioOmsMotivo("Sem sintomas relevantes");
+				request.setProvincia("Maputo");
+				request.setDistrito("Maputo Cidade");
+				request.setUnidadeSanitaria("US Simulada " + i);
+				request.setCodigoUnidadeSanitaria("US" + String.format("%03d", i));
+				request.setPeso((double)50 + (i % 30));
+				request.setSexo(sexo);
+				request.setGestante("nao");
+				request.setDataProvavelParto(null);
+				request.setLactante("nao");
+				request.setDataParto(null);
+
+				request.setHistoriaClinica("Histórico clínico simulado " + i);
+				request.setHistoriaAdesao("Adesão estimada em " + (60 + (i % 30)) + "%.");
+				request.setTratamentoTbAtivo("nao");
+
+				request.setClinicoNome("Dr. Simulado " + i);
+				request.setClinicoCategoria("Medico");
+				request.setClinicoTelefone("+25882" + String.format("%07d", i));
+				request.setClinicoEmail("medico" + i + "@misau.gov.mz");
+
+				request.setLinhaSolicitada("1 Linha");
+				request.setAnexo("[DUMMY_ATTACHMENT]");
+
+				// Save request before creating relations
+				request = dao.saveSESPCTRequest(request);
+
+				// TARV History
+				List<SESPCTTarvHistory> tarvHistory = new ArrayList<>();
+				SESPCTTarvHistory tarv = new SESPCTTarvHistory();
+				tarv.setUuid(UUID.randomUUID().toString());
+				tarv.setCreator(Context.getAuthenticatedUser());
+				tarv.setDateCreated(new Date());
+				tarv.setSespRequest(request);
+				tarv.setDataInicio(dateFormat.parse("2022-01-01"));
+				tarv.setDataTermino(dateFormat.parse("2023-01-01"));
+				tarv.setEsquemaTarv("TDF+3TC+EFV");
+				tarvHistory.add(tarv);
+				request.setHistoriaTarv(tarvHistory);
+
+				// CD4 Data
+				List<SESPCTCd4Data> cd4Data = new ArrayList<>();
+				SESPCTCd4Data cd4 = new SESPCTCd4Data();
+				cd4.setUuid(UUID.randomUUID().toString());
+				cd4.setCreator(Context.getAuthenticatedUser());
+				cd4.setDateCreated(new Date());
+				cd4.setSespRequest(request);
+				cd4.setDataExame(dateFormat.parse("2024-07-31"));
+				cd4.setCd4(200 + (i % 100));
+				cd4.setCd4Percentagem((double)10 + (i % 5));
+				cd4Data.add(cd4);
+				request.setDadosLaboratorioCD4(cd4Data);
+
+				// Viral Load Data
+				List<SESPCTViralLoadData> vlData = new ArrayList<>();
+				SESPCTViralLoadData vl = new SESPCTViralLoadData();
+				vl.setUuid(UUID.randomUUID().toString());
+				vl.setCreator(Context.getAuthenticatedUser());
+				vl.setDateCreated(new Date());
+				vl.setSespRequest(request);
+				vl.setDataExame(dateFormat.parse("2024-07-31"));
+				vl.setCargaViral(10000 + (i * 500));
+				vlData.add(vl);
+				request.setDadosLaboratorioCargaViral(vlData);
+
+				// Save with child data
+				dao.saveSESPCTRequest(request);
+			}
+
+			log.info("Dummy batch created successfully.");
+		} catch (Exception e) {
+			log.error("Error while creating batch dummy data", e);
 		}
 	}
 	
