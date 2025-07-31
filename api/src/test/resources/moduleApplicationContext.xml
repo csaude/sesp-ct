@@ -9,25 +9,11 @@
     
     <!-- Enable annotation-based configuration -->
     <context:component-scan base-package="org.openmrs.module.sespct" />
-   
-    <!-- Define the DAO bean first -->
-    <bean id="sespctDao" class="org.openmrs.module.sespct.api.dao.impl.SESPCTDaoImpl">
-        <property name="sessionFactory" ref="sessionFactory" />
-    </bean>
     
-    <!-- Define the service implementation -->
-    <bean id="sespctServiceImpl" 
+    <!-- Explicitly define the service bean -->
+    <bean id="sespct.SespCtService" 
           class="org.openmrs.module.sespct.api.impl.SESPCTServiceImpl">
         <property name="dao" ref="sespctDao" />
     </bean>
     
-    <!-- Register the service with OpenMRS Context -->
-    <bean parent="serviceContext">
-        <property name="moduleService">
-            <list>
-                <value>org.openmrs.module.sespct.api.SESPCTService</value>
-                <ref bean="sespctServiceImpl" />
-            </list>
-        </property>
-    </bean>
 </beans>
