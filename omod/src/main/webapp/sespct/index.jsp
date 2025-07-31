@@ -31,6 +31,8 @@
     </div>
 </div>
 
+<%@ include file="../common/alertBox.jspf" %>
+
 <div class="box">
     <table id="ftResultsTable" class="disa-table disa-table-results" style="width:100%; font-size:12px;">
         <thead>
@@ -124,7 +126,7 @@
     </table>
     <br />
     <div class="submit-btn center">
-        <button onclick="window.location.href = '/openmrs/module/sespct/manageftcases/export.form'">
+        <button id="exportButton">
             <openmrs:message code="sespct.export.button"/>
         </button>
     </div>
@@ -136,14 +138,53 @@
 
 <script type="text/javascript">
     window.addEventListener("DOMContentLoaded", () => {
-        $("#ftResultsTable").DataTable({
+        jQuery("#ftResultsTable").DataTable({
             pageLength: 20,
             lengthMenu: [20, 50, 75, 100],
             language: {
                 emptyTable: "Nenhum caso encontrado com os critérios selecionados."
             }
         });
+        
+        // Handle export button click
+        const exportButton = document.getElementById("exportButton");
+        if (exportButton) {
+            exportButton.addEventListener("click", function () {
+                const startDate = document.getElementById("startDate").value.trim();
+                const endDate = document.getElementById("endDate").value.trim();
+
+                if (!startDate || !endDate) {
+                	showAlertMessage("Para exportar dados, efectue primeiro uma pesquisa informando a Data Inicial e a Data Final (em que os resultados foram criados no servidor de integração).");
+                	window.location.href = "/openmrs/module/sespct/sespct.form";
+                    return;
+                }
+
+                const url = "/openmrs/module/sespct/manageftcases/export.form"
+                          + "?startDate=" + encodeURIComponent(startDate)
+                          + "&endDate=" + encodeURIComponent(endDate);
+
+                window.location.href = url;
+            });
+        }
     });
+    
+ 	// Function to show message in OpenMRS alert box
+    function showAlertMessage(message) {
+        const alertBox = document.getElementById("openmrs_msg");
+        if (alertBox) {
+            alertBox.innerHTML = "<b>" + message + "</b>";
+            alertBox.style.display = "block";
+        } else {
+            // Create the alert box if it doesn't exist
+            const alertContainer = document.getElementById("alert-box");
+            if (alertContainer) {
+                const newAlert = document.createElement("div");
+                newAlert.id = "openmrs_msg";
+                newAlert.innerHTML = "<b>" + message + "</b>";
+                alertContainer.appendChild(newAlert);
+            }
+        }
+    }
 </script>
 
 <%@ include file="/WEB-INF/template/footer.jsp" %>
