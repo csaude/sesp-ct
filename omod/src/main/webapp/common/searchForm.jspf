@@ -65,40 +65,7 @@
 </form>
 
 <script>
-	// --- Função para remover todos os espaços --- //
-	function stripAllWhitespace(str) {
-		return (str || '').replace(/[\s\u00A0]+/g, '');
-	}
-
-	// --- Limpa o valor de um input --- //
-	function cleanInputValue(inputEl) {
-		if (!inputEl) return;
-		const cleaned = stripAllWhitespace(inputEl.value);
-		if (inputEl.value !== cleaned) {
-			inputEl.value = cleaned;
-		}
-	}
-
 	window.addEventListener('DOMContentLoaded', function () {
-		// Ligar a limpeza automática ao NID e NCFT
-		const ncftInput = document.getElementById('ncft');
-		const nidInput = document.getElementById('nid');
-
-		[ncftInput, nidInput].forEach(function (el) {
-			if (!el) return;
-
-			el.addEventListener('blur', function () {
-				cleanInputValue(el);
-			});
-
-			el.addEventListener('paste', function () {
-				setTimeout(function () { cleanInputValue(el); }, 0);
-			});
-
-			// (Opcional) Enquanto digita:
-			el.addEventListener('input', function () { cleanInputValue(el); });
-		});
-
 		const clearButtons = document.querySelectorAll('.input-wrapper .clear');
 		clearButtons.forEach(function (clearButton) {
 			clearButton.addEventListener('click', function () {
