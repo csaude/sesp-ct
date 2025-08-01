@@ -1,70 +1,24 @@
+/**
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
 package org.openmrs.module.sespct.api;
 
+import org.openmrs.annotation.Authorized;
+import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
-import org.openmrs.module.sespct.api.model.SESPCTRequest;
+import org.openmrs.module.sespct.SESPCTConfig;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
+/**
+ * The main service of this module, which is exposed for other modules. See
+ * moduleApplicationContext.xml on how it is wired up.
+ */
 public interface SESPCTService extends OpenmrsService {
 	
-	/**
-	 * Initialize the module - create tables and populate dummy data
-	 */
-	void initializeModule();
-	
-	/**
-	 * Save or update a SESP request
-	 * 
-	 * @param SESPCTRequest the request to save
-	 * @return the saved request
-	 */
-	SESPCTRequest saveSESPCTRequest(SESPCTRequest SESPCTRequest);
-	
-	/**
-	 * Get a SESP request by ID
-	 * 
-	 * @param id the request ID
-	 * @return the request or null if not found
-	 */
-	@Transactional(readOnly = true)
-	SESPCTRequest getSESPCTRequestById(Integer id);
-	
-	/**
-	 * Get a SESP request by pedido ID
-	 * 
-	 * @param pedidoId the pedido ID
-	 * @return the request or null if not found
-	 */
-	@Transactional(readOnly = true)
-	SESPCTRequest getSESPCTRequestByPedidoId(String pedidoId);
-	
-	/**
-	 * Get all SESP requests
-	 * 
-	 * @return list of all requests
-	 */
-	@Transactional(readOnly = true)
-	List<SESPCTRequest> getAllSESPCTRequests();
-	
-	/**
-	 * Get SESP requests by estado (status)
-	 * 
-	 * @param estado the status to filter by
-	 * @return list of requests with the specified status
-	 */
-	@Transactional(readOnly = true)
-	List<SESPCTRequest> getSESPCTRequestsByEstado(String estado);
-	
-	/**
-	 * Delete a SESP request
-	 * 
-	 * @param SESPCTRequest the request to delete
-	 */
-	void deleteSESPCTRequest(SESPCTRequest SESPCTRequest);
-	
-	/**
-	 * Create dummy data for testing
-	 */
-	void createDummyData();
 }

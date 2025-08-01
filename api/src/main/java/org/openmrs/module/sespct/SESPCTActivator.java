@@ -9,55 +9,48 @@
  */
 package org.openmrs.module.sespct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.openmrs.module.sespct.api.SESPCTService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.BaseModuleActivator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class contains the logic that is run every time this module is either started or shutdown
  */
 public class SESPCTActivator extends BaseModuleActivator {
 	
-	private Log log = LogFactory.getLog(this.getClass());
+	private static final Logger log = LoggerFactory.getLogger(SESPCTActivator.class);
 	
-	public void willRefreshContext() {
-		log.info("Refreshing SESP-CT Module");
-	}
-	
-	public void contextRefreshed() {
-		log.info("SESP-CT Module refreshed");
-	}
-	
+	@Override
 	public void willStart() {
-		log.info("Starting SESP-CT Module");
+		log.debug("Starting SESPCT Module");
+		Context.getAdministrationService().setGlobalProperty("sespct.extensions.loaded", "true");
 	}
 	
+	@Override
 	public void started() {
-		log.info("SESP-CT Module started");
-		
+		log.info("Started SESPCT Module");
+	}
+	
+	@Override
+	public void willStop() {
+		log.info("Stopping SESPCT - trying to clean up extensions");
 		try {
-			// Get the service that handles our business logic
-			SESPCTService sespCtService = Context.getService(SESPCTService.class);
-			
-			// Create tables and populate with dummy data
-			sespCtService.initializeModule();
-			
-			log.info("SESP-CT Module initialization completed successfully");
+			org.openmrs.module.Module module = org.openmrs.module.ModuleFactory.getModuleById("sespct");
+			if (module != null) {
+				module.getExtensions().clear();
+				log.info("Extensions cleared successfully.");
+			} else {
+				log.warn("Could not find module 'sespct' to clear extensions.");
+			}
 		}
 		catch (Exception e) {
-			log.error("Error initializing SESP-CT Module", e);
+			log.error("Error while trying to clear extensions on stop", e);
 		}
 	}
 	
-	public void willStop() {
-		log.info("Stopping SESP-CT Module");
-	}
-	
+	@Override
 	public void stopped() {
-		log.info("SESP-CT Module stopped");
+		log.info("Stopped SESPCT Module");
 	}
 }

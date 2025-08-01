@@ -1,278 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
+ 
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-
-    <!-- Create main SESP CT Request table -->
-    <changeSet id="sespct-1.0.0-1" author="sespct">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="sespct_request"/>
-            </not>
-        </preConditions>
-        <comment>Create sespct_request table</comment>
-        
-        <createTable tableName="sespct_request">
-            <column name="request_id" type="int" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            
-            <!-- Standard OpenMRS audit fields -->
-            <column name="uuid" type="char(38)">
-                <constraints nullable="false" unique="true"/>
-            </column>
-            <column name="creator" type="int">
-                <constraints nullable="false"/>
-            </column>
-            <column name="date_created" type="datetime">
-                <constraints nullable="false"/>
-            </column>
-            <column name="changed_by" type="int"/>
-            <column name="date_changed" type="datetime"/>
-            <column name="voided" type="tinyint" defaultValue="0">
-                <constraints nullable="false"/>
-            </column>
-            <column name="voided_by" type="int"/>
-            <column name="date_voided" type="datetime"/>
-            <column name="void_reason" type="varchar(255)"/>
-            
-            <!-- Metadados fields -->
-            <column name="pedido_id" type="varchar(50)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="data_submissao" type="datetime"/>
-            <column name="versao" type="varchar(10)"/>
-            <column name="origem" type="varchar(50)"/>
-            <column name="tipo_formulario" type="varchar(20)"/>
-            <column name="solicitado_por" type="varchar(100)"/>
-            <column name="estado" type="varchar(50)"/>
-            
-            <!-- Dados do Utente fields -->
-            <column name="nome_completo" type="varchar(200)"/>
-            <column name="iniciais" type="varchar(10)"/>
-            <column name="nid" type="varchar(50)"/>
-            <column name="idade" type="double"/>
-            <column name="estadio_oms" type="varchar(50)"/>
-            <column name="estadio_oms_motivo" type="text"/>
-            <column name="provincia" type="varchar(100)"/>
-            <column name="distrito" type="varchar(100)"/>
-            <column name="unidade_sanitaria" type="varchar(200)"/>
-            <column name="codigo_unidade_sanitaria" type="varchar(50)"/>
-            <column name="peso" type="double"/>
-            <column name="sexo" type="varchar(20)"/>
-            <column name="gestante" type="varchar(10)"/>
-            <column name="data_provavel_parto" type="date"/>
-            <column name="lactante" type="varchar(10)"/>
-            <column name="data_parto" type="date"/>
-            
-            <!-- Reportar Falencia fields -->
-            <column name="historia_clinica" type="text"/>
-            <column name="historia_adesao" type="text"/>
-            <column name="tratamento_tb_ativo" type="varchar(10)"/>
-            
-            <!-- Dados Clinico fields -->
-            <column name="clinico_nome" type="varchar(200)"/>
-            <column name="clinico_categoria" type="varchar(100)"/>
-            <column name="clinico_telefone" type="varchar(20)"/>
-            <column name="clinico_email" type="varchar(100)"/>
-            
-            <!-- Linha Solicitada fields -->
-            <column name="linha_solicitada" type="varchar(20)"/>
-            <column name="anexo" type="longtext"/>
-        </createTable>
-        
-        <!-- Add foreign key constraints -->
-        <addForeignKeyConstraint 
-            constraintName="sespct_request_creator_fk"
-            baseTableName="sespct_request" baseColumnNames="creator"
-            referencedTableName="users" referencedColumnNames="user_id"/>
-            
-        <addForeignKeyConstraint 
-            constraintName="sespct_request_changed_by_fk"
-            baseTableName="sespct_request" baseColumnNames="changed_by"
-            referencedTableName="users" referencedColumnNames="user_id"/>
-            
-        <addForeignKeyConstraint 
-            constraintName="sespct_request_voided_by_fk"
-            baseTableName="sespct_request" baseColumnNames="voided_by"
-            referencedTableName="users" referencedColumnNames="user_id"/>
-            
-        <!-- Add indexes -->
-        <createIndex tableName="sespct_request" indexName="sespct_request_pedido_id_idx">
-            <column name="pedido_id"/>
-        </createIndex>
-        
-        <createIndex tableName="sespct_request" indexName="sespct_request_estado_idx">
-            <column name="estado"/>
-        </createIndex>
-    </changeSet>
-
-    <!-- Create TARV History table -->
-    <changeSet id="sespct-1.0.0-2" author="sespct">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="sespct_tarv_history"/>
-            </not>
-        </preConditions>
-        <comment>Create sespct_tarv_history table</comment>
-        
-        <createTable tableName="sespct_tarv_history">
-            <column name="tarv_history_id" type="int" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            
-            <!-- Standard OpenMRS audit fields -->
-            <column name="uuid" type="char(38)">
-                <constraints nullable="false" unique="true"/>
-            </column>
-            <column name="creator" type="int">
-                <constraints nullable="false"/>
-            </column>
-            <column name="date_created" type="datetime">
-                <constraints nullable="false"/>
-            </column>
-            <column name="changed_by" type="int"/>
-            <column name="date_changed" type="datetime"/>
-            <column name="voided" type="tinyint" defaultValue="0">
-                <constraints nullable="false"/>
-            </column>
-            <column name="voided_by" type="int"/>
-            <column name="date_voided" type="datetime"/>
-            <column name="void_reason" type="varchar(255)"/>
-            
-            <!-- Foreign key to main request -->
-            <column name="request_id" type="int">
-                <constraints nullable="false"/>
-            </column>
-            
-            <!-- TARV History specific fields -->
-            <column name="data_inicio" type="date"/>
-            <column name="data_termino" type="date"/>
-            <column name="esquema_tarv" type="varchar(100)"/>
-        </createTable>
-        
-        <!-- Add foreign key constraints -->
-        <addForeignKeyConstraint 
-            constraintName="sespct_tarv_history_request_fk"
-            baseTableName="sespct_tarv_history" baseColumnNames="request_id"
-            referencedTableName="sespct_request" referencedColumnNames="request_id"/>
-            
-        <addForeignKeyConstraint 
-            constraintName="sespct_tarv_history_creator_fk"
-            baseTableName="sespct_tarv_history" baseColumnNames="creator"
-            referencedTableName="users" referencedColumnNames="user_id"/>
-    </changeSet>
-
-    <!-- Create CD4 Data table -->
-    <changeSet id="sespct-1.0.0-3" author="sespct">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="sespct_cd4_data"/>
-            </not>
-        </preConditions>
-        <comment>Create sespct_cd4_data table</comment>
-        
-        <createTable tableName="sespct_cd4_data">
-            <column name="cd4_data_id" type="int" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            
-            <!-- Standard OpenMRS audit fields -->
-            <column name="uuid" type="char(38)">
-                <constraints nullable="false" unique="true"/>
-            </column>
-            <column name="creator" type="int">
-                <constraints nullable="false"/>
-            </column>
-            <column name="date_created" type="datetime">
-                <constraints nullable="false"/>
-            </column>
-            <column name="changed_by" type="int"/>
-            <column name="date_changed" type="datetime"/>
-            <column name="voided" type="tinyint" defaultValue="0">
-                <constraints nullable="false"/>
-            </column>
-            <column name="voided_by" type="int"/>
-            <column name="date_voided" type="datetime"/>
-            <column name="void_reason" type="varchar(255)"/>
-            
-            <!-- Foreign key to main request -->
-            <column name="request_id" type="int">
-                <constraints nullable="false"/>
-            </column>
-            
-            <!-- CD4 specific fields -->
-            <column name="data_exame" type="date"/>
-            <column name="cd4_value" type="int"/>
-            <column name="cd4_percentagem" type="double"/>
-        </createTable>
-        
-        <!-- Add foreign key constraint -->
-        <addForeignKeyConstraint 
-            constraintName="sespct_cd4_data_request_fk"
-            baseTableName="sespct_cd4_data" baseColumnNames="request_id"
-            referencedTableName="sespct_request" referencedColumnNames="request_id"/>
-            
-        <addForeignKeyConstraint 
-            constraintName="sespct_cd4_data_creator_fk"
-            baseTableName="sespct_cd4_data" baseColumnNames="creator"
-            referencedTableName="users" referencedColumnNames="user_id"/>
-    </changeSet>
-
-    <!-- Create Viral Load Data table -->
-    <changeSet id="sespct-1.0.0-4" author="sespct">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="sespct_viral_load_data"/>
-            </not>
-        </preConditions>
-        <comment>Create sespct_viral_load_data table</comment>
-        
-        <createTable tableName="sespct_viral_load_data">
-            <column name="viral_load_data_id" type="int" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            
-            <!-- Standard OpenMRS audit fields -->
-            <column name="uuid" type="char(38)">
-                <constraints nullable="false" unique="true"/>
-            </column>
-            <column name="creator" type="int">
-                <constraints nullable="false"/>
-            </column>
-            <column name="date_created" type="datetime">
-                <constraints nullable="false"/>
-            </column>
-            <column name="changed_by" type="int"/>
-            <column name="date_changed" type="datetime"/>
-            <column name="voided" type="tinyint" defaultValue="0">
-                <constraints nullable="false"/>
-            </column>
-            <column name="voided_by" type="int"/>
-            <column name="date_voided" type="datetime"/>
-            <column name="void_reason" type="varchar(255)"/>
-            
-            <!-- Foreign key to main request -->
-            <column name="request_id" type="int">
-                <constraints nullable="false"/>
-            </column>
-            
-            <!-- Viral Load specific fields -->
-            <column name="data_exame" type="date"/>
-            <column name="carga_viral" type="int"/>
-        </createTable>
-        
-        <!-- Add foreign key constraint -->
-        <addForeignKeyConstraint 
-            constraintName="sespct_viral_load_data_request_fk"
-            baseTableName="sespct_viral_load_data" baseColumnNames="request_id"
-            referencedTableName="sespct_request" referencedColumnNames="request_id"/>
-            
-        <addForeignKeyConstraint 
-            constraintName="sespct_viral_load_data_creator_fk"
-            baseTableName="sespct_viral_load_data" baseColumnNames="creator"
-            referencedTableName="users" referencedColumnNames="user_id"/>
-    </changeSet>
-
+ 
+    <!--
+    	See http://wiki.openmrs.org/display/docs/Module+liquibase+File for 
+    	documentation on this file.
+    
+        See http://www.liquibase.org/manual/home#available_database_refactorings
+        for a list of supported elements and attributes
+    -->
+ 
+ 	<!-- Uncomment the changeset below if you want to make the Item class persistable, see also Item and SESPCTDaoTest -->
+ 	<!--
+	<changeSet id="sespct-2016-08-02-12-21" author="raff">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="sespct_item"/></not>
+		</preConditions>
+		<comment>
+			Creating the sespct_item table
+		</comment>
+		<createTable tableName="sespct_item">
+			<column name="sespct_item_id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"></constraints>
+			</column>
+			<column name="owner" type="int" />
+			<column name="description" type="varchar(255)" />
+		</createTable>
+        <addForeignKeyConstraint constraintName="sespct_item_owner_fk" baseTableName="sespct_item" baseColumnNames="owner"  referencedTableName="users"
+                                 referencedColumnNames="user_id" />
+    </changeSet> -->
+ 
 </databaseChangeLog>

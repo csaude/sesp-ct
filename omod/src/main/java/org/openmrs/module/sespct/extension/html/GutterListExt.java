@@ -1,5 +1,6 @@
 package org.openmrs.module.sespct.extension.html;
 
+import org.openmrs.module.Extension.MEDIA_TYPE;
 import org.openmrs.module.web.extension.LinkExt;
 
 public class GutterListExt extends LinkExt {

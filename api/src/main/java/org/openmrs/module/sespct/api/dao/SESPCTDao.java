@@ -1,54 +1,26 @@
+/**
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
 package org.openmrs.module.sespct.api.dao;
 
-import org.openmrs.module.sespct.api.model.SESPCTRequest;
+import org.hibernate.criterion.Restrictions;
+import org.openmrs.api.db.hibernate.DbSession;
+import org.openmrs.api.db.hibernate.DbSessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
-public interface SESPCTDao {
+@Repository("sespct.SESPCTDao")
+public class SESPCTDao {
 	
-	/**
-	 * Save or update a SESP request
-	 * 
-	 * @param sespRequest the request to save
-	 * @return the saved request
-	 */
-	SESPCTRequest saveSESPCTRequest(SESPCTRequest sespRequest);
+	DbSessionFactory sessionFactory;
 	
-	/**
-	 * Get a SESP request by ID
-	 * 
-	 * @param id the request ID
-	 * @return the request or null if not found
-	 */
-	SESPCTRequest getSESPCTRequestById(Integer id);
-	
-	/**
-	 * Get a SESP request by pedido ID
-	 * 
-	 * @param pedidoId the pedido ID
-	 * @return the request or null if not found
-	 */
-	SESPCTRequest getSESPCTRequestByPedidoId(String pedidoId);
-	
-	/**
-	 * Get all SESP requests
-	 * 
-	 * @return list of all requests
-	 */
-	List<SESPCTRequest> getAllSESPCTRequests();
-	
-	/**
-	 * Get SESP requests by estado (status)
-	 * 
-	 * @param estado the status to filter by
-	 * @return list of requests with the specified status
-	 */
-	List<SESPCTRequest> getSESPCTRequestsByEstado(String estado);
-	
-	/**
-	 * Delete a SESP request
-	 * 
-	 * @param sespRequest the request to delete
-	 */
-	void deleteSESPCTRequest(SESPCTRequest sespRequest);
+	private DbSession getSession() {
+		return sessionFactory.getCurrentSession();
+	}
 }

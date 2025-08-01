@@ -14,10 +14,12 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.openmrs.User;
 import org.openmrs.api.UserService;
 import org.openmrs.module.sespct.api.dao.SESPCTDao;
 import org.openmrs.module.sespct.api.impl.SESPCTServiceImpl;
-
+import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -38,10 +40,5 @@ public class SESPCTServiceTest {
 	@Before
 	public void setupMocks() {
 		MockitoAnnotations.initMocks(this);
-	}
-	
-	@Test
-	public void shouldInstantiateService() {
-		assertNotNull("Service should be instantiated", basicModuleService);
 	}
 }
