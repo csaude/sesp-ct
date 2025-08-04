@@ -154,8 +154,8 @@
                 const endDate = document.getElementById("endDate").value.trim();
 
                 if (!startDate || !endDate) {
-                	showAlertMessage("Para exportar dados, efectue primeiro uma pesquisa informando a Data Inicial e a Data Final (em que os resultados foram criados no servidor de integração).");
-                	window.location.href = "/openmrs/module/sespct/sespct.form";
+                	showAlertMessage("Para exportar dados, efectue primeiro uma pesquisa informando a Data Inicial e a Data Final (em que os resultados foram criados no servidor SESP).");
+                	//window.location.href = "/openmrs/module/sespct/sespct.form";
                     return;
                 }
 
