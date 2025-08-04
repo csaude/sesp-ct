@@ -1,0 +1,159 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="org.openmrs.module.sespct.api.model">
+
+    <class name="Pedido" table="sespct_pedido">
+        <id name="id" type="java.lang.Integer" column="pedido_id" unsaved-value="0">
+            <generator class="identity" />
+        </id>
+
+        <!-- Standard OpenMRS audit fields -->
+        <property name="uuid" type="java.lang.String" column="uuid" length="38" not-null="true" unique="true" />
+        <many-to-one name="creator" class="org.openmrs.User" column="creator" not-null="true" />
+        <property name="dateCreated" type="java.util.Date" column="date_created" not-null="true" length="19" />
+        <many-to-one name="changedBy" class="org.openmrs.User" column="changed_by" />
+        <property name="dateChanged" type="java.util.Date" column="date_changed" length="19" />
+        <property name="voided" type="java.lang.Boolean" column="voided" length="1" not-null="true" />
+        <many-to-one name="voidedBy" class="org.openmrs.User" column="voided_by" />
+        <property name="dateVoided" type="java.util.Date" column="date_voided" length="19" />
+        <property name="voidReason" type="java.lang.String" column="void_reason" length="255" />
+
+        <!-- Core metadata fields -->
+        <property name="pedidoId" type="java.lang.String" column="pedido_id" length="50" not-null="true" />
+        <property name="dataSubmissao" type="java.util.Date" column="data_submissao" length="19" />
+        <property name="versao" type="java.lang.String" column="versao" length="10" />
+        <property name="origem" type="java.lang.String" column="origem" length="50" />
+        <property name="tipoFormulario" type="java.lang.String" column="tipo_formulario" length="20" />
+        <property name="solicitadoPor" type="java.lang.String" column="solicitado_por" length="100" />
+        <property name="estado" type="java.lang.String" column="estado" length="50" />
+
+        <!-- One-to-one associations -->
+        <one-to-one name="dadosUtente" class="org.openmrs.module.sespct.api.model.DadosUtente" cascade="all" fetch="select" />
+        <one-to-one name="dadosClinico" class="org.openmrs.module.sespct.api.model.DadosClinico" cascade="all" fetch="select" />
+        <one-to-one name="reportarFalencia" class="org.openmrs.module.sespct.api.model.ReportarFalencia" cascade="all" fetch="select" />
+        <one-to-one name="linhaSolicitada" class="org.openmrs.module.sespct.api.model.LinhaSolicitada" cascade="all" fetch="select" />
+
+        <!-- One-to-many collections -->
+        <set name="historiaTarv" lazy="true" inverse="true" cascade="all">
+            <key column="pedido_id" />
+            <one-to-many class="org.openmrs.module.sespct.api.model.HistoriaTarv" />
+        </set>
+
+        <set name="dadosLaboratorioCD4" lazy="true" inverse="true" cascade="all">
+            <key column="pedido_id" />
+            <one-to-many class="org.openmrs.module.sespct.api.model.DadosLaboratorioCD4" />
+        </set>
+
+        <set name="dadosLaboratorioCargaViral" lazy="true" inverse="true" cascade="all">
+            <key column="pedido_id" />
+            <one-to-many class="org.openmrs.module.sespct.api.model.DadosLaboratorioCargaViral" />
+        </set>
+    </class>
+
+    <!-- DadosUtente -->
+    <class name="DadosUtente" table="sespct_dados_utente">
+        <id name="id" type="java.lang.Integer" column="dados_utente_id" unsaved-value="0">
+            <generator class="identity" />
+        </id>
+
+        <one-to-one name="pedido" class="Pedido" column="pedido_id" not-null="true" unique="true" />
+
+        <property name="nomeCompleto" type="java.lang.String" column="nome_completo" length="200" />
+        <property name="iniciais" type="java.lang.String" column="iniciais" length="10" />
+        <property name="nid" type="java.lang.String" column="nid" length="50" />
+        <property name="idade" type="java.lang.Double" column="idade" />
+        <property name="estadioOms" type="java.lang.String" column="estadio_oms" length="50" />
+        <property name="estadioOmsMotivo" type="java.lang.String" column="estadio_oms_motivo" />
+        <property name="provincia" type="java.lang.String" column="provincia" length="100" />
+        <property name="distrito" type="java.lang.String" column="distrito" length="100" />
+        <property name="unidadeSanitaria" type="java.lang.String" column="unidade_sanitaria" length="200" />
+        <property name="codigoUnidadeSanitaria" type="java.lang.String" column="codigo_unidade_sanitaria" length="50" />
+        <property name="peso" type="java.lang.Double" column="peso" />
+        <property name="sexo" type="java.lang.String" column="sexo" length="20" />
+        <property name="gestante" type="java.lang.String" column="gestante" length="10" />
+        <property name="dataProvavelParto" type="java.util.Date" column="data_provavel_parto" length="10" />
+        <property name="lactante" type="java.lang.String" column="lactante" length="10" />
+        <property name="dataParto" type="java.util.Date" column="data_parto" length="10" />
+    </class>
+
+    <!-- DadosClinico -->
+    <class name="DadosClinico" table="sespct_dados_clinico">
+        <id name="id" type="java.lang.Integer" column="dados_clinico_id" unsaved-value="0">
+            <generator class="identity" />
+        </id>
+
+        <one-to-one name="pedido" class="Pedido" column="pedido_id" not-null="true" unique="true" />
+
+        <property name="nome" type="java.lang.String" column="nome" length="200" />
+        <property name="categoriaProfissional" type="java.lang.String" column="categoria_profissional" length="100" />
+        <property name="telefone" type="java.lang.String" column="telefone" length="20" />
+        <property name="email" type="java.lang.String" column="email" length="100" />
+    </class>
+
+    <!-- ReportarFalencia -->
+    <class name="ReportarFalencia" table="sespct_reportar_falencia">
+        <id name="id" type="java.lang.Integer" column="reportar_falencia_id" unsaved-value="0">
+            <generator class="identity" />
+        </id>
+
+        <one-to-one name="pedido" class="Pedido" column="pedido_id" not-null="true" unique="true" />
+
+        <property name="historiaClinica" type="java.lang.String" column="historia_clinica" />
+        <property name="historiaAdesao" type="java.lang.String" column="historia_adesao" />
+        <property name="tratamentoTbAtivo" type="java.lang.String" column="tratamento_tb_ativo" length="10" />
+    </class>
+
+    <!-- LinhaSolicitada -->
+    <class name="LinhaSolicitada" table="sespct_linha_solicitada">
+        <id name="id" type="java.lang.Integer" column="linha_solicitada_id" unsaved-value="0">
+            <generator class="identity" />
+        </id>
+
+        <one-to-one name="pedido" class="Pedido" column="pedido_id" not-null="true" unique="true" />
+
+        <property name="linha" type="java.lang.String" column="linha" length="20" />
+        <property name="anexo" type="java.lang.String" column="anexo" />
+    </class>
+
+    <!-- HistoriaTarv -->
+    <class name="HistoriaTarv" table="sespct_tarv_history">
+        <id name="id" type="java.lang.Integer" column="tarv_history_id" unsaved-value="0">
+            <generator class="identity" />
+        </id>
+
+        <many-to-one name="pedido" class="Pedido" column="pedido_id" not-null="true" />
+
+        <property name="dataInicio" type="java.util.Date" column="data_inicio" length="10" />
+        <property name="dataTermino" type="java.util.Date" column="data_termino" length="10" />
+        <property name="esquemaTarv" type="java.lang.String" column="esquema_tarv" length="100" />
+    </class>
+
+    <!-- DadosLaboratorioCD4 -->
+    <class name="DadosLaboratorioCD4" table="sespct_cd4_data">
+        <id name="id" type="java.lang.Integer" column="cd4_data_id" unsaved-value="0">
+            <generator class="identity" />
+        </id>
+
+        <many-to-one name="pedido" class="Pedido" column="pedido_id" not-null="true" />
+
+        <property name="data" type="java.util.Date" column="data_exame" length="10" />
+        <property name="cd4" type="java.lang.Integer" column="cd4" />
+        <property name="cd4Percentagem" type="java.lang.Double" column="cd4_percentagem" />
+    </class>
+
+    <!-- DadosLaboratorioCargaViral -->
+    <class name="DadosLaboratorioCargaViral" table="sespct_viral_load_data">
+        <id name="id" type="java.lang.Integer" column="viral_load_data_id" unsaved-value="0">
+            <generator class="identity" />
+        </id>
+
+        <many-to-one name="pedido" class="Pedido" column="pedido_id" not-null="true" />
+
+        <property name="data" type="java.util.Date" column="data_exame" length="10" />
+        <property name="cargaViral" type="java.lang.Long" column="carga_viral" />
+    </class>
+
+</hibernate-mapping>
