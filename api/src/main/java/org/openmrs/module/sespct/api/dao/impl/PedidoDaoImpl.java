@@ -3,59 +3,74 @@ package org.openmrs.module.sespct.api.dao.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
-import org.hibernate.Session;
-import org.openmrs.api.db.hibernate.HibernateOpenmrsDataDAO;
+import org.openmrs.api.db.hibernate.DbSession;
+import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.module.sespct.api.dao.PedidoDao;
 import org.openmrs.module.sespct.api.model.Pedido;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
-public class PedidoDaoImpl extends HibernateOpenmrsDataDAO<Pedido> implements PedidoDao {
+public class PedidoDaoImpl implements PedidoDao {
 	
-	private static final Log log = LogFactory.getLog(PedidoDaoImpl.class);
+	protected final Log log = LogFactory.getLog(this.getClass());
 	
-	public PedidoDaoImpl() {
-		super(Pedido.class);
+	private DbSessionFactory dbSessionFactory;
+	
+	public void setDbSessionFactory(DbSessionFactory dbSessionFactory) {
+		this.dbSessionFactory = dbSessionFactory;
 	}
 	
-	private Session getSession() {
-		return sessionFactory.getCurrentSession();
+	public DbSessionFactory getDbSessionFactory() {
+		return dbSessionFactory;
+	}
+	
+	private DbSession getCurrentSession() {
+		return dbSessionFactory.getCurrentSession();
 	}
 	
 	@Override
 	public Pedido savePedido(Pedido pedido) {
-		return saveOrUpdate(pedido);
+		this.getCurrentSession().saveOrUpdate(pedido);
+		return pedido;
 	}
 	
 	@Override
 	public Pedido getPedidoById(Integer id) {
-		return getById(id);
+		return (Pedido) this.getCurrentSession().get(Pedido.class, id);
 	}
 	
 	@Override
 	public Pedido getPedidoByExternalId(String externalId) {
-		Query query = getSession().createQuery("FROM Pedido WHERE pedidoExternalId = :externalId");
-		query.setParameter("externalId", externalId);
-		return (Pedido) query.uniqueResult();
+		final String hql = "FROM Pedido WHERE pedidoExternalId = :externalId AND voided = 0";
+		final Query query = this.getCurrentSession().createQuery(hql).setParameter("externalId", externalId);
+		
+		@SuppressWarnings("unchecked")
+		List<Pedido> results = query.list();
+		return results.isEmpty() ? null : results.get(0);
 	}
 	
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Pedido> getAllPedidos() {
-		Query query = getSession().createQuery("FROM Pedido ORDER BY dateCreated DESC");
+		final String hql = "FROM Pedido WHERE voided = 0 ORDER BY dateCreated DESC";
+		final Query query = this.getCurrentSession().createQuery(hql);
 		return query.list();
 	}
 	
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Pedido> getPedidosByEstado(String estado) {
-		Query query = getSession().createQuery("FROM Pedido WHERE estado = :estado ORDER BY dateCreated DESC");
-		query.setParameter("estado", estado);
+		final String hql = "FROM Pedido WHERE estado = :estado AND voided = 0 ORDER BY dateCreated DESC";
+		final Query query = this.getCurrentSession().createQuery(hql).setParameter("estado", estado);
 		return query.list();
 	}
 	
 	@Override
 	public void deletePedido(Pedido pedido) {
-		delete(pedido);
+		// Don't actually delete, just void it (OpenMRS pattern)
+		pedido.setVoided(true);
+		this.getCurrentSession().saveOrUpdate(pedido);
 	}
 }

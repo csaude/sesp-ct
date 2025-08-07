@@ -10,9 +10,9 @@
     <!-- Enable annotation-based configuration -->
     <context:component-scan base-package="org.openmrs.module.sespct" />
 
-    <!-- Define the DAO bean -->
+    <!-- Define the DAO bean with sessionFactory injection -->
     <bean id="pedidoDao" class="org.openmrs.module.sespct.api.dao.impl.PedidoDaoImpl">
-        <property name="sessionFactory" ref="sessionFactory" />
+        <property name="dbSessionFactory" ref="dbSessionFactory" />
     </bean>
 
     <!-- Define the service implementation -->

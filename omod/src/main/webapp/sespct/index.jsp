@@ -2,6 +2,7 @@
 <%@ include file="/WEB-INF/template/include.jsp" %>
 <%@ include file="/WEB-INF/template/header.jsp" %>
 <jsp:useBean id="currentDate" class="java.util.Date" />
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <openmrs:require privilege="Permite acesso à aplicação SESP-CT" otherwise="/login.htm"
                  redirect="/module/sespct/sespct.form" />
@@ -59,7 +60,7 @@
         </thead>
         <tbody>
         <c:choose>
-            <c:when test="${empty sespctRequests}">
+            <c:when test="${empty pedidos}">
                 <tr>
                     <td colspan="12" style="text-align: center; font-style: italic;">
                         Nenhum caso encontrado com os critérios selecionados.
@@ -67,60 +68,60 @@
                 </tr>
             </c:when>
             <c:otherwise>
-                <c:forEach var="request" items="${sespctRequests}">
+                <c:forEach var="pedido" items="${pedidos}">
                     <tr>
-                        <td>${request.unidadeSanitaria} (${request.codigoUnidadeSanitaria})</td>
-                        <td>${request.nid}</td>
+                        <td>${pedido.dadosUtente.unidadeSanitaria} (${pedido.dadosUtente.codigoUnidadeSanitaria})</td>
+                        <td>${pedido.dadosUtente.nid}</td>
                         <td>
-                            <a href="${pageContext.request.contextPath}/module/sespct/viewRequest.form?pedidoId=${request.pedidoId}">
-                                    ${request.pedidoId}
+                            <a href="${pageContext.request.contextPath}/module/sespct/viewRequest.form?pedidoId=${pedido.pedidoId}">
+                                    ${pedido.pedidoId}
                             </a>
                         </td>
-                        <td>${request.iniciais}</td>
+                        <td>${pedido.dadosUtente.iniciais}</td>
                         <td>
                             <c:choose>
-                                <c:when test="${request.sexo == 'masculino'}">M</c:when>
-                                <c:when test="${request.sexo == 'feminino'}">F</c:when>
-                                <c:otherwise>${request.sexo}</c:otherwise>
+                                <c:when test="${pedido.dadosUtente.sexo == 'masculino'}">M</c:when>
+                                <c:when test="${pedido.dadosUtente.sexo == 'feminino'}">F</c:when>
+                                <c:otherwise>${pedido.dadosUtente.sexo}</c:otherwise>
                             </c:choose>
                         </td>
                         <td>
-                            <fmt:formatNumber value="${request.idade}" maxFractionDigits="0" />
+                            <fmt:formatNumber value="${pedido.dadosUtente.idade}" maxFractionDigits="0" />
                         </td>
                         <td>
-                            <fmt:formatDate value="${request.dataSubmissao}" pattern="dd/MM/yyyy" />
+                            <fmt:formatDate value="${pedido.dataSubmissao}" pattern="dd/MM/yyyy" />
                         </td>
                         <td>
                             <c:choose>
-                                <c:when test="${request.estado == 'Sem resposta'}">-</c:when>
+                                <c:when test="${pedido.estado == 'Sem resposta'}">-</c:when>
                                 <c:otherwise>
-                                    <fmt:formatDate value="${request.dateChanged}" pattern="dd/MM/yyyy" />
+                                    <fmt:formatDate value="${pedido.dataSubmissao}" pattern="dd/MM/yyyy" />
                                 </c:otherwise>
                             </c:choose>
                         </td>
                         <td>
-                            <fmt:formatDate value="${request.dateChanged}" pattern="dd/MM/yyyy" />
+                            <fmt:formatDate value="${pedido.dataSubmissao}" pattern="dd/MM/yyyy" />
                         </td>
                         <td>
-                            <span class="status-${fn:replace(request.estado, ' ', '-')}">
-                                    ${request.estado}
+                            <span class="status-${fn:replace(pedido.estado, ' ', '-')}">
+                                    ${pedido.estado}
                             </span>
                         </td>
                         <td>
                             <c:choose>
-                                <c:when test="${request.estado == 'Não processado'}">
+                                <c:when test="${pedido.estado == 'Não Processado'}">
                                     NID não encontrado
                                 </c:when>
                                 <c:otherwise>-</c:otherwise>
                             </c:choose>
                         </td>
                         <td>
-                            <c:if test="${request.estado == 'Não processado'}">
+                            <c:if test="${pedido.estado == 'Não Processado'}">
                                 <a href="#" onclick="mapNid('${request.nid}')">
                                     <openmrs:message code="sespct.mapNid"/>
                                 </a>
                             </c:if>
-                            <c:if test="${request.estado != 'Não processado'}">-</c:if>
+                            <c:if test="${pedido.estado != 'Não Processado'}">-</c:if>
                         </td>
                     </tr>
                 </c:forEach>
