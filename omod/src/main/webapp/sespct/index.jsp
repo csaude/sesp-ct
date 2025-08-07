@@ -103,14 +103,22 @@
                             <fmt:formatDate value="${pedido.dataSubmissao}" pattern="dd/MM/yyyy" />
                         </td>
                         <td>
-                            <span class="status-${fn:replace(pedido.estado, ' ', '-')}">
-                                    ${pedido.estado}
-                            </span>
+                            <c:choose>
+                                <c:when test="${pedido.estado == 'Sem resposta' || pedido.estado == 'No Response'}">
+                                    <span class="status-no-response"><openmrs:message code="sespct.search.status.SEM_RESPOSTA"/></span>
+                                </c:when>
+                                <c:when test="${pedido.estado == 'Não Processado' || pedido.estado == 'Not Processed'}">
+                                    <span class="status-not-processed"><openmrs:message code="sespct.search.status.NAO_PROCESSADO"/></span>
+                                </c:when>
+                                <c:otherwise>
+                                    ${pedido.estado} <%-- Fallback for any other statuses --%>
+                                </c:otherwise>
+                            </c:choose>
                         </td>
                         <td>
                             <c:choose>
-                                <c:when test="${pedido.estado == 'Não Processado'}">
-                                    NID não encontrado
+                                <c:when test="${pedido.estado == 'Não Processado' || pedido.estado == 'Not Processed'}">
+                                    <openmrs:message code="sespct.error.NOT_FOUND"/>
                                 </c:when>
                                 <c:otherwise>-</c:otherwise>
                             </c:choose>
@@ -151,7 +159,25 @@
                 lengthMenu: [20, 50, 75, 100],
                 order: [[6, 'desc']],
                 language: {
-                    emptyTable: "Nenhum caso encontrado com os critérios selecionados."
+                    "emptyTable": "Nenhum registo encontrado",
+                    "info": "Mostrando de _START_ até _END_ de _TOTAL_ registos",
+                    "infoEmpty": "Mostrando 0 até 0 de 0 registos",
+                    "infoFiltered": "(Filtrado de _MAX_ registos no total)",
+                    "lengthMenu": "Mostrar _MENU_ registos",
+                    "loadingRecords": "A carregar...",
+                    "processing": "A processar...",
+                    "search": "Procurar:",
+                    "zeroRecords": "Nenhum registo encontrado",
+                    "paginate": {
+                        "first": "Primeiro",
+                        "last": "Último",
+                        "next": "Seguinte",
+                        "previous": "Anterior"
+                    },
+                    "aria": {
+                        "sortAscending": ": Ordenar por ordem crescente",
+                        "sortDescending": ": Ordenar por ordem decrescente"
+                    }
                 }
             });
         } else {
