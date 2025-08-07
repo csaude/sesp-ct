@@ -11,9 +11,7 @@ package org.openmrs.module.sespct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.module.sespct.api.SESPCTService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.openmrs.module.sespct.api.PedidoService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.BaseModuleActivator;
 
@@ -37,14 +35,14 @@ public class SESPCTActivator extends BaseModuleActivator {
 	}
 	
 	public void started() {
+		System.out.println("### Starting SESP-CT Module");
 		log.info("SESP-CT Module started");
-		
 		try {
 			// Get the service that handles our business logic
-			SESPCTService sespCtService = Context.getService(SESPCTService.class);
-			
+			PedidoService pedidoService = Context.getService(PedidoService.class);
+			System.out.println(pedidoService);
 			// Create tables and populate with dummy data
-			sespCtService.initializeModule();
+			pedidoService.initializeModule();
 			
 			log.info("SESP-CT Module initialization completed successfully");
 		}

@@ -6,27 +6,27 @@
                            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
                            http://www.springframework.org/schema/context
                            http://www.springframework.org/schema/context/spring-context-3.0.xsd">
-    
+
     <!-- Enable annotation-based configuration -->
     <context:component-scan base-package="org.openmrs.module.sespct" />
-   
-    <!-- Define the DAO bean first -->
-    <bean id="sespctDao" class="org.openmrs.module.sespct.api.dao.impl.SESPCTDaoImpl">
+
+    <!-- Define the DAO bean -->
+    <bean id="pedidoDao" class="org.openmrs.module.sespct.api.dao.impl.PedidoDaoImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
-    
+
     <!-- Define the service implementation -->
-    <bean id="sespctServiceImpl" 
-          class="org.openmrs.module.sespct.api.impl.SESPCTServiceImpl">
-        <property name="dao" ref="sespctDao" />
+    <bean id="pedidoServiceImpl"
+          class="org.openmrs.module.sespct.api.impl.PedidoServiceImpl">
+        <property name="pedidoDao" ref="pedidoDao" />
     </bean>
-    
+
     <!-- Register the service with OpenMRS Context -->
     <bean parent="serviceContext">
         <property name="moduleService">
             <list>
-                <value>org.openmrs.module.sespct.api.SESPCTService</value>
-                <ref bean="sespctServiceImpl" />
+                <value>org.openmrs.module.sespct.api.PedidoService</value>
+                <ref bean="pedidoServiceImpl" />
             </list>
         </property>
     </bean>

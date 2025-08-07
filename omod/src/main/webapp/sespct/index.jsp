@@ -1,4 +1,3 @@
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/template/include.jsp" %>
 <%@ include file="/WEB-INF/template/header.jsp" %>
@@ -13,17 +12,18 @@
 
 <h2><openmrs:message code="sespct.title"/></h2>
 
-<%--<p>--%>
-<%--    <small>--%>
-<%--        <small>--%>
-<%--            <fmt:message key="sespct.lastSync">--%>
-<%--                <fmt:param value="<fmt:formatDate value='${currentDate}' pattern='dd \'de\' MMMM \'de\' yyyy' />" />--%>
-<%--                <fmt:param value="<fmt:formatDate value='${currentDate}' pattern='HH:mm\'h\'' />" />--%>
-<%--                <fmt:param value="10 mins" />--%>
-<%--            </fmt:message>--%>
-<%--        </small>--%>
-<%--    </small>--%>
-<%--</p>--%>
+<p>
+    <small>
+        <small>
+            <fmt:message key="sespct.lastSync">
+                <fmt:param value="8 de Julho de 2025" />
+                <fmt:param value="11:36h" />
+                <fmt:param value="10 minutos" />
+            </fmt:message>
+        </small>
+    </small>
+</p>
+
 
 <div>
     <b class="boxHeader"><openmrs:message code="sespct.search.header"/></b>
@@ -130,7 +130,7 @@
     </table>
     <br />
     <div class="submit-btn center">
-        <button onclick="window.location.href = '${pageContext.request.contextPath}/module/sespct/manageftcases/export.form'">
+        <button id="exportButton" onclick="window.location.href = '${pageContext.request.contextPath}/module/sespct/manageftcases/export.form'">
             <openmrs:message code="sespct.export.button"/>
         </button>
     </div>
@@ -142,7 +142,6 @@
 
 <script type="text/javascript">
     window.addEventListener("DOMContentLoaded", () => {
-        // Check what's available and use it
         var $ = window.jQuery || window.jq || window.$;
 
         if ($) {
@@ -157,7 +156,46 @@
         } else {
             console.error("No jQuery available!");
         }
+
+        // Handle export button click
+        const exportButton = document.getElementById("exportButton");
+        if (exportButton) {
+            exportButton.addEventListener("click", function () {
+                const startDate = document.getElementById("startDate").value.trim();
+                const endDate = document.getElementById("endDate").value.trim();
+
+                if (!startDate || !endDate) {
+                	showAlertMessage("Para exportar dados, efectue primeiro uma pesquisa informando a Data Inicial e a Data Final (em que os resultados foram criados no servidor SESP).");
+                	//window.location.href = "/openmrs/module/sespct/sespct.form";
+                    return;
+                }
+
+                const url = "/openmrs/module/sespct/manageftcases/export.form"
+                          + "?startDate=" + encodeURIComponent(startDate)
+                          + "&endDate=" + encodeURIComponent(endDate);
+
+                window.location.href = url;
+            });
+        }
     });
+
+ 	// Function to show message in OpenMRS alert box
+    function showAlertMessage(message) {
+        const alertBox = document.getElementById("openmrs_msg");
+        if (alertBox) {
+            alertBox.innerHTML = "<b>" + message + "</b>";
+            alertBox.style.display = "block";
+        } else {
+            // Create the alert box if it doesn't exist
+            const alertContainer = document.getElementById("alert-box");
+            if (alertContainer) {
+                const newAlert = document.createElement("div");
+                newAlert.id = "openmrs_msg";
+                newAlert.innerHTML = "<b>" + message + "</b>";
+                alertContainer.appendChild(newAlert);
+            }
+        }
+    }
 </script>
 
 <%@ include file="/WEB-INF/template/footer.jsp" %>

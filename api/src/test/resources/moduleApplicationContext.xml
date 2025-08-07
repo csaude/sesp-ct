@@ -12,7 +12,7 @@
     
     <!-- Explicitly define the service bean -->
     <bean id="sespct.SespCtService" 
-          class="org.openmrs.module.sespct.api.impl.SESPCTServiceImpl">
+          class="org.openmrs.module.sespct.api.impl.PedidoServiceImpl">
         <property name="dao" ref="sespctDao" />
     </bean>
     
