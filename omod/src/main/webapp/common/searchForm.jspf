@@ -50,11 +50,6 @@
 			<label for="us"><openmrs:message code="sespct.search.us" /></label>
 			<select id="us" name="usCode">
 				<option value="ALL"><openmrs:message code="sespct.search.us.ALL" /></option>
-				<option value="US001">Centro de Saúde Xai-Xai (US001)</option>
-				<option value="US002">Hospital Provincial Quelimane (US002)</option>
-				<option value="US003">Centro de Saúde Nampula (US003)</option>
-				<option value="US004">Hospital Central Maputo (US004)</option>
-				<option value="US005">Centro de Saúde Pemba (US005)</option>
 			</select>
 		</div>
 

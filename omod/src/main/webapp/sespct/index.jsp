@@ -1,6 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/template/include.jsp" %>
 <%@ include file="/WEB-INF/template/header.jsp" %>
+<jsp:useBean id="currentDate" class="java.util.Date" />
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <openmrs:require privilege="Permite acesso à aplicação SESP-CT" otherwise="/login.htm"
                  redirect="/module/sespct/sespct.form" />
@@ -31,7 +33,12 @@
     </div>
 </div>
 
-<%@ include file="../common/alertBox.jspf" %>
+<c:if test="${not empty errorMessage}">
+    <div class="error">
+        <strong>Error:</strong> ${errorMessage}
+    </div>
+    <br/>
+</c:if>
 
 <div class="box">
     <table id="ftResultsTable" class="disa-table disa-table-results" style="width:100%; font-size:12px;">
@@ -52,81 +59,87 @@
         </tr>
         </thead>
         <tbody>
-        <tr>
-            <td>US Maputo (001)</td>
-            <td>123456789</td>
-            <td><a href="#">NCFT001</a></td>
-            <td>AJ</td>
-            <td>M</td>
-            <td>32</td>
-            <td>01/07/2025</td>
-            <td>05/07/2025</td>
-            <td>06/07/2025</td>
-            <td>Aprovado</td>
-            <td>-</td>
-            <td>-</td>
-        </tr>
-        <tr>
-            <td>US Beira (002)</td>
-            <td>987654321</td>
-            <td><a href="#">NCFT002</a></td>
-            <td>BN</td>
-            <td>F</td>
-            <td>28</td>
-            <td>15/06/2025</td>
-            <td>20/06/2025</td>
-            <td>21/06/2025</td>
-            <td>Não processado</td>
-            <td>NID não encontrado</td>
-            <td><a href="#"><openmrs:message code="sespct.mapNid"/></a></td>
-        </tr>
-        <tr>
-            <td>US Nampula (003)</td>
-            <td>111222333</td>
-            <td><a href="#">NCFT003</a></td>
-            <td>CL</td>
-            <td>M</td>
-            <td>45</td>
-            <td>02/06/2025</td>
-            <td>-</td>
-            <td>04/06/2025</td>
-            <td>Sem resposta</td>
-            <td>-</td>
-            <td>-</td>
-        </tr>
-        <tr>
-            <td>US Xai-Xai (004)</td>
-            <td>444555666</td>
-            <td><a href="#">NCFT004</a></td>
-            <td>DM</td>
-            <td>F</td>
-            <td>39</td>
-            <td>10/05/2025</td>
-            <td>12/05/2025</td>
-            <td>13/05/2025</td>
-            <td>Adiado</td>
-            <td>-</td>
-            <td>-</td>
-        </tr>
-        <tr>
-            <td>US Chimoio (005)</td>
-            <td>777888999</td>
-            <td><a href="#">NCFT005</a></td>
-            <td>EP</td>
-            <td>M</td>
-            <td>50</td>
-            <td>03/05/2025</td>
-            <td>06/05/2025</td>
-            <td>07/05/2025</td>
-            <td>Aprovado</td>
-            <td>-</td>
-            <td>-</td>
-        </tr>
+        <c:choose>
+            <c:when test="${empty pedidos}">
+                <tr>
+                    <td colspan="12" style="text-align: center; font-style: italic;">
+                        Nenhum caso encontrado com os critérios selecionados.
+                    </td>
+                </tr>
+            </c:when>
+            <c:otherwise>
+                <c:forEach var="pedido" items="${pedidos}">
+                    <tr>
+                        <td>${pedido.dadosUtente.unidadeSanitaria} (${pedido.dadosUtente.codigoUnidadeSanitaria})</td>
+                        <td>${pedido.dadosUtente.nid}</td>
+                        <td>
+                            <a href="${pageContext.request.contextPath}/module/sespct/viewRequest.form?pedidoId=${pedido.pedidoId}">
+                                    ${pedido.pedidoId}
+                            </a>
+                        </td>
+                        <td>${pedido.dadosUtente.iniciais}</td>
+                        <td>
+                            <c:choose>
+                                <c:when test="${pedido.dadosUtente.sexo == 'masculino'}">M</c:when>
+                                <c:when test="${pedido.dadosUtente.sexo == 'feminino'}">F</c:when>
+                                <c:otherwise>${pedido.dadosUtente.sexo}</c:otherwise>
+                            </c:choose>
+                        </td>
+                        <td>
+                            <fmt:formatNumber value="${pedido.dadosUtente.idade}" maxFractionDigits="0" />
+                        </td>
+                        <td>
+                            <fmt:formatDate value="${pedido.dataSubmissao}" pattern="dd/MM/yyyy" />
+                        </td>
+                        <td>
+                            <c:choose>
+                                <c:when test="${pedido.estado == 'Sem resposta'}">-</c:when>
+                                <c:otherwise>
+                                    <fmt:formatDate value="${pedido.dataSubmissao}" pattern="dd/MM/yyyy" />
+                                </c:otherwise>
+                            </c:choose>
+                        </td>
+                        <td>
+                            <fmt:formatDate value="${pedido.dataSubmissao}" pattern="dd/MM/yyyy" />
+                        </td>
+                        <td>
+                            <c:choose>
+                                <c:when test="${pedido.estado == 'Sem resposta' || pedido.estado == 'No Response'}">
+                                    <span class="status-no-response"><openmrs:message code="sespct.search.status.SEM_RESPOSTA"/></span>
+                                </c:when>
+                                <c:when test="${pedido.estado == 'Não Processado' || pedido.estado == 'Not Processed'}">
+                                    <span class="status-not-processed"><openmrs:message code="sespct.search.status.NAO_PROCESSADO"/></span>
+                                </c:when>
+                                <c:otherwise>
+                                    ${pedido.estado} <%-- Fallback for any other statuses --%>
+                                </c:otherwise>
+                            </c:choose>
+                        </td>
+                        <td>
+                            <c:choose>
+                                <c:when test="${pedido.estado == 'Não Processado' || pedido.estado == 'Not Processed'}">
+                                    <openmrs:message code="sespct.error.NOT_FOUND"/>
+                                </c:when>
+                                <c:otherwise>-</c:otherwise>
+                            </c:choose>
+                        </td>
+                        <td>
+                            <c:if test="${pedido.estado == 'Não Processado'}">
+                                <a href="#" onclick="mapNid('${request.nid}')">
+                                    <openmrs:message code="sespct.mapNid"/>
+                                </a>
+                            </c:if>
+                            <c:if test="${pedido.estado != 'Não Processado'}">-</c:if>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </c:otherwise>
+        </c:choose>
         </tbody>
     </table>
     <br />
     <div class="submit-btn center">
-        <button id="exportButton">
+        <button id="exportButton" onclick="window.location.href = '${pageContext.request.contextPath}/module/sespct/manageftcases/export.form'">
             <openmrs:message code="sespct.export.button"/>
         </button>
     </div>
@@ -138,14 +151,39 @@
 
 <script type="text/javascript">
     window.addEventListener("DOMContentLoaded", () => {
-        jQuery("#ftResultsTable").DataTable({
-            pageLength: 20,
-            lengthMenu: [20, 50, 75, 100],
-            language: {
-                emptyTable: "Nenhum caso encontrado com os critérios selecionados."
-            }
-        });
-        
+        var $ = window.jQuery || window.jq || window.$;
+
+        if ($) {
+            $("#ftResultsTable").DataTable({
+                pageLength: 20,
+                lengthMenu: [20, 50, 75, 100],
+                order: [[6, 'desc']],
+                language: {
+                    "emptyTable": "Nenhum registo encontrado",
+                    "info": "Mostrando de _START_ até _END_ de _TOTAL_ registos",
+                    "infoEmpty": "Mostrando 0 até 0 de 0 registos",
+                    "infoFiltered": "(Filtrado de _MAX_ registos no total)",
+                    "lengthMenu": "Mostrar _MENU_ registos",
+                    "loadingRecords": "A carregar...",
+                    "processing": "A processar...",
+                    "search": "Procurar:",
+                    "zeroRecords": "Nenhum registo encontrado",
+                    "paginate": {
+                        "first": "Primeiro",
+                        "last": "Último",
+                        "next": "Seguinte",
+                        "previous": "Anterior"
+                    },
+                    "aria": {
+                        "sortAscending": ": Ordenar por ordem crescente",
+                        "sortDescending": ": Ordenar por ordem decrescente"
+                    }
+                }
+            });
+        } else {
+            console.error("No jQuery available!");
+        }
+
         // Handle export button click
         const exportButton = document.getElementById("exportButton");
         if (exportButton) {
@@ -167,7 +205,7 @@
             });
         }
     });
-    
+
  	// Function to show message in OpenMRS alert box
     function showAlertMessage(message) {
         const alertBox = document.getElementById("openmrs_msg");
