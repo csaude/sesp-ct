@@ -40,6 +40,8 @@
     <br/>
 </c:if>
 
+<%@ include file="../common/alertBox.jspf" %>
+
 <div class="box">
     <table id="ftResultsTable" class="disa-table disa-table-results" style="width:100%; font-size:12px;">
         <thead>
@@ -139,9 +141,9 @@
     </table>
     <br />
     <div class="submit-btn center">
-        <button id="exportButton" onclick="window.location.href = '${pageContext.request.contextPath}/module/sespct/manageftcases/export.form'">
-            <openmrs:message code="sespct.export.button"/>
-        </button>
+		<button id="exportButton">
+		    <openmrs:message code="sespct.export.button"/>
+		</button>
     </div>
 </div>
 
@@ -187,17 +189,29 @@
         // Handle export button click
         const exportButton = document.getElementById("exportButton");
         if (exportButton) {
-            exportButton.addEventListener("click", function () {
-                const startDate = document.getElementById("startDate").value.trim();
-                const endDate = document.getElementById("endDate").value.trim();
-
+            exportButton.addEventListener("click", function (event) {
+                event.preventDefault();
+                
+                // Obter os elementos
+                const startDateElement = document.getElementById("startDate");
+                const endDateElement = document.getElementById("endDate");
+                
+                // Verificar se os elementos existem primeiro
+                if (!startDateElement || !endDateElement) {
+                    showAlertMessage("Campos de data não encontrados. Faça primeiro uma pesquisa.");
+                    return;
+                }
+                
+                // Obter os valores e verificar se estão preenchidos
+                const startDate = startDateElement.value ? startDateElement.value.trim() : '';
+                const endDate = endDateElement.value ? endDateElement.value.trim() : '';
+                
                 if (!startDate || !endDate) {
-                	showAlertMessage("Para exportar dados, efectue primeiro uma pesquisa informando o periodo de submissão do pedido (a Data Início e Fim)");
-                	//window.location.href = "/openmrs/module/sespct/sespct.form";
+                    showAlertMessage("Para exportar dados, efectue primeiro uma pesquisa informando o periodo de submissão do pedido (a Data Início e Fim)");
                     return;
                 }
 
-                const url = "/openmrs/module/sespct/manageftcases/export.form"
+                const url = "${pageContext.request.contextPath}/module/sespct/manageftcases/export.form"
                           + "?startDate=" + encodeURIComponent(startDate)
                           + "&endDate=" + encodeURIComponent(endDate);
 
@@ -206,7 +220,7 @@
         }
     });
 
- 	// Function to show message in OpenMRS alert box
+    // Function to show message in OpenMRS alert box
     function showAlertMessage(message) {
         const alertBox = document.getElementById("openmrs_msg");
         if (alertBox) {
@@ -220,7 +234,16 @@
                 newAlert.id = "openmrs_msg";
                 newAlert.innerHTML = "<b>" + message + "</b>";
                 alertContainer.appendChild(newAlert);
+            } else {
+                // Fallback para alert do browser se não encontrar container
+                alert(message);
             }
+        }
+        
+        // Scroll para mostrar a mensagem
+        const alertElement = document.getElementById("openmrs_msg");
+        if (alertElement) {
+            alertElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }
 </script>
