@@ -4,6 +4,7 @@ import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.sespct.api.model.Pedido;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 
 public interface PedidoService extends OpenmrsService {
@@ -23,6 +24,8 @@ public interface PedidoService extends OpenmrsService {
 	
 	@Transactional(readOnly = true)
 	List<Pedido> getPedidosByEstado(String estado);
+	
+	List<Pedido> getPedidosByDateRange(Date startDate, Date endDate);
 	
 	void deletePedido(Pedido pedido);
 	

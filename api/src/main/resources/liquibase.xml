@@ -97,6 +97,25 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
+            <!-- Standard OpenMRS audit fields -->
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="voided" type="tinyint" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)"/>
+
             <!-- Foreign key to pedido -->
             <column name="pedido_id" type="int">
                 <constraints nullable="false" unique="true"/>
@@ -144,6 +163,25 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
+            <!-- Standard OpenMRS audit fields -->
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="voided" type="tinyint" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)"/>
+
             <!-- Foreign key to pedido -->
             <column name="pedido_id" type="int">
                 <constraints nullable="false" unique="true"/>
@@ -184,6 +222,25 @@
                 <constraints nullable="false" unique="true"/>
             </column>
 
+            <!-- Standard OpenMRS audit fields -->
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="voided" type="tinyint" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)"/>
+
             <!-- Reportar Falencia fields -->
             <column name="historia_clinica" type="text"/>
             <column name="historia_adesao" type="text"/>
@@ -212,6 +269,25 @@
             <column name="linha_solicitada_id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
+
+            <!-- Standard OpenMRS audit fields -->
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="voided" type="tinyint" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)"/>
 
             <!-- Foreign key to pedido -->
             <column name="pedido_id" type="int">
@@ -452,5 +528,231 @@
                 referencedColumnNames="user_id"
                 constraintName="fk_viral_load_data_voided_by"/>
     </changeSet>
+
+    <!-- Create Resposta table -->
+    <changeSet id="sespct-1.0.0-9" author="sespct">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="sespct_resposta"/>
+            </not>
+        </preConditions>
+        <comment>Create sespct_resposta table</comment>
+
+        <createTable tableName="sespct_resposta">
+            <column name="resposta_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <!-- Standard OpenMRS audit fields -->
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="voided" type="tinyint" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)"/>
+
+            <!-- Foreign key to pedido -->
+            <column name="pedido_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Foreign keys -->
+        <addForeignKeyConstraint
+                baseTableName="sespct_resposta"
+                baseColumnNames="pedido_id"
+                referencedTableName="sespct_pedido"
+                referencedColumnNames="pedido_id"
+                constraintName="fk_resposta_pedido"/>
+        <addForeignKeyConstraint
+                baseTableName="sespct_resposta"
+                baseColumnNames="creator"
+                referencedTableName="users"
+                referencedColumnNames="user_id"
+                constraintName="fk_resposta_creator"/>
+        <addForeignKeyConstraint
+                baseTableName="sespct_resposta"
+                baseColumnNames="changed_by"
+                referencedTableName="users"
+                referencedColumnNames="user_id"
+                constraintName="fk_resposta_changed_by"/>
+        <addForeignKeyConstraint
+                baseTableName="sespct_resposta"
+                baseColumnNames="voided_by"
+                referencedTableName="users"
+                referencedColumnNames="user_id"
+                constraintName="fk_resposta_voided_by"/>
+    </changeSet>
+
+    <!-- Create Metadados Resposta table -->
+    <changeSet id="sespct-1.0.0-10" author="sespct">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="sespct_metadados_resposta"/>
+            </not>
+        </preConditions>
+        <comment>Create sespct_metadados_resposta table</comment>
+
+        <createTable tableName="sespct_metadados_resposta">
+            <column name="metadados_resposta_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="resposta_id" type="int">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="resposta_id_external" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pedido_id_reference" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="versao" type="varchar(10)"/>
+            <column name="timestamp" type="datetime"/>
+            <column name="processado_por" type="varchar(100)"/>
+            <column name="ultima_sincronizacao" type="datetime"/>
+
+            <!-- Standard OpenMRS audit fields -->
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="voided" type="tinyint" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="sespct_metadados_resposta"
+                baseColumnNames="resposta_id"
+                referencedTableName="sespct_resposta"
+                referencedColumnNames="resposta_id"
+                constraintName="fk_metadados_resposta_resposta"/>
+    </changeSet>
+
+    <!-- Create Resposta Comite table -->
+    <changeSet id="sespct-1.0.0-11" author="sespct">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="sespct_resposta_comite"/>
+            </not>
+        </preConditions>
+        <comment>Create sespct_resposta_comite table</comment>
+
+        <createTable tableName="sespct_resposta_comite">
+            <column name="resposta_comite_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="resposta_id" type="int">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="resposta" type="varchar(200)"/>
+            <column name="linha_terapeutica" type="varchar(50)"/>
+            <column name="esquema_aprovado" type="varchar(100)"/>
+            <column name="data_resposta" type="datetime"/>
+            <column name="comentario" type="text"/>
+            <column name="autorizante" type="varchar(200)"/>
+            <column name="email" type="varchar(100)"/>
+            <column name="contacto" type="varchar(20)"/>
+            <column name="nivel_autorizacao" type="varchar(50)"/>
+            <column name="data_aprovacao" type="datetime"/>
+
+            <!-- Standard OpenMRS audit fields -->
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="voided" type="tinyint" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="sespct_resposta_comite"
+                baseColumnNames="resposta_id"
+                referencedTableName="sespct_resposta"
+                referencedColumnNames="resposta_id"
+                constraintName="fk_resposta_comite_resposta"/>
+    </changeSet>
+
+    <!-- Create Notificacoes table -->
+    <changeSet id="sespct-1.0.0-12" author="sespct">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="sespct_notificacoes"/>
+            </not>
+        </preConditions>
+        <comment>Create sespct_notificacoes table</comment>
+
+        <createTable tableName="sespct_notificacoes">
+            <column name="notificacoes_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="resposta_id" type="int">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="webhook_entregue" type="boolean"/>
+            <column name="email_enviado" type="boolean"/>
+            <column name="sms_enviado" type="boolean"/>
+            <column name="data_notificacao" type="datetime"/>
+
+            <!-- Standard OpenMRS audit fields -->
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="voided" type="tinyint" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="sespct_notificacoes"
+                baseColumnNames="resposta_id"
+                referencedTableName="sespct_resposta"
+                referencedColumnNames="resposta_id"
+                constraintName="fk_notificacoes_resposta"/>
+    </changeSet>
+
 
 </databaseChangeLog>

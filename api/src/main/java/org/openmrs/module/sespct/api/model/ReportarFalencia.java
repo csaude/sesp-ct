@@ -1,10 +1,12 @@
 package org.openmrs.module.sespct.api.model;
 
+import org.openmrs.BaseOpenmrsData;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "sespct_reportar_falencia")
-public class ReportarFalencia {
+public class ReportarFalencia extends BaseOpenmrsData {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +27,16 @@ public class ReportarFalencia {
 	private String tratamentoTbAtivo;
 	
 	// --- Getters and Setters ---
+	
+	@Override
+	public Integer getId() {
+		return id;
+	}
+	
+	@Override
+	public void setId(Integer id) {
+		this.id = id;
+	}
 	
 	public Pedido getPedido() {
 		return pedido;

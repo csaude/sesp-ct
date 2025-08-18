@@ -1,11 +1,13 @@
 package org.openmrs.module.sespct.api.model;
 
+import org.openmrs.BaseOpenmrsData;
+
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
 @Table(name = "sespct_dados_utente")
-public class DadosUtente {
+public class DadosUtente extends BaseOpenmrsData {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -67,6 +69,17 @@ public class DadosUtente {
 	private Date dataParto;
 	
 	// --- Getters and Setters ---
+	
+	@Override
+	public Integer getId() {
+		return id;
+	}
+	
+	@Override
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	
 	public Pedido getPedido() {
 		return pedido;
 	}

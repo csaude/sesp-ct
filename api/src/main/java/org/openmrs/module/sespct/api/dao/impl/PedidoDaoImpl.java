@@ -10,6 +10,7 @@ import org.openmrs.module.sespct.api.model.Pedido;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class PedidoDaoImpl implements PedidoDao {
@@ -72,5 +73,15 @@ public class PedidoDaoImpl implements PedidoDao {
 		// Don't actually delete, just void it (OpenMRS pattern)
 		pedido.setVoided(true);
 		this.getCurrentSession().saveOrUpdate(pedido);
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<Pedido> getPedidosByDateRange(Date startDate, Date endDate) {
+		final String hql = "FROM Pedido WHERE dataSubmissao BETWEEN :startDate AND :endDate "
+		        + "AND voided = 0 ORDER BY dataSubmissao DESC";
+		final Query query = this.getCurrentSession().createQuery(hql).setParameter("startDate", startDate)
+		        .setParameter("endDate", endDate);
+		return query.list();
 	}
 }

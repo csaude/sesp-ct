@@ -2,6 +2,7 @@ package org.openmrs.module.sespct.api.dao;
 
 import org.openmrs.module.sespct.api.model.Pedido;
 
+import java.util.Date;
 import java.util.List;
 
 public interface PedidoDao {
@@ -51,4 +52,6 @@ public interface PedidoDao {
 	 * @param pedido the Pedido to delete
 	 */
 	void deletePedido(Pedido pedido);
+	
+	List<Pedido> getPedidosByDateRange(Date startDate, Date endDate);
 }
