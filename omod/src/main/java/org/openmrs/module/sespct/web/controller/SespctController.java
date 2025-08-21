@@ -24,7 +24,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.PrintWriter;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -80,10 +82,9 @@ public class SespctController {
 		try {
 			log.info("Starting export with dates: {} to {}", startDate, endDate);
 			
-			// Parse dates - expecting MM/dd/yyyy format from frontend
-			SimpleDateFormat inputDateFormat = new SimpleDateFormat("MM/dd/yyyy");
-			Date start = inputDateFormat.parse(startDate);
-			Date end = inputDateFormat.parse(endDate);
+			// Use the new helper method to parse the dates
+			Date start = parseDateMultiFormat(startDate);
+			Date end = parseDateMultiFormat(endDate);
 			
 			log.info("Parsed dates successfully: {} to {}", start, end);
 			
@@ -443,6 +444,25 @@ public class SespctController {
 		CellStyle style = createDataStyle(workbook); // Inherit base data style
 		style.setAlignment(HorizontalAlignment.CENTER);
 		return style;
+	}
+	
+	private Date parseDateMultiFormat(String dateString) {
+		// List of expected date formats
+		List<SimpleDateFormat> knownFormats = Arrays.asList(new SimpleDateFormat("MM/dd/yyyy"), // English format
+		    new SimpleDateFormat("dd-MM-yyyy") // Portuguese format
+		        );
+		
+		for (SimpleDateFormat format : knownFormats) {
+			try {
+				// Try to parse with the current format
+				return format.parse(dateString);
+			}
+			catch (ParseException e) {
+				// Ignore and try the next format
+			}
+		}
+		// If no format matches, throw an exception
+		throw new IllegalArgumentException("Invalid date format for value: \"" + dateString + "\"");
 	}
 	
 	/**
