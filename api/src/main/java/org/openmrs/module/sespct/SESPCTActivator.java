@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.sespct.api.PedidoService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.BaseModuleActivator;
+import org.openmrs.module.sespct.api.SespctApiService;
 
 /**
  * This class contains the logic that is run every time this module is either started or shutdown
@@ -38,16 +39,24 @@ public class SESPCTActivator extends BaseModuleActivator {
 		System.out.println("### Starting SESP-CT Module");
 		log.info("SESP-CT Module started");
 		try {
-			// Get the service that handles our business logic
-			PedidoService pedidoService = Context.getService(PedidoService.class);
-			System.out.println(pedidoService);
-			// Create tables and populate with dummy data
-			pedidoService.initializeModule();
+			// We are testing the NEW API service, so we get that one.
+			SespctApiService apiService = Context.getService(SespctApiService.class);
 			
-			log.info("SESP-CT Module initialization completed successfully");
+			if (apiService == null) {
+				log.error("CRITICAL: SespctApiService could not be loaded. Please check the moduleApplicationContext.xml configuration.");
+				return;
+			}
+			
+			log.info("SespctApiService loaded successfully. Initiating a test API call to sync data...");
+			
+			// This line triggers the API communication test.
+			apiService.syncPedidosFromApi();
+			
+			log.info("SESP-CT Module startup test sequence finished. Check the logs for API communication details.");
+			
 		}
 		catch (Exception e) {
-			log.error("Error initializing SESP-CT Module", e);
+			log.error("A major error occurred during the SESP-CT Module startup test.", e);
 		}
 	}
 	

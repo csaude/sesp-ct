@@ -57,7 +57,108 @@
 		</description>
 	</globalProperty>
 	/Required Global Properties -->
-	
+	<globalProperty>
+		<property>sespct.api.baseUrl</property>
+		<defaultValue>https://api.comitetarvmisau.co.mz</defaultValue>
+		<description>
+			The base URL for the SESP-CT external API.
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>sespct.api.clientId</property>
+		<defaultValue>openmrs_sespct_client_004</defaultValue>
+		<description>
+			The Client ID for authenticating with the SESP-CT API.
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>sespct.api.clientSecret</property>
+		<defaultValue>secret-shaquil</defaultValue>
+		<description>
+			The Client Secret for authenticating with the SESP-CT API.
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>sespct.api.scopes</property>
+		<defaultValue>read write</defaultValue>
+		<description>
+			The permission scopes to request from the SESP-CT API (space-separated).
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>sespct.api.clientPrivateKey</property>
+		<defaultValue>
+			<![CDATA[
+-----BEGIN PRIVATE KEY-----
+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
+QsN22I77jWsAtpG0xvznHXhEkldjig==
+-----END PRIVATE KEY-----
+        ]]>
+		</defaultValue>
+		<description>
+			The client's private RSA key (in PEM format) used to sign requests.
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>sespct.api.serverPublicKey</property>
+		<defaultValue>
+			<![CDATA[
+-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtxgKv7xamvKWMYdhM8ev\nTDPgGwZUDmRSF383V4nc4lak+0k0c7thw/JzOwkQGQ+E9sgG5vIDQGbBP4sRQQSu\n2JZ2472L8y6b5Uvp/I+Igq9sUYoDQA1yhzbWPikSTNxF5rXZ/sPmctFg9KMSURk1\n64GRhxpm+hHyEMy2esk0qoM2g+f3gN+jih1rgZI54pmlZdcwE6+iTtJK7p4wxrWd\nI2XlUVYptqPYsiVpFEaZRukM2vI5BLzF019eq3qJiKqVFdgnvLpVZNAcoFbiEKmB\nH9kCR+HW5iFbV6jd9ll7oXedibBdA8xYxcXGCTVvaRWuu1nwg8yW5a+t8N2NOMtG\nEwIDAQAB\n-----END PUBLIC KEY-----\n
+        ]]>
+		</defaultValue>
+		<description>
+			The server's public RSA key (in PEM format) used to verify responses.
+		</description>
+	</globalProperty>
+
 	<!--
 	<dwr>
 		<allow>

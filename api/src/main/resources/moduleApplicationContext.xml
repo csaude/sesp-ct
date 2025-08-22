@@ -16,15 +16,20 @@
     </bean>
 
     <!-- Define the service implementation -->
+    <bean id="SespctApiServiceImpl"
+          class="org.openmrs.module.sespct.api.impl.SespctApiServiceImpl">
+    </bean>
     <bean id="pedidoServiceImpl"
           class="org.openmrs.module.sespct.api.impl.PedidoServiceImpl">
         <property name="pedidoDao" ref="pedidoDao" />
     </bean>
-
     <!-- Register the service with OpenMRS Context -->
     <bean parent="serviceContext">
         <property name="moduleService">
             <list>
+                <value>org.openmrs.module.sespct.api.SespctApiService</value>
+                <ref bean="SespctApiServiceImpl" />
+
                 <value>org.openmrs.module.sespct.api.PedidoService</value>
                 <ref bean="pedidoServiceImpl" />
             </list>
