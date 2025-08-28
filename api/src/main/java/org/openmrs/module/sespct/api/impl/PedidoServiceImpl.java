@@ -10,12 +10,8 @@ import org.openmrs.module.sespct.api.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 
-@Transactional
 public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoService {
 	
 	private static final Log log = LogFactory.getLog(PedidoServiceImpl.class);
@@ -28,18 +24,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	}
 	
 	@Override
-	public void initializeModule() {
-		log.info("Initializing SESP-CT Module...");
-		List<Pedido> existingPedidos = pedidoDao.getAllPedidos();
-		if (existingPedidos.isEmpty() || existingPedidos.size() > 20) {
-			log.info("No existing data found. Creating dummy data...");
-			createDummyData();
-		} else {
-			log.info("Found " + existingPedidos.size() + " existing pedidos. Skipping dummy data creation.");
-		}
-	}
-	
-	@Override
+	@Transactional
 	public Pedido savePedido(Pedido pedido) {
 		return pedidoDao.savePedido(pedido);
 	}
@@ -69,8 +54,24 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	}
 	
 	@Override
+	@Transactional
 	public void deletePedido(Pedido pedido) {
 		pedidoDao.deletePedido(pedido);
+	}
+	
+	// And implement it in your PedidoServiceImpl
+	@Override
+	@Transactional
+	public List<Pedido> getPedidosByDateRange(Date startDate, Date endDate) {
+		// Adjust end date to include the entire day
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(endDate);
+		cal.set(Calendar.HOUR_OF_DAY, 23);
+		cal.set(Calendar.MINUTE, 59);
+		cal.set(Calendar.SECOND, 59);
+		Date adjustedEndDate = cal.getTime();
+		
+		return pedidoDao.getPedidosByDateRange(startDate, adjustedEndDate);
 	}
 	
 	/**
@@ -83,7 +84,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	 * records with submissions from 2020 to 2025. Includes special cases for NID mapping as per
 	 * business rules.
 	 */
-	@Override
+	@Transactional
 	public void createDummyData() {
 		log.info("Starting dummy data creation for SESPCT module...");
 		Random rand = new Random();
@@ -347,17 +348,4 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 		return cal.getTime();
 	}
 	
-	// And implement it in your PedidoServiceImpl
-	@Override
-	public List<Pedido> getPedidosByDateRange(Date startDate, Date endDate) {
-		// Adjust end date to include the entire day
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(endDate);
-		cal.set(Calendar.HOUR_OF_DAY, 23);
-		cal.set(Calendar.MINUTE, 59);
-		cal.set(Calendar.SECOND, 59);
-		Date adjustedEndDate = cal.getTime();
-		
-		return pedidoDao.getPedidosByDateRange(startDate, adjustedEndDate);
-	}
 }

@@ -1,15 +1,11 @@
 package org.openmrs.module.sespct.web.controller;
 
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.sespct.api.PedidoService;
-import org.openmrs.module.sespct.api.model.DadosUtente;
 import org.openmrs.module.sespct.api.model.Pedido;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
 import org.openmrs.module.sespct.api.model.Resposta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,20 +19,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.io.PrintWriter;
+import javax.validation.Valid;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.poi.ss.util.CellRangeAddress;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
 
 @Controller
 @RequestMapping("/module/sespct/")

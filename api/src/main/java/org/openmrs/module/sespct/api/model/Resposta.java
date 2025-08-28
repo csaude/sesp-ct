@@ -9,12 +9,6 @@ import java.util.Date;
 public class Resposta extends BaseOpenmrsData {
 	
 	public Resposta() {
-		this.metadados = new MetadadosResposta();
-		this.respostaComite = new RespostaComite();
-		this.notificacoes = new Notificacoes();
-		this.metadados.setResposta(this);
-		this.respostaComite.setResposta(this);
-		this.notificacoes.setResposta(this);
 	}
 	
 	@Id
@@ -24,7 +18,7 @@ public class Resposta extends BaseOpenmrsData {
 	
 	// Link to the original request
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "pedido_id", referencedColumnName = "pedido_id")
+	@JoinColumn(name = "pedido_id")
 	private Pedido pedido;
 	
 	// One-to-One relationships
