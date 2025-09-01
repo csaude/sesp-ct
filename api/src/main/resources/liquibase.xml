@@ -453,4 +453,53 @@
                 constraintName="fk_viral_load_data_voided_by"/>
     </changeSet>
 
+    <changeSet id="sespct-001-event-log" author="sespct">
+        <createTable tableName="sespct_event_log">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="request_id" type="VARCHAR(64)"/>
+            <column name="event" type="VARCHAR(64)"/>
+            <column name="ts" type="DATETIME"/>
+            <column name="status" type="VARCHAR(32)"/>
+            <column name="attempts" type="INT" defaultValueNumeric="0"/>
+            <column name="error" type="VARCHAR(1024)"/>
+            <column name="payload" type="LONGTEXT"/>
+            <column name="date_created" type="DATETIME" />
+        </createTable>
+        <createIndex tableName="sespct_event_log" indexName="idx_sespct_event_req">
+            <column name="request_id"/>
+        </createIndex>
+    </changeSet>
+
+
+    <changeSet id="sespct-002-subscription" author="sespct">
+        <createTable tableName="sespct_subscription">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="subscription_id" type="VARCHAR(128)">
+                <constraints unique="true"/>
+            </column>
+            <column name="status" type="VARCHAR(32)" />
+            <column name="date_created" type="DATETIME" />
+        </createTable>
+    </changeSet>
+    <changeSet id="sespct-dev-gp-upsert-mysql" author="sespct" >
+        <sql>
+            INSERT INTO global_property (property, property_value, description, uuid) VALUES
+            ('sesp.ct.keys.omrsPrivatePem','file:/home/voloide/PROJECTS/DEV/KEYS/omrs-private.pem','DEV: OpenMRS private key','11111111-1111-1111-1111-111111111111'),
+            ('sesp.ct.keys.omrsPublicPem','file:/home/voloide/PROJECTS/DEV/KEYS/omrs-public.pem','DEV: OpenMRS public key','22222222-2222-2222-2222-222222222222'),
+            ('sesp.ct.keys.ctPublicPem','file:/home/voloide/PROJECTS/DEV/KEYS/ct-public.dev.pem','DEV: CT public key','33333333-3333-3333-3333-333333333333'),
+            ('sesp.ct.keys.clientKeyId','openmrs-dev-key-1','DEV: Key ID','44444444-4444-4444-4444-444444444444')
+            ON DUPLICATE KEY UPDATE
+            property_value=VALUES(property_value),
+            description=VALUES(description);
+        </sql>
+        <rollback>
+            DELETE FROM global_property
+            WHERE property IN ('sesp.ct.keys.omrsPrivatePem','sesp.ct.keys.omrsPublicPem','sesp.ct.keys.ctPublicPem','sesp.ct.keys.clientKeyId');
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

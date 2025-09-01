@@ -23,7 +23,7 @@
 		<url>https://github.com/openmrs/openmrs-module-sespct/</url>
 	</scm>
 
-	<modules>
+    <modules>
 		<module>api</module>
 		<module>omod</module>
 	</modules>
@@ -204,5 +204,6 @@
 
 	<properties>
 		<openmrsPlatformVersion>2.3.3</openmrsPlatformVersion>
+        <spring.version>4.3.25.RELEASE</spring.version>
 	</properties>
 </project>
