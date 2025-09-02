@@ -11,7 +11,7 @@ import org.openmrs.module.sespct.api.model.Pedido;
 import org.openmrs.module.sespct.api.model.HistoriaTarv;
 import org.openmrs.module.sespct.api.model.DadosLaboratorioCD4;
 import org.openmrs.module.sespct.api.model.DadosLaboratorioCargaViral;
-import org.openmrs.module.sespct.config.SESPCTConfig;
+import org.openmrs.module.sespct.config.CTConfig;
 import org.openmrs.module.sespct.ct.CtClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -28,8 +28,12 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	
 	@Autowired
 	private PedidoDao pedidoDao;
-    @Autowired private CtClient ctClient;
-    @Autowired private SESPCTConfig cfg;
+	
+	@Autowired
+	private CtClient ctClient;
+	
+	@Autowired
+	private CTConfig cfg;
 	
 	public void setPedidoDao(PedidoDao pedidoDao) {
 		this.pedidoDao = pedidoDao;
@@ -232,19 +236,20 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 			log.error("Error creating dummy Pedido data", e);
 		}
 	}
-
-    @Async("sespctTaskExecutor")
-    @Override
-    public void fetchAndUpsertFromCtAsync(String requestId, String facilityCode) {
-        try {
-            String fac = (facilityCode != null && !facilityCode.isEmpty()) ? facilityCode : cfg.getDefaultFacility();
-            JsonNode full = ctClient.getPedidoById(requestId, fac);
-            JsonNode dp = full.path("dadosPedido"); // ajusta se a API do CT usar outro “root”
-            // Idempotente: o DAO deve fazer upsert por pedidoId (UNIQUE)
-            pedidoDao.saveOrUpdateFromJson(dp);
-        } catch (Exception e) {
-            // TODO: retry/backoff e DLQ (se usar fila)
-            e.printStackTrace();
-        }
-    }
+	
+	@Async("sespctTaskExecutor")
+	@Override
+	public void fetchAndUpsertFromCtAsync(String requestId, String facilityCode) {
+		try {
+			String fac = (facilityCode != null && !facilityCode.isEmpty()) ? facilityCode : cfg.getDefaultFacility();
+			JsonNode full = ctClient.getPedidoById(requestId, fac);
+			JsonNode dp = full.path("dadosPedido"); // ajusta se a API do CT usar outro “root”
+			// Idempotente: o DAO deve fazer upsert por pedidoId (UNIQUE)
+			pedidoDao.saveOrUpdateFromJson(dp);
+		}
+		catch (Exception e) {
+			// TODO: retry/backoff e DLQ (se usar fila)
+			e.printStackTrace();
+		}
+	}
 }

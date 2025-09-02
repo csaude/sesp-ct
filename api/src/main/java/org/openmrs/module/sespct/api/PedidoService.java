@@ -27,6 +27,6 @@ public interface PedidoService extends OpenmrsService {
 	void deletePedido(Pedido pedido);
 	
 	void createDummyData();
-
-    void fetchAndUpsertFromCtAsync(String requestId, String facilityCode);
+	
+	void fetchAndUpsertFromCtAsync(String requestId, String facilityCode);
 }

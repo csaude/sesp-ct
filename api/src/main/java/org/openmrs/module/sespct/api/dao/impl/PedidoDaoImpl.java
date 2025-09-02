@@ -74,9 +74,9 @@ public class PedidoDaoImpl implements PedidoDao {
 		pedido.setVoided(true);
 		this.getCurrentSession().saveOrUpdate(pedido);
 	}
-
-    @Override
-    public void saveOrUpdateFromJson(JsonNode dp) {
-
-    }
+	
+	@Override
+	public void saveOrUpdateFromJson(JsonNode dp) {
+		
+	}
 }

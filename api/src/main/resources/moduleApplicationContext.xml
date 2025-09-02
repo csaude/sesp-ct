@@ -35,7 +35,6 @@
     <bean id="restTemplate" class="org.springframework.web.client.RestTemplate"/>
 
     <!-- Async + Scheduled -->
-    <task:annotation-driven executor="sespctTaskExecutor" scheduler="sespctScheduler"/>
     <bean id="sespctTaskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
         <property name="corePoolSize" value="3"/>
         <property name="maxPoolSize" value="8"/>
