@@ -1,10 +1,15 @@
 package org.openmrs.module.sespct.crypto;
 
+import org.openmrs.api.context.Context;
+
 import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
@@ -17,6 +22,12 @@ public final class CtCompactCrypto {
 	
 	private static final OAEPParameterSpec OAEP_SHA256_SHA256 = new OAEPParameterSpec("SHA-256", "MGF1",
 	        MGF1ParameterSpec.SHA256, PSource.PSpecified.DEFAULT);
+	
+	private static final String GP_MASTER_KEY = "sesp.ct.kms.masterKeyB64"; // 32 bytes base64
+	
+	private static final int GCM_TAG_BITS = 128; // 16 bytes tag
+	
+	private static final int GCM_IV_BYTES = 12;
 	
 	private CtCompactCrypto() {
 	}
@@ -82,4 +93,88 @@ public final class CtCompactCrypto {
 		System.arraycopy(a, from, out, 0, len);
 		return out;
 	}
+	
+	public static String encryptForGP(String plain) {
+		if (plain == null || plain.trim().isEmpty())
+			return "";
+		try {
+			SecretKey key = loadOrCreateMasterKey(); // may create & store on first run
+			if (key == null)
+				return "{b64}" + Base64.getEncoder().encodeToString(plain.getBytes(StandardCharsets.UTF_8));
+			
+			byte[] iv = new byte[GCM_IV_BYTES];
+			new SecureRandom().nextBytes(iv);
+			
+			Cipher gcm = Cipher.getInstance("AES/GCM/NoPadding");
+			gcm.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(GCM_TAG_BITS, iv));
+			byte[] ct = gcm.doFinal(plain.getBytes(StandardCharsets.UTF_8));
+			
+			// store as: v1|base64(iv|ct)
+			ByteBuffer bb = ByteBuffer.allocate(iv.length + ct.length);
+			bb.put(iv).put(ct);
+			String payload = Base64.getEncoder().encodeToString(bb.array());
+			return "{v1}" + payload;
+		}
+		catch (Exception e) {
+			// last-resort fallback
+			return "{b64}" + Base64.getEncoder().encodeToString(plain.getBytes(StandardCharsets.UTF_8));
+		}
+	}
+	
+	/** Decrypts a GP value encrypted by encryptForGP (supports {v1} and {b64} fallbacks). */
+	public static String decryptFromGP(String stored) {
+		if (stored == null || stored.trim().isEmpty())
+			return "";
+		try {
+			if (stored.startsWith("{v1}")) {
+				String b64 = stored.substring("{v1}".length());
+				byte[] blob = Base64.getDecoder().decode(b64);
+				if (blob.length < GCM_IV_BYTES + 16)
+					return "";
+				
+				byte[] iv = slice(blob, 0, GCM_IV_BYTES);
+				byte[] ct = slice(blob, GCM_IV_BYTES, blob.length);
+				
+				SecretKey key = loadOrCreateMasterKey();
+				if (key == null)
+					return ""; // cannot decrypt
+					
+				Cipher gcm = Cipher.getInstance("AES/GCM/NoPadding");
+				gcm.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(GCM_TAG_BITS, iv));
+				byte[] clear = gcm.doFinal(ct);
+				return new String(clear, StandardCharsets.UTF_8);
+			}
+			if (stored.startsWith("{b64}")) {
+				String b64 = stored.substring("{b64}".length());
+				byte[] bytes = Base64.getDecoder().decode(b64);
+				return new String(bytes, StandardCharsets.UTF_8);
+			}
+			// plain (not encrypted)
+			return stored;
+		}
+		catch (Exception e) {
+			return "";
+		}
+	}
+	
+	/** Loads master key from GP or creates a new 32-byte key and saves it Base64-encoded. */
+	private static SecretKey loadOrCreateMasterKey() {
+        String b64 = Context.getAdministrationService().getGlobalProperty(GP_MASTER_KEY);
+        try {
+            if (b64 == null || b64.trim().isEmpty()) {
+                // create new 256-bit key
+                KeyGenerator kg = KeyGenerator.getInstance("AES");
+                kg.init(256, new SecureRandom());
+                SecretKey key = kg.generateKey();
+                String enc = Base64.getEncoder().encodeToString(key.getEncoded());
+                Context.getAdministrationService().setGlobalProperty(GP_MASTER_KEY, enc);
+                return key;
+            } else {
+                byte[] raw = Base64.getDecoder().decode(b64.trim());
+                return new SecretKeySpec(raw, "AES");
+            }
+        } catch (GeneralSecurityException | IllegalArgumentException e) {
+            return null; // caller will fallback to {b64}
+        }
+    }
 }

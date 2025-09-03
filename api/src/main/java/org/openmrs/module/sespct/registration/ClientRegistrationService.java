@@ -1,15 +1,13 @@
-package org.openmrs.module.sespct.webhooks;
+package org.openmrs.module.sespct.registration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.sespct.config.CTConfig;
 import org.openmrs.module.sespct.crypto.CtCompactCrypto;
 import org.openmrs.module.sespct.oauth.OAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -23,6 +21,8 @@ import java.security.*;
 import java.security.spec.MGF1ParameterSpec;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -44,52 +44,63 @@ public class ClientRegistrationService {
 	
 	private final ObjectMapper mapper = new ObjectMapper();
 	
-	/** Registers the OpenMRS client in CT (compact envelope + base64 signature). */
-	public ClientRegistrationResult registerClient() throws Exception {
-		// 1) Build clear payload
-		ObjectNode payload = mapper.createObjectNode();
-		payload.put("clientKeyId", cfg.getClientKeyId());
-		payload.put("clientPublicKeyPem", cfg.getOmrsPublicPem());
-		payload.put("timestamp", Instant.now().toString());
-		payload.put("nonce", UUID.randomUUID().toString());
+	public ClientRegistrationResult registerClient() {
+		// Read clientId and (decrypted) clientSecret from GP
+		String clientId = Context.getAdministrationService().getGlobalProperty("sesp.ct.oauth.clientId");
+		String storedSecret = Context.getAdministrationService().getGlobalProperty("sesp.ct.oauth.clientSecret");
+		String clientSecret = CtCompactCrypto.decryptFromGP(storedSecret); // falls back if not encrypted
 		
-		// 2) Encrypt + sign (CT requires: data is Base64, signature over Base64)
-		PublicKey ctPublic = CtCompactCrypto.readPublicKeyPem(cfg.getCtPublicPem());
-		PrivateKey myPriv = CtCompactCrypto.readPrivateKeyPem(cfg.getOmrsPrivatePem());
-		String dataB64 = compactEncryptToBase64(mapper.writeValueAsBytes(payload), ctPublic);
-		String signatureB64 = signBase64(dataB64, myPriv);
+		if (clientId == null || clientId.trim().isEmpty())
+			throw new IllegalStateException("Missing GP sesp.ct.oauth.clientId");
+		if (clientSecret == null || clientSecret.trim().isEmpty())
+			throw new IllegalStateException("Missing GP sesp.ct.oauth.clientSecret");
 		
-		// 3) POST to CT (assume protected by OAuth)
-		ObjectNode body = mapper.createObjectNode();
-		body.put("kid", cfg.getClientKeyId());
-		body.put("data", dataB64);
-		body.put("signature", signatureB64);
+		// Build JSON body exactly like your working curl
+		Map<String, Object> body = new HashMap<String, Object>();
+		body.put("clientId", clientId);
+		body.put("clientSecret", clientSecret);
+		body.put("publicKey", cfg.getOmrsPublicPem()); // PEM with \n
+		body.put("keyExpirationDuration", 365);
+		body.put("initialKeyVersion", "1");
+		body.put("scopes", "read,write"); // keep EXACT as your sample
 		
 		HttpHeaders h = new HttpHeaders();
 		h.setContentType(MediaType.APPLICATION_JSON);
-		h.set("Authorization", "Bearer " + oauth.getToken());
+		h.set("scopes", "admin"); // required by CT to create clients
 		
-		ResponseEntity<String> r = rest.postForEntity(cfg.getCtBaseUrl() + E_CLIENTS, new HttpEntity<String>(
-		        body.toString(), h), String.class);
+		ResponseEntity<Map> r = rest
+		        .exchange(cfg.getRegisterUrl(), HttpMethod.POST, new HttpEntity<Map>(body, h), Map.class);
+		
 		if (!r.getStatusCode().is2xxSuccessful()) {
 			throw new IllegalStateException("register client " + r.getStatusCode());
 		}
 		
-		// 4) Verify + decrypt CT response
-		ObjectNode resp = (ObjectNode) mapper.readTree(r.getBody());
-		String respDataB64 = resp.path("data").asText();
-		String respSigB64 = resp.path("signature").asText();
-		
-		boolean ok = CtCompactCrypto.verifySignatureBase64(respDataB64, respSigB64, ctPublic);
-		if (!ok)
-			throw new SecurityException("CT signature invalid");
-		
-		byte[] clear = CtCompactCrypto.decryptCompact(respDataB64, myPriv);
-		ObjectNode json = (ObjectNode) mapper.readTree(clear);
-		
+		Map<?, ?> m = r.getBody();
 		ClientRegistrationResult out = new ClientRegistrationResult();
-		out.setClientId(json.path("clientId").asText(null));
-		out.setClientSecret(json.path("clientSecret").asText(null)); // may be null if CT doesn’t return it
+		
+		// CT may echo/normalize the clientId
+		if (m != null && m.get("clientId") != null) {
+			out.setClientId(String.valueOf(m.get("clientId")));
+			// persist normalized id
+			Context.getAdministrationService().setGlobalProperty("sesp.ct.oauth.clientId", out.getClientId());
+		} else {
+			out.setClientId(clientId);
+		}
+		
+		// Save CT server public key if present and not already set
+		if (m != null && m.get("serverPublicKey") != null) {
+			String ctPub = String.valueOf(m.get("serverPublicKey"));
+			String existing = Context.getAdministrationService().getGlobalProperty("sesp.ct.keys.ctPublicPem");
+			if (existing == null || existing.trim().isEmpty()) {
+				Context.getAdministrationService().setGlobalProperty("sesp.ct.keys.ctPublicPem", ctPub);
+			}
+		}
+		
+		// Keep the clientSecret you used; re-save encrypted (idempotent)
+		Context.getAdministrationService().setGlobalProperty("sesp.ct.oauth.clientSecret",
+		    CtCompactCrypto.encryptForGP(clientSecret));
+		out.setClientSecret(clientSecret);
+		
 		return out;
 	}
 	

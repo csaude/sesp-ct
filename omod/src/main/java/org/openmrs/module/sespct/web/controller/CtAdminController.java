@@ -1,6 +1,6 @@
 package org.openmrs.module.sespct.web.controller;
 
-import org.openmrs.module.sespct.webhooks.ClientRegistrationService;
+import org.openmrs.module.sespct.registration.ClientRegistrationService;
 import org.openmrs.module.sespct.webhooks.WebhookSubscriptionService;
 import org.openmrs.module.sespct.oauth.OAuthService;
 import org.slf4j.Logger;
@@ -30,47 +30,6 @@ public class CtAdminController {
 	
 	@Autowired
 	private OAuthService oauth;
-	
-	/** POST /openmrs/sespct/admin/ct/register → registers the client at CT */
-	@RequestMapping(value = "/register", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public ResponseEntity<Map<String, Object>> registerClient() {
-		try {
-			ClientRegistrationService.ClientRegistrationResult res = clientRegistration.registerClient();
-			Map<String, Object> out = new HashMap<String, Object>();
-			out.put("clientId", res.getClientId());
-			if (res.getClientSecret() != null)
-				out.put("clientSecret", res.getClientSecret());
-			return new ResponseEntity<Map<String, Object>>(out, HttpStatus.OK);
-		}
-		catch (Exception e) {
-			log.error("CT client registration failed", e);
-			Map<String, Object> err = new HashMap<String, Object>();
-			err.put("error", "register_failed");
-			err.put("message", e.getMessage());
-			return new ResponseEntity<Map<String, Object>>(err, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-	
-	/** GET /openmrs/sespct/admin/ct/token → fetches/returns the current OAuth token */
-	@RequestMapping(value = "/token", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public ResponseEntity<Map<String, Object>> getToken() {
-		try {
-			String token = oauth.getToken();
-			Map<String, Object> out = new HashMap<String, Object>();
-			out.put("access_token", token);
-			// If your OAuthService tracks expiry, include it here (expires_in, token_type, etc.)
-			return new ResponseEntity<Map<String, Object>>(out, HttpStatus.OK);
-		}
-		catch (Exception e) {
-			log.error("Failed to obtain OAuth token", e);
-			Map<String, Object> err = new HashMap<String, Object>();
-			err.put("error", "token_failed");
-			err.put("message", e.getMessage());
-			return new ResponseEntity<Map<String, Object>>(err, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
 	
 	/** POST /openmrs/sespct/admin/ct/subscribe → creates webhook subscription in CT */
 	@RequestMapping(value = "/subscribe", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

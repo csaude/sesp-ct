@@ -76,6 +76,11 @@ public class CTConfig {
 		return gp("sesp.ct.webhook.url", "http://localhost:8080/openmrs/public/webhook/e-ft");
 	}
 	
+	// in org.openmrs.module.sespct.config.CTConfig
+	public String getRegisterUrl() {
+		return gp("sesp.ct.register.url", getCtBaseUrl() + "/oauth2/clients");
+	}
+	
 	public String getDefaultFacility() {
 		return gp("sesp.ct.facilityCode", "HCM001");
 	}
