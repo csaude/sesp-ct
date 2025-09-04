@@ -10,6 +10,8 @@ import org.openmrs.module.sespct.api.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoService {
@@ -62,16 +64,10 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	// And implement it in your PedidoServiceImpl
 	@Override
 	@Transactional
-	public List<Pedido> getPedidosByDateRange(Date startDate, Date endDate) {
-		// Adjust end date to include the entire day
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(endDate);
-		cal.set(Calendar.HOUR_OF_DAY, 23);
-		cal.set(Calendar.MINUTE, 59);
-		cal.set(Calendar.SECOND, 59);
-		Date adjustedEndDate = cal.getTime();
-		
-		return pedidoDao.getPedidosByDateRange(startDate, adjustedEndDate);
+	public List<Pedido> getPedidosByDateTimeRange(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+		// The date range adjustment is now handled in the controller.
+		// This method becomes a clean, direct pass-through to the DAO.
+		return pedidoDao.getPedidosByDateTimeRange(startDateTime, endDateTime);
 	}
 	
 	/**
@@ -86,6 +82,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	 */
 	@Transactional
 	public void createDummyData() {
+		ZoneId maputoZone = ZoneId.of("Africa/Maputo");
 		log.info("Starting dummy data creation for SESPCT module...");
 		Random rand = new Random();
 		int numberOfPedidos = 50; // Generate 50 dummy requests
@@ -123,7 +120,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 
 				// --- 1. Populate Pedido (the main request entity) ---
 				pedido.setPedidoId((1515 + i + 1)+""); // Use UUID for unique external ID
-				pedido.setDataSubmissao(getRandomDate(rand, 2020, 2025));
+				pedido.setDataSubmissao(getRandomLocalDateTime(rand, 2020, 2025));
 				pedido.setVersao("1.0");
 				pedido.setOrigem("OpenMRS");
 				pedido.setTipoFormulario("Falencia Terapeutica");
@@ -172,14 +169,14 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 					boolean isGestante = rand.nextBoolean();
 					if (isGestante) {
 						utente.setGestante("Sim");
-						utente.setDataProvavelParto(getRandomDate(rand, 2025, 2026));
+						utente.setDataProvavelParto(getRandomLocalDateTime(rand, 2025, 2026));
 						utente.setLactante("Não");
 					} else {
 						utente.setGestante("Não");
 						boolean isLactante = rand.nextBoolean();
 						utente.setLactante(isLactante ? "Sim" : "Não");
 						if (isLactante) {
-							utente.setDataParto(getRandomDate(rand, 2024, 2025));
+							utente.setDataParto(getRandomLocalDateTime(rand, 2024, 2025));
 						}
 					}
 				} else {
@@ -222,8 +219,8 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 					hist.setDateCreated(new Date());
 					hist.setVoided(false);
 					hist.setPedido(pedido);
-					hist.setDataInicio(getRandomDate(rand, 2018 - j * 2, 2020 - j * 2));
-					hist.setDataTermino(getRandomDate(rand, 2020 - j * 2, 2022 - j * 2));
+					hist.setDataInicio(getRandomLocalDateTime(rand, 2018 - j * 2, 2020 - j * 2));
+					hist.setDataTermino(getRandomLocalDateTime(rand, 2020 - j * 2, 2022 - j * 2));
 					hist.setEsquemaTarv(getRandomElement(ART_REGIMENS, rand));
 					historiaTarvList.add(hist);
 				}
@@ -240,7 +237,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 					cv.setDateCreated(new Date());
 					cv.setVoided(false);
 					cv.setPedido(pedido);
-					cv.setData(getRandomDate(rand, 2022, 2024));
+					cv.setData(getRandomLocalDateTime(rand, 2022, 2024));
 					cv.setCargaViral((long) (1000 + rand.nextInt(50000)));
 					cargaViralList.add(cv);
 				}
@@ -257,7 +254,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 					cd4.setDateCreated(new Date());
 					cd4.setVoided(false);
 					cd4.setPedido(pedido);
-					cd4.setData(getRandomDate(rand, 2022, 2024));
+					cd4.setData(getRandomLocalDateTime(rand, 2022, 2024));
 					cd4.setCd4(100 + rand.nextInt(400));
 					cd4.setCd4Percentagem(rand.nextDouble() * 15 + 5);
 					cd4List.add(cd4);
@@ -281,9 +278,9 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 					meta.setRespostaId("RESP-" + (i + 1));
 					meta.setPedidoId(pedido.getPedidoId());
 					meta.setVersao("1.0");
-					meta.setTimestamp(new Date());
+					meta.setTimestamp(LocalDateTime.now(maputoZone));
 					meta.setProcessadoPor("Comite Nacional");
-					meta.setUltimaSincronizacao(new Date());
+					meta.setUltimaSincronizacao(LocalDateTime.now(maputoZone));
 					resposta.setMetadados(meta);
 
 					RespostaComite comite = new RespostaComite();
@@ -296,13 +293,13 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 						comite.setLinhaTerapeutica(linha.getLinha());
 						comite.setEsquemaAprovado(getRandomElement(APPROVED_REGIMENS, rand));
 					}
-					comite.setDataResposta(new Date());
+					comite.setDataResposta(LocalDateTime.now(maputoZone));
 					comite.setComentario("Comentário automático de teste gerado para pedido " + pedido.getPedidoId());
 					comite.setAutorizante("Dr. Responsável Virtual");
 					comite.setEmail("responsavel.comite@sis.gov.mz");
 					comite.setContacto("82" + String.format("%07d", rand.nextInt(10_000_000)));
 					comite.setNivelAutorizacao("Nacional");
-					comite.setDataAprovacao(new Date());
+					comite.setDataAprovacao(LocalDateTime.now(maputoZone));
 					resposta.setRespostaComite(comite);
 
 					Notificacoes notificacoes = new Notificacoes();
@@ -310,7 +307,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 					notificacoes.setWebhookEntregue(rand.nextBoolean());
 					notificacoes.setEmailEnviado(true);
 					notificacoes.setSmsEnviado(rand.nextBoolean());
-					notificacoes.setDataNotificacao(new Date());
+					notificacoes.setDataNotificacao(LocalDateTime.now(maputoZone));
 					resposta.setNotificacoes(notificacoes);
 
 					respostasList.add(resposta);
@@ -338,14 +335,15 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	/**
 	 * FIXED: Refactored to accept a Random instance instead of creating a new one.
 	 */
-	private Date getRandomDate(Random rand, int startYear, int endYear) {
+	private LocalDateTime getRandomLocalDateTime(Random rand, int startYear, int endYear) {
 		int year = startYear + rand.nextInt(endYear - startYear + 1);
-		int month = rand.nextInt(12); // 0-11 for Calendar
-		int day = rand.nextInt(28) + 1;
+		int month = rand.nextInt(12) + 1; // 1-12 for java.time
+		int day = rand.nextInt(28) + 1; // 1-28 to be safe for all months
+		int hour = rand.nextInt(24); // 0-23
+		int minute = rand.nextInt(60); // 0-59
+		int second = rand.nextInt(60); // 0-59
 		
-		Calendar cal = Calendar.getInstance();
-		cal.set(year, month, day, rand.nextInt(24), rand.nextInt(60), rand.nextInt(60));
-		return cal.getTime();
+		return LocalDateTime.of(year, month, day, hour, minute, second);
 	}
 	
 }

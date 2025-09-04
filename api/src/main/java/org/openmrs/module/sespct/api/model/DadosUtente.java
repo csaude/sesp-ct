@@ -1,8 +1,10 @@
 package org.openmrs.module.sespct.api.model;
 
 import org.openmrs.BaseOpenmrsData;
+import org.openmrs.module.sespct.api.util.LocalDateTimeAttributeConverter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -58,15 +60,15 @@ public class DadosUtente extends BaseOpenmrsData {
 	private String gestante;
 	
 	@Column(name = "data_provavel_parto")
-	@Temporal(TemporalType.DATE)
-	private Date dataProvavelParto;
+	@Convert(converter = LocalDateTimeAttributeConverter.class)
+	private LocalDateTime dataProvavelParto;
 	
 	@Column(name = "lactante", length = 10)
 	private String lactante;
 	
 	@Column(name = "data_parto")
-	@Temporal(TemporalType.DATE)
-	private Date dataParto;
+	@Convert(converter = LocalDateTimeAttributeConverter.class)
+	private LocalDateTime dataParto;
 	
 	// --- Getters and Setters ---
 	
@@ -192,11 +194,11 @@ public class DadosUtente extends BaseOpenmrsData {
 		this.gestante = gestante;
 	}
 	
-	public Date getDataProvavelParto() {
+	public LocalDateTime getDataProvavelParto() {
 		return dataProvavelParto;
 	}
 	
-	public void setDataProvavelParto(Date dataProvavelParto) {
+	public void setDataProvavelParto(LocalDateTime dataProvavelParto) {
 		this.dataProvavelParto = dataProvavelParto;
 	}
 	
@@ -208,11 +210,11 @@ public class DadosUtente extends BaseOpenmrsData {
 		this.lactante = lactante;
 	}
 	
-	public Date getDataParto() {
+	public LocalDateTime getDataParto() {
 		return dataParto;
 	}
 	
-	public void setDataParto(Date dataParto) {
+	public void setDataParto(LocalDateTime dataParto) {
 		this.dataParto = dataParto;
 	}
 }

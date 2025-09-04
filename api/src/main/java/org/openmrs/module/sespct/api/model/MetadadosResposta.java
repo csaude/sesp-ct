@@ -1,8 +1,10 @@
 package org.openmrs.module.sespct.api.model;
 
 import org.openmrs.BaseOpenmrsData;
+import org.openmrs.module.sespct.api.util.LocalDateTimeAttributeConverter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -28,15 +30,15 @@ public class MetadadosResposta extends BaseOpenmrsData {
 	private String versao;
 	
 	@Column(name = "timestamp")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date timestamp;
+	@Convert(converter = LocalDateTimeAttributeConverter.class)
+	private LocalDateTime timestamp;
 	
 	@Column(name = "processado_por", length = 100)
 	private String processadoPor;
 	
 	@Column(name = "ultima_sincronizacao")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date ultimaSincronizacao;
+	@Convert(converter = LocalDateTimeAttributeConverter.class)
+	private LocalDateTime ultimaSincronizacao;
 	
 	// Getters and Setters
 	public Integer getId() {
@@ -79,11 +81,11 @@ public class MetadadosResposta extends BaseOpenmrsData {
 		this.versao = versao;
 	}
 	
-	public Date getTimestamp() {
+	public LocalDateTime getTimestamp() {
 		return timestamp;
 	}
 	
-	public void setTimestamp(Date timestamp) {
+	public void setTimestamp(LocalDateTime timestamp) {
 		this.timestamp = timestamp;
 	}
 	
@@ -95,11 +97,11 @@ public class MetadadosResposta extends BaseOpenmrsData {
 		this.processadoPor = processadoPor;
 	}
 	
-	public Date getUltimaSincronizacao() {
+	public LocalDateTime getUltimaSincronizacao() {
 		return ultimaSincronizacao;
 	}
 	
-	public void setUltimaSincronizacao(Date ultimaSincronizacao) {
+	public void setUltimaSincronizacao(LocalDateTime ultimaSincronizacao) {
 		this.ultimaSincronizacao = ultimaSincronizacao;
 	}
 }

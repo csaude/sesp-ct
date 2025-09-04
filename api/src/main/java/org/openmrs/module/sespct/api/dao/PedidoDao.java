@@ -2,6 +2,7 @@ package org.openmrs.module.sespct.api.dao;
 
 import org.openmrs.module.sespct.api.model.Pedido;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -19,5 +20,5 @@ public interface PedidoDao {
 	
 	void deletePedido(Pedido pedido);
 	
-	List<Pedido> getPedidosByDateRange(Date startDate, Date endDate);
+	List<Pedido> getPedidosByDateTimeRange(LocalDateTime startDateTime, LocalDateTime endDateTime);
 }

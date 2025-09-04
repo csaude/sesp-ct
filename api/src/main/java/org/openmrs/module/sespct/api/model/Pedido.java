@@ -1,9 +1,11 @@
 package org.openmrs.module.sespct.api.model;
 
 import org.openmrs.BaseOpenmrsData;
+import org.openmrs.module.sespct.api.util.LocalDateTimeAttributeConverter;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Entity
@@ -36,8 +38,8 @@ public class Pedido extends BaseOpenmrsData {
 	private String pedidoId;
 	
 	@Column(name = "data_submissao")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date dataSubmissao;
+	@Convert(converter = LocalDateTimeAttributeConverter.class)
+	private LocalDateTime dataSubmissao;
 	
 	@Column(name = "versao", length = 10)
 	private String versao;
@@ -111,11 +113,11 @@ public class Pedido extends BaseOpenmrsData {
 		this.pedidoId = pedidoId;
 	}
 	
-	public Date getDataSubmissao() {
+	public LocalDateTime getDataSubmissao() {
 		return dataSubmissao;
 	}
 	
-	public void setDataSubmissao(Date dataSubmissao) {
+	public void setDataSubmissao(LocalDateTime dataSubmissao) {
 		this.dataSubmissao = dataSubmissao;
 	}
 	
@@ -221,5 +223,15 @@ public class Pedido extends BaseOpenmrsData {
 	
 	public void setRespostas(List<Resposta> respostas) {
 		this.respostas = respostas;
+	}
+	
+	@Transient
+	public String getFormattedDataSubmissao() {
+		if (dataSubmissao == null) {
+			return "";
+		}
+		// This formatter will produce "04/09/2025"
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		return dataSubmissao.format(formatter);
 	}
 }

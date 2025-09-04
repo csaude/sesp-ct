@@ -9,6 +9,7 @@ import org.openmrs.module.sespct.api.dao.PedidoDao;
 import org.openmrs.module.sespct.api.model.Pedido;
 
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -77,11 +78,15 @@ public class PedidoDaoImpl implements PedidoDao {
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<Pedido> getPedidosByDateRange(Date startDate, Date endDate) {
-		final String hql = "FROM Pedido WHERE dataSubmissao BETWEEN :startDate AND :endDate "
-		        + "AND voided = 0 ORDER BY dataSubmissao DESC";
-		final Query query = this.getCurrentSession().createQuery(hql).setParameter("startDate", startDate)
-		        .setParameter("endDate", endDate);
+	public List<Pedido> getPedidosByDateTimeRange(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+		final String hql = "FROM Pedido p WHERE p.dataSubmissao BETWEEN :startDateTime AND :endDateTime "
+		        + "AND p.voided = false ORDER BY p.dataSubmissao DESC";
+		
+		// 1. Use the non-generic org.hibernate.Query
+		final Query query = this.getCurrentSession().createQuery(hql).setParameter("startDateTime", startDateTime)
+		        .setParameter("endDateTime", endDateTime);
+		
+		// 2. Use the .list() method, which is correct for Hibernate 4
 		return query.list();
 	}
 }

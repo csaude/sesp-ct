@@ -1,8 +1,10 @@
 package org.openmrs.module.sespct.api.model;
 
 import org.openmrs.BaseOpenmrsData;
+import org.openmrs.module.sespct.api.util.LocalDateTimeAttributeConverter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -28,8 +30,8 @@ public class Notificacoes extends BaseOpenmrsData {
 	private Boolean smsEnviado;
 	
 	@Column(name = "data_notificacao")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date dataNotificacao;
+	@Convert(converter = LocalDateTimeAttributeConverter.class)
+	private LocalDateTime dataNotificacao;
 	
 	// Getters and Setters
 	public Integer getId() {
@@ -72,11 +74,11 @@ public class Notificacoes extends BaseOpenmrsData {
 		this.smsEnviado = smsEnviado;
 	}
 	
-	public Date getDataNotificacao() {
+	public LocalDateTime getDataNotificacao() {
 		return dataNotificacao;
 	}
 	
-	public void setDataNotificacao(Date dataNotificacao) {
+	public void setDataNotificacao(LocalDateTime dataNotificacao) {
 		this.dataNotificacao = dataNotificacao;
 	}
 }

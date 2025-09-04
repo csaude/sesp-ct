@@ -1,8 +1,11 @@
 package org.openmrs.module.sespct.api.model;
 
 import org.openmrs.BaseOpenmrsData;
+import org.openmrs.module.sespct.api.util.LocalDateTimeAttributeConverter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 @Entity
@@ -28,8 +31,8 @@ public class RespostaComite extends BaseOpenmrsData {
 	private String esquemaAprovado;
 	
 	@Column(name = "data_resposta")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date dataResposta;
+	@Convert(converter = LocalDateTimeAttributeConverter.class)
+	private LocalDateTime dataResposta;
 	
 	@Column(name = "comentario", columnDefinition = "TEXT")
 	private String comentario;
@@ -47,8 +50,8 @@ public class RespostaComite extends BaseOpenmrsData {
 	private String nivelAutorizacao;
 	
 	@Column(name = "data_aprovacao")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date dataAprovacao;
+	@Convert(converter = LocalDateTimeAttributeConverter.class)
+	private LocalDateTime dataAprovacao;
 	
 	// Getters and Setters
 	public Integer getId() {
@@ -91,11 +94,11 @@ public class RespostaComite extends BaseOpenmrsData {
 		this.esquemaAprovado = esquemaAprovado;
 	}
 	
-	public Date getDataResposta() {
+	public LocalDateTime getDataResposta() {
 		return dataResposta;
 	}
 	
-	public void setDataResposta(Date dataResposta) {
+	public void setDataResposta(LocalDateTime dataResposta) {
 		this.dataResposta = dataResposta;
 	}
 	
@@ -139,11 +142,20 @@ public class RespostaComite extends BaseOpenmrsData {
 		this.nivelAutorizacao = nivelAutorizacao;
 	}
 	
-	public Date getDataAprovacao() {
+	public LocalDateTime getDataAprovacao() {
 		return dataAprovacao;
 	}
 	
-	public void setDataAprovacao(Date dataAprovacao) {
+	public void setDataAprovacao(LocalDateTime dataAprovacao) {
 		this.dataAprovacao = dataAprovacao;
+	}
+	
+	@Transient
+	public String getFormattedDataResposta() {
+		if (dataResposta == null) {
+			return "-"; // Return a dash if there is no response date
+		}
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		return dataResposta.format(formatter);
 	}
 }

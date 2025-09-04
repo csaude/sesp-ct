@@ -2,7 +2,7 @@ package org.openmrs.module.sespct.api.model;
 
 import org.openmrs.BaseOpenmrsData;
 import javax.persistence.*;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "sespct_resposta")
@@ -73,4 +73,5 @@ public class Resposta extends BaseOpenmrsData {
 	public void setNotificacoes(Notificacoes notificacoes) {
 		this.notificacoes = notificacoes;
 	}
+	
 }
