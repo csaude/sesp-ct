@@ -42,7 +42,10 @@ public class SESPCTActivator extends BaseModuleActivator {
 			PedidoService pedidoService = Context.getService(PedidoService.class);
 			System.out.println(pedidoService);
 			// Create tables and populate with dummy data
-			pedidoService.initializeModule();
+			//pedidoService.initializeModule();
+			
+			// CT bootstrap (registration, keys, token)
+			Context.getRegisteredComponent("sespctCtBootstrap", org.openmrs.module.sespct.bootstrap.CtBootstrap.class).run();
 			
 			log.info("SESP-CT Module initialization completed successfully");
 		}

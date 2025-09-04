@@ -1,5 +1,6 @@
 package org.openmrs.module.sespct.api.dao;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.openmrs.module.sespct.api.model.Pedido;
 
 import java.util.List;
@@ -51,4 +52,6 @@ public interface PedidoDao {
 	 * @param pedido the Pedido to delete
 	 */
 	void deletePedido(Pedido pedido);
+	
+	void saveOrUpdateFromJson(JsonNode dp);
 }

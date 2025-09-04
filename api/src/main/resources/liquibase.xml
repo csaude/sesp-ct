@@ -453,4 +453,37 @@
                 constraintName="fk_viral_load_data_voided_by"/>
     </changeSet>
 
+    <changeSet id="sespct-001-event-log" author="sespct">
+        <createTable tableName="sespct_event_log">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="request_id" type="VARCHAR(64)"/>
+            <column name="event" type="VARCHAR(64)"/>
+            <column name="ts" type="DATETIME"/>
+            <column name="status" type="VARCHAR(32)"/>
+            <column name="attempts" type="INT" defaultValueNumeric="0"/>
+            <column name="error" type="VARCHAR(1024)"/>
+            <column name="payload" type="LONGTEXT"/>
+            <column name="date_created" type="DATETIME" />
+        </createTable>
+        <createIndex tableName="sespct_event_log" indexName="idx_sespct_event_req">
+            <column name="request_id"/>
+        </createIndex>
+    </changeSet>
+
+
+    <changeSet id="sespct-002-subscription" author="sespct">
+        <createTable tableName="sespct_subscription">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="subscription_id" type="VARCHAR(128)">
+                <constraints unique="true"/>
+            </column>
+            <column name="status" type="VARCHAR(32)" />
+            <column name="date_created" type="DATETIME" />
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>

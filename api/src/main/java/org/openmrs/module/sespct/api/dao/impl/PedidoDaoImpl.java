@@ -1,5 +1,6 @@
 package org.openmrs.module.sespct.api.dao.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
@@ -72,5 +73,10 @@ public class PedidoDaoImpl implements PedidoDao {
 		// Don't actually delete, just void it (OpenMRS pattern)
 		pedido.setVoided(true);
 		this.getCurrentSession().saveOrUpdate(pedido);
+	}
+	
+	@Override
+	public void saveOrUpdateFromJson(JsonNode dp) {
+		
 	}
 }
