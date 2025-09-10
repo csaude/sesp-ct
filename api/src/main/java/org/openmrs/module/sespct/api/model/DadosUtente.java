@@ -1,6 +1,9 @@
 package org.openmrs.module.sespct.api.model;
 
 import javax.persistence.*;
+
+import org.openmrs.module.sespct.api.util.Constants;
+
 import java.util.Date;
 
 @Entity
@@ -65,6 +68,16 @@ public class DadosUtente {
 	@Column(name = "data_parto")
 	@Temporal(TemporalType.DATE)
 	private Date dataParto;
+	
+	@Transient
+	public boolean isGestante() {
+		return gestante != null && gestante.equalsIgnoreCase(Constants.SIM);
+	}
+	
+	@Transient
+	public boolean isLactante() {
+		return lactante != null && lactante.equalsIgnoreCase(Constants.SIM);
+	}
 	
 	// --- Getters and Setters ---
 	public Pedido getPedido() {
