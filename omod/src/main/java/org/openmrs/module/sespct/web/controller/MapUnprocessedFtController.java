@@ -51,7 +51,7 @@ public class MapUnprocessedFtController {
 		Pedido pedido = pedidoService.getPedidoById(id);
 		
 		// Load suggestions
-		model.addAttribute("searchSuggestion", pedido.getDadosUtente().getNomeCompleto());
+		model.addAttribute("searchSuggestion", pedido.getDadosUtente().getIniciais());
 		
 		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
 		
