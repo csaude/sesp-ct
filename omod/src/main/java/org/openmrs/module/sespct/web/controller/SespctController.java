@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -43,8 +44,15 @@ public class SespctController {
 	
 	@RequestMapping(value = "sespct.form", method = RequestMethod.GET)
 	public String showMainPage(@Valid Pedido pedido, ModelMap model,
-	        @RequestParam(value = "estado", required = false) String estado) {
+	        @RequestParam(value = "estado", required = false) String estado,
+	        @RequestParam(value = "flashMessage", required = false) String flashMessage, HttpServletRequest request) {
+		
 		try {
+			// Handle flash message from URL parameter (similar to your existing DISA module)
+			if (flashMessage != null && !flashMessage.trim().isEmpty()) {
+				model.addAttribute("flashMessage", flashMessage);
+				log.info("Flash message received: {}", flashMessage);
+			}
 			
 			List<Pedido> requests;
 			if (estado != null && !estado.trim().isEmpty()) {

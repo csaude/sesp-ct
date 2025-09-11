@@ -3,6 +3,7 @@
 <%@ include file="/WEB-INF/template/header.jsp" %>
 <jsp:useBean id="currentDate" class="java.util.Date" />
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ page import="org.openmrs.module.sespct.api.model.Pedido" %>
 
 <openmrs:require privilege="Permite acesso à aplicação SESP-CT" otherwise="/login.htm"
                  redirect="/module/sespct/sespct.form" />
@@ -27,8 +28,18 @@
     <br/>
 </c:if>
 
+
+<c:if test="${empty pedidos}">
+    <div id="openmrs_msg">
+        <b>
+            <spring:message code="sespct.noResults" />
+        </b>
+    </div>
+</c:if>
+
 <%@ include file="../common/alertBox.jspf" %>
 
+<c:if test="${not empty pedidos}">
 <div class="box">
     <table id="ftResultsTable" class="disa-table disa-table-results" style="width:100%; font-size:12px;">
         <thead>
@@ -52,7 +63,7 @@
             <c:when test="${empty pedidos}">
                 <tr>
                     <td colspan="12" style="text-align: center; font-style: italic;">
-                        Nenhum caso encontrado com os critérios selecionados.
+                        <openmrs:message code="sespct.noResults"/>
                     </td>
                 </tr>
             </c:when>
@@ -69,8 +80,8 @@
                         <td>${pedido.dadosUtente.iniciais}</td>
                         <td>
                             <c:choose>
-                                <c:when test="${pedido.dadosUtente.sexo == 'masculino'}">M</c:when>
-                                <c:when test="${pedido.dadosUtente.sexo == 'feminino'}">F</c:when>
+                                <c:when test="${pedido.dadosUtente.sexo == Pedido.SEXO_MASCULINO}">M</c:when>
+                                <c:when test="${pedido.dadosUtente.sexo == Pedido.SEXO_FEMININO}">F</c:when>
                                 <c:otherwise>${pedido.dadosUtente.sexo}</c:otherwise>
                             </c:choose>
                         </td>
@@ -82,7 +93,7 @@
                         </td>
                         <td>
                             <c:choose>
-                                <c:when test="${pedido.estado == 'Sem resposta'}">-</c:when>
+                                <c:when test="${pedido.estado == Pedido.ESTADO_SEM_RESPOSTA}">-</c:when>
                                 <c:otherwise>
                                     ${pedido.formattedDataSubmissao}
                                 </c:otherwise>
@@ -93,32 +104,40 @@
                         </td>
                         <td>
                             <c:choose>
-                                <c:when test="${pedido.estado == 'Sem resposta' || pedido.estado == 'No Response'}">
+                                <c:when test="${pedido.estado == Pedido.ESTADO_SEM_RESPOSTA}">
                                     <span class="status-no-response"><openmrs:message code="sespct.search.status.SEM_RESPOSTA"/></span>
                                 </c:when>
-                                <c:when test="${pedido.estado == 'Não Processado' || pedido.estado == 'Not Processed'}">
+                                <c:when test="${pedido.estado == Pedido.ESTADO_NAO_PROCESSADO}">
                                     <span class="status-not-processed"><openmrs:message code="sespct.search.status.NAO_PROCESSADO"/></span>
                                 </c:when>
+                                <c:when test="${pedido.estado == Pedido.ESTADO_APROVADO}">
+                                    <span class="status-not-processed"><openmrs:message code="sespct.search.status.APROVADO"/></span>
+                                </c:when>
                                 <c:otherwise>
-                                    ${pedido.estado} <%-- Fallback for any other statuses --%>
+                                    ${pedido.estado}
                                 </c:otherwise>
                             </c:choose>
                         </td>
                         <td>
                             <c:choose>
-                                <c:when test="${pedido.estado == 'Não Processado' || pedido.estado == 'Not Processed'}">
+                                <c:when test="${pedido.causa == Pedido.CAUSA_NID_NAO_ENCONTRADO}">
                                     <openmrs:message code="sespct.error.NOT_FOUND"/>
+                                </c:when>
+                                <c:when test="${pedido.causa == Pedido.CAUSA_NID_DUPLICADO}">
+                                    <openmrs:message code="sespct.error.DUPLICATED"/>
                                 </c:when>
                                 <c:otherwise>-</c:otherwise>
                             </c:choose>
                         </td>
                         <td>
-                            <c:if test="${pedido.estado == 'Não Processado'}">
-                                <a href="#" onclick="mapNid('${request.nid}')">
+                            <c:choose>
+                            <c:when test="${pedido.causa == 'NID não encontrado'}">
+                                <a href="manageftcases/${pedido.id}/map.form" onclick="mapNid('${pedido.dadosUtente.nid}')">
                                     <openmrs:message code="sespct.mapNid"/>
                                 </a>
-                            </c:if>
-                            <c:if test="${pedido.estado != 'Não Processado'}">-</c:if>
+                            </c:when>
+                            <c:otherwise>-</c:otherwise>
+                            </c:choose>
                         </td>
                     </tr>
                 </c:forEach>
@@ -133,6 +152,7 @@
 		</button>
     </div>
 </div>
+</c:if>
 
 <openmrs:htmlInclude file="${pageContext.request.contextPath}/moduleResources/sespct/js/datatables.net/1.13.2/jquery.dataTables.min.js" />
 <openmrs:htmlInclude file="${pageContext.request.contextPath}/moduleResources/sespct/js/buttons/2.3.4/dataTables.buttons.min.js" />
@@ -143,35 +163,42 @@
         var $ = window.jQuery || window.jq || window.$;
 
         if ($) {
+            // 1. Define the language object using OpenMRS messages
+            const dataTableTranslations = {
+                "emptyTable": "<openmrs:message code='sespct.datatable.emptyTable'/>",
+                "info": "<openmrs:message code='sespct.datatable.info'/>",
+                "infoEmpty": "<openmrs:message code='sespct.datatable.infoEmpty'/>",
+                "infoFiltered": "<openmrs:message code='sespct.datatable.infoFiltered'/>",
+                "lengthMenu": "<openmrs:message code='sespct.datatable.lengthMenu'/>",
+                "loadingRecords": "<openmrs:message code='sespct.datatable.loadingRecords'/>",
+                "processing": "<openmrs:message code='sespct.datatable.processing'/>",
+                "search": "<openmrs:message code='sespct.datatable.search'/>",
+                "zeroRecords": "<openmrs:message code='sespct.datatable.zeroRecords'/>",
+                "paginate": {
+                    "first": "<openmrs:message code='sespct.datatable.paginate.first'/>",
+                    "last": "<openmrs:message code='sespct.datatable.paginate.last'/>",
+                    "next": "<openmrs:message code='sespct.datatable.paginate.next'/>",
+                    "previous": "<openmrs:message code='sespct.datatable.paginate.previous'/>"
+                },
+                "aria": {
+                    "sortAscending": "<openmrs:message code='sespct.datatable.aria.sortAscending'/>",
+                    "sortDescending": "<openmrs:message code='sespct.datatable.aria.sortDescending'/>"
+                }
+            };
+
             $("#ftResultsTable").DataTable({
                 pageLength: 20,
                 lengthMenu: [20, 50, 75, 100],
                 order: [[6, 'desc']],
-                language: {
-                    "emptyTable": "Nenhum registo encontrado",
-                    "info": "Mostrando de _START_ até _END_ de _TOTAL_ registos",
-                    "infoEmpty": "Mostrando 0 até 0 de 0 registos",
-                    "infoFiltered": "(Filtrado de _MAX_ registos no total)",
-                    "lengthMenu": "Mostrar _MENU_ registos",
-                    "loadingRecords": "A carregar...",
-                    "processing": "A processar...",
-                    "search": "Procurar:",
-                    "zeroRecords": "Nenhum registo encontrado",
-                    "paginate": {
-                        "first": "Primeiro",
-                        "last": "Último",
-                        "next": "Seguinte",
-                        "previous": "Anterior"
-                    },
-                    "aria": {
-                        "sortAscending": ": Ordenar por ordem crescente",
-                        "sortDescending": ": Ordenar por ordem decrescente"
-                    }
-                }
+                // 2. Use the dynamically created language object here
+                language: dataTableTranslations,
+                dom: 'frtip<"clear">l',
+                pagingType: 'full_numbers'
             });
         } else {
             console.error("No jQuery available!");
         }
+
 
         // Handle export button click
         const exportButton = document.getElementById("exportButton");
