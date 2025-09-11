@@ -13,19 +13,6 @@
 
 <h2><openmrs:message code="sespct.title"/></h2>
 
-<p>
-    <small>
-        <small>
-            <fmt:message key="sespct.lastSync">
-                <fmt:param value="8 de Julho de 2025" />
-                <fmt:param value="11:36h" />
-                <fmt:param value="10 minutos" />
-            </fmt:message>
-        </small>
-    </small>
-</p>
-
-
 <div>
     <b class="boxHeader"><openmrs:message code="sespct.search.header"/></b>
     <div class="box">
@@ -91,18 +78,18 @@
                             <fmt:formatNumber value="${pedido.dadosUtente.idade}" maxFractionDigits="0" />
                         </td>
                         <td>
-                            <fmt:formatDate value="${pedido.dataSubmissao}" pattern="dd/MM/yyyy" />
+                                ${pedido.formattedDataSubmissao}
                         </td>
                         <td>
                             <c:choose>
                                 <c:when test="${pedido.estado == 'Sem resposta'}">-</c:when>
                                 <c:otherwise>
-                                    <fmt:formatDate value="${pedido.dataSubmissao}" pattern="dd/MM/yyyy" />
+                                    ${pedido.formattedDataSubmissao}
                                 </c:otherwise>
                             </c:choose>
                         </td>
                         <td>
-                            <fmt:formatDate value="${pedido.dataSubmissao}" pattern="dd/MM/yyyy" />
+                                ${pedido.respostas[fn:length(pedido.respostas) - 1].respostaComite.formattedDataResposta}
                         </td>
                         <td>
                             <c:choose>

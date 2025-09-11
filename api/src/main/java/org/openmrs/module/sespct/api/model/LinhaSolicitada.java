@@ -1,10 +1,12 @@
 package org.openmrs.module.sespct.api.model;
 
+import org.openmrs.BaseOpenmrsData;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "sespct_linha_solicitada")
-public class LinhaSolicitada {
+public class LinhaSolicitada extends BaseOpenmrsData {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,6 +24,17 @@ public class LinhaSolicitada {
 	private String anexo;
 	
 	// --- Getters and Setters ---
+	
+	@Override
+	public Integer getId() {
+		return id;
+	}
+	
+	@Override
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	
 	public Pedido getPedido() {
 		return pedido;
 	}

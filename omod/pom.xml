@@ -44,17 +44,17 @@
 		</dependency>
 		
 		<!-- Apache POI dependencies -->
-	    <dependency>
-	        <groupId>org.apache.poi</groupId>
-	        <artifactId>poi</artifactId>
-	        <version>5.2.3</version>
-	    </dependency>
-	    
-	    <dependency>
-	        <groupId>org.apache.poi</groupId>
-	        <artifactId>poi-ooxml</artifactId>
-	        <version>5.2.3</version>
-	    </dependency>
+
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	    
 	    <!-- Commons IO - necessário para POI -->
 	    <dependency>
@@ -99,7 +99,23 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.2.4</version> <executions>
+				<execution>
+					<phase>package</phase>
+					<goals>
+						<goal>shade</goal>
+					</goals>
+					<configuration>
+						<relocations>
+							<relocation>
+								<pattern>org.apache.poi</pattern>
+								<shadedPattern>org.openmrs.module.sespct.shaded.poi</shadedPattern>
+							</relocation>
+						</relocations>
+					</configuration>
+				</execution>
+			</executions>
 			</plugin>
 		</plugins>
 	</build>

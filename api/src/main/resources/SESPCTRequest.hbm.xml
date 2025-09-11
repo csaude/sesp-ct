@@ -51,6 +51,10 @@
             <key column="pedido_id" />
             <one-to-many class="org.openmrs.module.sespct.api.model.DadosLaboratorioCargaViral" />
         </set>
+        <set name="respostas" lazy="true" inverse="true" cascade="all">
+            <key column="pedido_id" />
+            <one-to-many class="org.openmrs.module.sespct.api.model.Resposta" />
+        </set>
     </class>
 
     <!-- DadosUtente -->
@@ -154,6 +158,83 @@
 
         <property name="data" type="java.util.Date" column="data_exame" length="10" />
         <property name="cargaViral" type="java.lang.Long" column="carga_viral" />
+    </class>
+
+
+    <!-- Main Response entity -->
+    <class name="Resposta" table="sespct_resposta">
+        <id name="id" type="java.lang.Integer" column="resposta_id" unsaved-value="0">
+            <generator class="identity" />
+        </id>
+
+        <!-- Standard OpenMRS audit fields -->
+        <property name="uuid" type="java.lang.String" column="uuid" length="38" not-null="true" unique="true" />
+        <many-to-one name="creator" class="org.openmrs.User" column="creator" not-null="true" />
+        <property name="dateCreated" type="java.util.Date" column="date_created" not-null="true" length="19" />
+        <many-to-one name="changedBy" class="org.openmrs.User" column="changed_by" />
+        <property name="dateChanged" type="java.util.Date" column="date_changed" length="19" />
+        <property name="voided" type="java.lang.Boolean" column="voided" length="1" not-null="true" />
+        <many-to-one name="voidedBy" class="org.openmrs.User" column="voided_by" />
+        <property name="dateVoided" type="java.util.Date" column="date_voided" length="19" />
+        <property name="voidReason" type="java.lang.String" column="void_reason" length="255" />
+
+        <!-- Reference to original request -->
+        <many-to-one name="pedido" class="org.openmrs.module.sespct.api.model.Pedido" column="pedido_id" />
+
+        <!-- One-to-one associations -->
+        <one-to-one name="metadados" class="org.openmrs.module.sespct.api.model.MetadadosResposta" cascade="all" fetch="select" />
+        <one-to-one name="respostaComite" class="org.openmrs.module.sespct.api.model.RespostaComite" cascade="all" fetch="select" />
+        <one-to-one name="notificacoes" class="org.openmrs.module.sespct.api.model.Notificacoes" cascade="all" fetch="select" />
+    </class>
+
+    <!-- MetadadosResposta -->
+    <class name="MetadadosResposta" table="sespct_metadados_resposta">
+        <id name="id" type="java.lang.Integer" column="metadados_resposta_id" unsaved-value="0">
+            <generator class="identity" />
+        </id>
+
+        <one-to-one name="resposta" class="Resposta" column="resposta_id" not-null="true" unique="true" />
+
+        <property name="respostaId" type="java.lang.String" column="resposta_id_external" length="50" not-null="true" />
+        <property name="pedidoId" type="java.lang.String" column="pedido_id_reference" length="50" not-null="true" />
+        <property name="versao" type="java.lang.String" column="versao" length="10" />
+        <property name="timestamp" type="java.util.Date" column="timestamp" length="19" />
+        <property name="processadoPor" type="java.lang.String" column="processado_por" length="100" />
+        <property name="ultimaSincronizacao" type="java.util.Date" column="ultima_sincronizacao" length="19" />
+    </class>
+
+    <!-- RespostaComite -->
+    <class name="RespostaComite" table="sespct_resposta_comite">
+        <id name="id" type="java.lang.Integer" column="resposta_comite_id" unsaved-value="0">
+            <generator class="identity" />
+        </id>
+
+        <one-to-one name="resposta" class="Resposta" column="resposta_id" not-null="true" unique="true" />
+
+        <property name="respostaTexto" type="java.lang.String" column="resposta" length="200" />
+        <property name="linhaTerapeutica" type="java.lang.String" column="linha_terapeutica" length="50" />
+        <property name="esquemaAprovado" type="java.lang.String" column="esquema_aprovado" length="100" />
+        <property name="dataResposta" type="java.util.Date" column="data_resposta" length="19" />
+        <property name="comentario" type="java.lang.String" column="comentario" />
+        <property name="autorizante" type="java.lang.String" column="autorizante" length="200" />
+        <property name="email" type="java.lang.String" column="email" length="100" />
+        <property name="contacto" type="java.lang.String" column="contacto" length="20" />
+        <property name="nivelAutorizacao" type="java.lang.String" column="nivel_autorizacao" length="50" />
+        <property name="dataAprovacao" type="java.util.Date" column="data_aprovacao" length="19" />
+    </class>
+
+    <!-- Notificacoes -->
+    <class name="Notificacoes" table="sespct_notificacoes">
+        <id name="id" type="java.lang.Integer" column="notificacoes_id" unsaved-value="0">
+            <generator class="identity" />
+        </id>
+
+        <one-to-one name="resposta" class="Resposta" column="resposta_id" not-null="true" unique="true" />
+
+        <property name="webhookEntregue" type="java.lang.Boolean" column="webhook_entregue" />
+        <property name="emailEnviado" type="java.lang.Boolean" column="email_enviado" />
+        <property name="smsEnviado" type="java.lang.Boolean" column="sms_enviado" />
+        <property name="dataNotificacao" type="java.util.Date" column="data_notificacao" length="19" />
     </class>
 
 </hibernate-mapping>

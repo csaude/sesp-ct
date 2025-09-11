@@ -6,18 +6,14 @@ import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.sespct.api.PedidoService;
 import org.openmrs.module.sespct.api.dao.PedidoDao;
-import org.openmrs.module.sespct.api.model.Pedido;
-import org.openmrs.module.sespct.api.model.HistoriaTarv;
-import org.openmrs.module.sespct.api.model.DadosLaboratorioCD4;
-import org.openmrs.module.sespct.api.model.DadosLaboratorioCargaViral;
+import org.openmrs.module.sespct.api.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
-@Transactional
 public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoService {
 	
 	private static final Log log = LogFactory.getLog(PedidoServiceImpl.class);
@@ -30,18 +26,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	}
 	
 	@Override
-	public void initializeModule() {
-		log.info("Initializing SESP-CT Module...");
-		List<Pedido> existingPedidos = pedidoDao.getAllPedidos();
-		if (existingPedidos.isEmpty() || existingPedidos.size() > 20) {
-			log.info("No existing data found. Creating dummy data...");
-			createDummyData();
-		} else {
-			log.info("Found " + existingPedidos.size() + " existing pedidos. Skipping dummy data creation.");
-		}
-	}
-	
-	@Override
+	@Transactional
 	public Pedido savePedido(Pedido pedido) {
 		return pedidoDao.savePedido(pedido);
 	}
@@ -71,159 +56,294 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	}
 	
 	@Override
+	@Transactional
 	public void deletePedido(Pedido pedido) {
 		pedidoDao.deletePedido(pedido);
 	}
 	
+	// And implement it in your PedidoServiceImpl
 	@Override
+	@Transactional
+	public List<Pedido> getPedidosByDateTimeRange(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+		// The date range adjustment is now handled in the controller.
+		// This method becomes a clean, direct pass-through to the DAO.
+		return pedidoDao.getPedidosByDateTimeRange(startDateTime, endDateTime);
+	}
+	
+	/**
+	 * Creates and persists a set of dummy Pedido objects with their related entities. Generates 50
+	 * records with submissions from 2020 to 2025. Includes special cases for NID mapping as per
+	 * business rules.
+	 */
+	/**
+	 * Creates and persists a set of dummy Pedido objects with their related entities. Generates 50
+	 * records with submissions from 2020 to 2025. Includes special cases for NID mapping as per
+	 * business rules.
+	 */
+	@Transactional
 	public void createDummyData() {
-		try {
-			log.info("Creating dummy SESP-CT data...");
-			
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-			SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-			
-			for (int i = 1; i <= 50; i++) {
+		ZoneId maputoZone = ZoneId.of("Africa/Maputo");
+		log.info("Starting dummy data creation for SESPCT module...");
+		Random rand = new Random();
+		int numberOfPedidos = 50; // Generate 50 dummy requests
+
+		// Arrays for realistic dummy data
+		String[] FIRST_NAMES = {"João", "Maria", "Pedro", "Ana", "Carlos", "Luisa", "António", "Isabel", "Manuel", "Rosa", "Francisco", "Teresa", "José", "Catarina", "Miguel"};
+		String[] LAST_NAMES = {"Silva", "Santos", "Oliveira", "Pereira", "Costa", "Rodrigues", "Martins", "Jesus", "Soares", "Ferreira", "Alves", "Monteiro", "Ribeiro", "Rocha", "Nunes"};
+		// FIXED: Simplified statuses to make response generation logic work correctly
+		String[] REQUEST_STATUSES = {"Aprovado", "Não Processado", "Adiado", "Sem resposta"};
+		String[] REJECTION_CAUSES = {"NID não encontrado", "NID duplicado",};
+		String[] WHO_STAGES = {"Estadio I", "Estadio II", "Estadio III", "Estadio IV"};
+		String[] PROVINCES = {"Maputo", "Gaza", "Inhambane", "Sofala", "Manica", "Tete", "Zambézia", "Nampula", "Cabo Delgado", "Niassa"};
+		String[] DISTRICTS = {"Maputo", "Matola", "Boane", "Marracuene", "Manhiça", "Magude", "Moamba", "Namaacha", "Xai-Xai", "Chibuto"};
+		String[] US_NAMES = {"Hospital Central de Maputo", "Hospital Geral de Mavalane", "Centro de Saúde da Polana", "Hospital Rural de Manhiça", "Centro de Saúde de Marracuene"};
+		String[] YES_NO = {"Sim", "Não"};
+		String[] PROFESSIONAL_CATEGORIES = {"Médico", "Enfermeiro", "Técnico de Medicina", "Farmacêutico"};
+		String[] ART_REGIMENS = {"TDF+3TC+EFV", "AZT+3TC+NVP", "ABC+3TC+EFV", "TDF+3TC+DTG", "AZT+3TC+EFV"};
+		String[] APPROVED_REGIMENS = {"ATV/r+TDF+3TC", "LPV/r+AZT+3TC", "DTG+ABC+3TC", "DRV/r+TDF+FTC"};
+		String[] RESPONSE_TEXTS = {"Aprovado", "Rejeitado", "Aprovado com condições"};
+
+		// Calculate how many records should have "NID não encontrado" status (about 20%)
+		int nidNotFoundCount = (int) (numberOfPedidos * 0.2);
+
+		for (int i = 0; i < numberOfPedidos; i++) {
+			try {
 				Pedido pedido = new Pedido();
-				
-				// Set standard OpenMRS fields
-				pedido.setUuid(UUID.randomUUID().toString());
+
+				// FIXED: Set all standard OpenMRS audit fields, including the creator
+//				pedido.setUuid(UUID.randomUUID().toString());
+				// Use Context.getAuthenticatedUser() if in a logged-in session, or a default user ID.
+				// Using '1' for the admin user as a fallback for dummy data scripts.
 				pedido.setCreator(Context.getAuthenticatedUser());
 				pedido.setDateCreated(new Date());
-				
-				// Metadata with incremental pedidoId and slight changes
-				pedido.setPedidoId("15" + (1500 + i)); // e.g., 15151, 15152...
-				pedido.setDataSubmissao(dateTimeFormat.parse("2024-03-15T10:30:00Z"));
-				pedido.setVersao("2.0");
-				pedido.setOrigem("SESP_MOZAMBIQUE");
-				pedido.setTipoFormulario("e-FT");
-				pedido.setSolicitadoPor("user_sesp_" + (100 + i));
-				
-				// Alternate estado and causa for some records for GCT_BR3 mapping
-				if (i % 10 == 0) { // every 10th record
+				pedido.setVoided(false);
+
+				// --- 1. Populate Pedido (the main request entity) ---
+				pedido.setPedidoId((1515 + i + 1)+""); // Use UUID for unique external ID
+				pedido.setDataSubmissao(getRandomLocalDateTime(rand, 2020, 2025));
+				pedido.setVersao("1.0");
+				pedido.setOrigem("OpenMRS");
+				pedido.setTipoFormulario("Falencia Terapeutica");
+				pedido.setSolicitadoPor("admin");
+
+				// --- Special Case Logic for NID mapping ---
+				if (i < nidNotFoundCount) {
 					pedido.setEstado("Não Processado");
 					pedido.setCausa("NID não encontrado");
 				} else {
-					pedido.setEstado("Sem resposta");
-					pedido.setCausa(null);
+					pedido.setEstado(getRandomElement(REQUEST_STATUSES, rand));
+					if ("Não Processado".equals(pedido.getEstado())) {
+						// Ensure a cause is set if "Não Processado" but not the special NID case
+						String cause = getRandomElement(REJECTION_CAUSES, rand);
+						pedido.setCausa(cause);
+					} else {
+						pedido.setCausa(null);
+					}
 				}
-				
-				// DadosUtente (increment name, nid, initials, idade, etc.)
-				pedido.getDadosUtente().setNomeCompleto("João Manuel Santos " + i);
-				pedido.getDadosUtente().setIniciais("JMS" + i);
-				pedido.getDadosUtente().setNid("0109010701/2007/00" + String.format("%03d", i));
-				pedido.getDadosUtente().setIdade(30.0 + i * 0.5); // 30, 30.5, 31...
-				pedido.getDadosUtente().setEstadioOms("Estadio III");
-				pedido.getDadosUtente().setEstadioOmsMotivo("Perda de peso significativa e infecções recorrentes");
-				pedido.getDadosUtente().setProvincia("Maputo");
-				pedido.getDadosUtente().setDistrito("Maputo Cidade");
-				pedido.getDadosUtente().setUnidadeSanitaria("Hospital Central de Maputo");
-				pedido.getDadosUtente().setCodigoUnidadeSanitaria("HCM" + String.format("%03d", i));
-				pedido.getDadosUtente().setPeso(60.0 + i * 0.5);
-				pedido.getDadosUtente().setSexo(i % 2 == 0 ? "masculino" : "feminino");
-				pedido.getDadosUtente().setGestante("nao");
-				pedido.getDadosUtente().setDataProvavelParto(null);
-				pedido.getDadosUtente().setLactante("nao");
-				pedido.getDadosUtente().setDataParto(null);
-				
-				// ReportarFalencia
-				pedido.getReportarFalencia()
-				        .setHistoriaClinica(
-				            "Paciente com histórico de boa adesão inicial, apresentando sinais de falência terapêutica nos últimos 6 meses. Observado perda de peso progressiva e aumento de infecções oportunistas.");
-				pedido.getReportarFalencia()
-				        .setHistoriaAdesao(
-				            "Adesão inicial excelente (>95%) nos primeiros 2 anos. Declínio gradual observado a partir de 2022 devido a fatores socioeconômicos. Adesão atual estimada em 70-80%.");
-				pedido.getReportarFalencia().setTratamentoTbAtivo("nao");
-				
-				// DadosClinico
-				pedido.getDadosClinico().setNome("Dr. Maria Santos");
-				pedido.getDadosClinico().setCategoriaProfissional("Medico");
-				pedido.getDadosClinico().setTelefone("+258823456789");
-				pedido.getDadosClinico().setEmail("maria.santos@misau.gov.mz");
-				
-				// LinhaSolicitada
-				pedido.getLinhaSolicitada().setLinha("2 Linha");
-				pedido.getLinhaSolicitada().setAnexo("[BASE64_ENCODED_ATTACHMENT]");
-				
-				// Save Pedido first (to get id if needed)
-				pedido = pedidoDao.savePedido(pedido);
-				
-				// Create and add TARV History
-				HistoriaTarv tarv1 = new HistoriaTarv();
-				tarv1.setUuid(UUID.randomUUID().toString());
-				tarv1.setCreator(Context.getAuthenticatedUser());
-				tarv1.setDateCreated(new Date());
-				tarv1.setPedido(pedido);
-				tarv1.setDataInicio(dateFormat.parse("2020-01-15"));
-				tarv1.setDataTermino(dateFormat.parse("2022-06-30"));
-				tarv1.setEsquemaTarv("AZT+3TC+EFV");
-				
-				HistoriaTarv tarv2 = new HistoriaTarv();
-				tarv2.setUuid(UUID.randomUUID().toString());
-				tarv2.setCreator(Context.getAuthenticatedUser());
-				tarv2.setDateCreated(new Date());
-				tarv2.setPedido(pedido);
-				tarv2.setDataInicio(dateFormat.parse("2022-07-01"));
-				tarv2.setDataTermino(dateFormat.parse("2024-03-10"));
-				tarv2.setEsquemaTarv("TDF+3TC+EFV");
-				
-				pedido.getHistoriaTarv().add(tarv1);
-				pedido.getHistoriaTarv().add(tarv2);
-				
-				// Create and add CD4 Data
-				DadosLaboratorioCD4 cd4_1 = new DadosLaboratorioCD4();
-				cd4_1.setUuid(UUID.randomUUID().toString());
-				cd4_1.setCreator(Context.getAuthenticatedUser());
-				cd4_1.setDateCreated(new Date());
-				cd4_1.setPedido(pedido);
-				cd4_1.setData(dateFormat.parse("2024-01-15"));
-				cd4_1.setCd4(250 + i); // slight variation
-				cd4_1.setCd4Percentagem(12.5 + i * 0.1);
-				
-				DadosLaboratorioCD4 cd4_2 = new DadosLaboratorioCD4();
-				cd4_2.setUuid(UUID.randomUUID().toString());
-				cd4_2.setCreator(Context.getAuthenticatedUser());
-				cd4_2.setDateCreated(new Date());
-				cd4_2.setPedido(pedido);
-				cd4_2.setData(dateFormat.parse("2024-02-20"));
-				cd4_2.setCd4(180 + i);
-				cd4_2.setCd4Percentagem(8.2 + i * 0.1);
-				
-				pedido.getDadosLaboratorioCD4().add(cd4_1);
-				pedido.getDadosLaboratorioCD4().add(cd4_2);
-				
-				// Create and add Viral Load Data
-				DadosLaboratorioCargaViral vl1 = new DadosLaboratorioCargaViral();
-				vl1.setUuid(UUID.randomUUID().toString());
-				vl1.setCreator(Context.getAuthenticatedUser());
-				vl1.setDateCreated(new Date());
-				vl1.setPedido(pedido);
-				vl1.setData(dateFormat.parse("2024-01-15"));
-				vl1.setCargaViral(15000L + i * 100);
-				
-				DadosLaboratorioCargaViral vl2 = new DadosLaboratorioCargaViral();
-				vl2.setUuid(UUID.randomUUID().toString());
-				vl2.setCreator(Context.getAuthenticatedUser());
-				vl2.setDateCreated(new Date());
-				vl2.setPedido(pedido);
-				vl2.setData(dateFormat.parse("2024-02-20"));
-				vl2.setCargaViral(25000L + i * 100);
-				
-				pedido.getDadosLaboratorioCargaViral().add(vl1);
-				pedido.getDadosLaboratorioCargaViral().add(vl2);
-				
-				// Save Pedido again to persist relationships
+
+				// --- 2. Populate DadosUtente (One-to-One) ---
+				DadosUtente utente = new DadosUtente();
+				utente.setPedido(pedido);
+
+				String firstName = getRandomElement(FIRST_NAMES, rand);
+				String lastName = getRandomElement(LAST_NAMES, rand);
+				utente.setNomeCompleto(firstName + " " + lastName);
+				utente.setIniciais(String.valueOf(firstName.charAt(0)) + String.valueOf(lastName.charAt(0)));
+
+				String facilityCode = "0109010701";  // or pick from predefined list
+				int year = 2007 + rand.nextInt(19);  // 2007–2025
+				String sequence = String.format("%05d", i + 1); // ensures uniqueness per dummy data batch
+				utente.setNid(facilityCode + "/" + year + "/" + sequence);
+
+				utente.setIdade((double) (rand.nextInt(50) + 18));
+				utente.setEstadioOms(getRandomElement(WHO_STAGES, rand));
+				utente.setEstadioOmsMotivo("Motivo de teste para estadio " + utente.getEstadioOms());
+				utente.setProvincia(getRandomElement(PROVINCES, rand));
+				utente.setDistrito(getRandomElement(DISTRICTS, rand));
+				utente.setUnidadeSanitaria(getRandomElement(US_NAMES, rand));
+				utente.setCodigoUnidadeSanitaria(String.valueOf(101150 + rand.nextInt(100)));
+				utente.setPeso((double) (rand.nextInt(40) + 50));
+				utente.setSexo(rand.nextBoolean() ? "Masculino" : "Feminino");
+
+				if ("Feminino".equals(utente.getSexo())) {
+					boolean isGestante = rand.nextBoolean();
+					if (isGestante) {
+						utente.setGestante("Sim");
+						utente.setDataProvavelParto(getRandomLocalDateTime(rand, 2025, 2026));
+						utente.setLactante("Não");
+					} else {
+						utente.setGestante("Não");
+						boolean isLactante = rand.nextBoolean();
+						utente.setLactante(isLactante ? "Sim" : "Não");
+						if (isLactante) {
+							utente.setDataParto(getRandomLocalDateTime(rand, 2024, 2025));
+						}
+					}
+				} else {
+					utente.setGestante("Não");
+					utente.setLactante("Não");
+				}
+				pedido.setDadosUtente(utente);
+
+				// --- 3. Populate DadosClinico (One-to-One) ---
+				DadosClinico clinico = new DadosClinico();
+				clinico.setPedido(pedido);
+				clinico.setNome("Dr. " + getRandomElement(FIRST_NAMES, rand) + " " + getRandomElement(LAST_NAMES, rand));
+				clinico.setCategoriaProfissional(getRandomElement(PROFESSIONAL_CATEGORIES, rand));
+				clinico.setTelefone("84" + String.format("%07d", rand.nextInt(10_000_000)));
+				clinico.setEmail("clinico" + i + "@mail.com");
+				pedido.setDadosClinico(clinico);
+
+				// --- 4. Populate ReportarFalencia (One-to-One) ---
+				ReportarFalencia falencia = new ReportarFalencia();
+				falencia.setPedido(pedido);
+				falencia.setHistoriaClinica("Paciente com historial de má adesão, apresentando sinais de falha virológica.");
+				falencia.setHistoriaAdesao("Adesão reportada como inconsistente nos últimos meses.");
+				falencia.setTratamentoTbAtivo(getRandomElement(YES_NO, rand));
+				pedido.setReportarFalencia(falencia);
+
+				// --- 5. Populate LinhaSolicitada (One-to-One) ---
+				LinhaSolicitada linha = new LinhaSolicitada();
+				linha.setPedido(pedido);
+				linha.setLinha(rand.nextBoolean() ? "Segunda Linha" : "Terceira Linha");
+				pedido.setLinhaSolicitada(linha);
+
+				// --- 6. Populate HistoriaTarv (One-to-Many) ---
+				// FIXED: Changed Set to List and HashSet to ArrayList
+				List<HistoriaTarv> historiaTarvList = new ArrayList<>();
+				int numTarvHistory = rand.nextInt(3) + 1;
+				for (int j = 0; j < numTarvHistory; j++) {
+					HistoriaTarv hist = new HistoriaTarv();
+//					hist.setUuid(UUID.randomUUID().toString());
+					hist.setCreator(Context.getAuthenticatedUser()); // Default to admin user
+					hist.setDateCreated(new Date());
+					hist.setVoided(false);
+					hist.setPedido(pedido);
+					hist.setDataInicio(getRandomLocalDateTime(rand, 2018 - j * 2, 2020 - j * 2));
+					hist.setDataTermino(getRandomLocalDateTime(rand, 2020 - j * 2, 2022 - j * 2));
+					hist.setEsquemaTarv(getRandomElement(ART_REGIMENS, rand));
+					historiaTarvList.add(hist);
+				}
+				pedido.setHistoriaTarv(historiaTarvList);
+
+				// --- 7. Populate DadosLaboratorioCargaViral (One-to-Many) ---
+				// FIXED: Changed Set to List and HashSet to ArrayList
+				List<DadosLaboratorioCargaViral> cargaViralList = new ArrayList<>();
+				int numViralLoads = rand.nextInt(4) + 2;
+				for (int j = 0; j < numViralLoads; j++) {
+					DadosLaboratorioCargaViral cv = new DadosLaboratorioCargaViral();
+//					cv.setUuid(UUID.randomUUID().toString());
+					cv.setCreator(Context.getAuthenticatedUser());
+					cv.setDateCreated(new Date());
+					cv.setVoided(false);
+					cv.setPedido(pedido);
+					cv.setData(getRandomLocalDateTime(rand, 2022, 2024));
+					cv.setCargaViral((long) (1000 + rand.nextInt(50000)));
+					cargaViralList.add(cv);
+				}
+				pedido.setDadosLaboratorioCargaViral(cargaViralList);
+
+				// --- 8. Populate DadosLaboratorioCD4 (One-to-Many) ---
+				// FIXED: Changed Set to List and HashSet to ArrayList
+				List<DadosLaboratorioCD4> cd4List = new ArrayList<>();
+				int numCd4 = rand.nextInt(4) + 2;
+				for (int j = 0; j < numCd4; j++) {
+					DadosLaboratorioCD4 cd4 = new DadosLaboratorioCD4();
+//					cd4.setUuid(UUID.randomUUID().toString());
+					cd4.setCreator(Context.getAuthenticatedUser());
+					cd4.setDateCreated(new Date());
+					cd4.setVoided(false);
+					cd4.setPedido(pedido);
+					cd4.setData(getRandomLocalDateTime(rand, 2022, 2024));
+					cd4.setCd4(100 + rand.nextInt(400));
+					cd4.setCd4Percentagem(rand.nextDouble() * 15 + 5);
+					cd4List.add(cd4);
+				}
+				pedido.setDadosLaboratorioCD4(cd4List);
+
+				// --- 9. Populate Resposta (One-to-Many) - Conditionally ---
+				// FIXED: Changed Set to List and HashSet to ArrayList
+				List<Resposta> respostasList = new ArrayList<>();
+				// FIXED: Corrected logic to generate responses for "Aprovado" or "Não Processado" statuses
+				if ("Aprovado".equals(pedido.getEstado()) || "Não Processado".equals(pedido.getEstado())) {
+					Resposta resposta = new Resposta();
+//					resposta.setUuid(UUID.randomUUID().toString());
+					resposta.setCreator(Context.getAuthenticatedUser());
+					resposta.setDateCreated(new Date());
+					resposta.setVoided(false);
+					resposta.setPedido(pedido);
+
+					MetadadosResposta meta = new MetadadosResposta();
+					meta.setResposta(resposta);
+					meta.setRespostaId("RESP-" + (i + 1));
+					meta.setPedidoId(pedido.getPedidoId());
+					meta.setVersao("1.0");
+					meta.setTimestamp(LocalDateTime.now(maputoZone));
+					meta.setProcessadoPor("Comite Nacional");
+					meta.setUltimaSincronizacao(LocalDateTime.now(maputoZone));
+					resposta.setMetadados(meta);
+
+					RespostaComite comite = new RespostaComite();
+					comite.setResposta(resposta);
+					// Base response on the Pedido's state
+					String responseText = "Aprovado".equals(pedido.getEstado()) ? "Aprovado" : "Rejeitado";
+					comite.setRespostaTexto(responseText);
+
+					if ("Aprovado".equals(responseText)) {
+						comite.setLinhaTerapeutica(linha.getLinha());
+						comite.setEsquemaAprovado(getRandomElement(APPROVED_REGIMENS, rand));
+					}
+					comite.setDataResposta(LocalDateTime.now(maputoZone));
+					comite.setComentario("Comentário automático de teste gerado para pedido " + pedido.getPedidoId());
+					comite.setAutorizante("Dr. Responsável Virtual");
+					comite.setEmail("responsavel.comite@sis.gov.mz");
+					comite.setContacto("82" + String.format("%07d", rand.nextInt(10_000_000)));
+					comite.setNivelAutorizacao("Nacional");
+					comite.setDataAprovacao(LocalDateTime.now(maputoZone));
+					resposta.setRespostaComite(comite);
+
+					Notificacoes notificacoes = new Notificacoes();
+					notificacoes.setResposta(resposta);
+					notificacoes.setWebhookEntregue(rand.nextBoolean());
+					notificacoes.setEmailEnviado(true);
+					notificacoes.setSmsEnviado(rand.nextBoolean());
+					notificacoes.setDataNotificacao(LocalDateTime.now(maputoZone));
+					resposta.setNotificacoes(notificacoes);
+
+					respostasList.add(resposta);
+				}
+				pedido.setRespostas(respostasList);
+
+				// --- 10. Save the Pedido ---
 				pedidoDao.savePedido(pedido);
+
+				if ((i + 1) % 10 == 0) {
+					log.info("Created " + (i + 1) + " dummy pedidos...");
+				}
+
+			} catch (Exception e) {
+				log.error("Error saving dummy pedido " + (i + 1), e);
 			}
-			
-			log.info("Dummy Pedido data created successfully");
-			
 		}
-		catch (ParseException e) {
-			log.error("Error parsing dates while creating dummy data", e);
-		}
-		catch (Exception e) {
-			log.error("Error creating dummy Pedido data", e);
-		}
+		log.info("Finished creating " + numberOfPedidos + " dummy SESPCT pedidos with " + nidNotFoundCount + " NID mapping cases.");
 	}
+	
+	private String getRandomElement(String[] array, Random rand) {
+		return array[rand.nextInt(array.length)];
+	}
+	
+	/**
+	 * FIXED: Refactored to accept a Random instance instead of creating a new one.
+	 */
+	private LocalDateTime getRandomLocalDateTime(Random rand, int startYear, int endYear) {
+		int year = startYear + rand.nextInt(endYear - startYear + 1);
+		int month = rand.nextInt(12) + 1; // 1-12 for java.time
+		int day = rand.nextInt(28) + 1; // 1-28 to be safe for all months
+		int hour = rand.nextInt(24); // 0-23
+		int minute = rand.nextInt(60); // 0-59
+		int second = rand.nextInt(60); // 0-59
+		
+		return LocalDateTime.of(year, month, day, hour, minute, second);
+	}
+	
 }
