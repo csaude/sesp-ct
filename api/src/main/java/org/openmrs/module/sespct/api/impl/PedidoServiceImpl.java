@@ -1,13 +1,24 @@
 package org.openmrs.module.sespct.api.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.Location;
+import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
+import org.openmrs.PatientIdentifierType;
+import org.openmrs.api.LocationService;
+import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
+import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.sespct.api.PedidoService;
 import org.openmrs.module.sespct.api.dao.PedidoDao;
 import org.openmrs.module.sespct.api.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -16,10 +27,20 @@ import java.util.*;
 
 public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoService {
 	
-	private static final Log log = LogFactory.getLog(PedidoServiceImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(PedidoServiceImpl.class);
+	
+	private static final String ESTADO_NAO_PROCESSADO = "Não Processado";
+	
+	private static final String CAUSA_NID_NAO_ENCONTRADO = "NID não encontrado";
+	
+	private static final String ESTADO_SEM_RESPOSTA = "Sem resposta";
 	
 	@Autowired
 	private PedidoDao pedidoDao;
+	
+	private MessageSourceService messageSourceService;
+	
+	public static final String NID_SCT = "ac75ec91-bc27-4681-97d0-7db08937b2d7";
 	
 	public void setPedidoDao(PedidoDao pedidoDao) {
 		this.pedidoDao = pedidoDao;
@@ -346,4 +367,195 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 		return LocalDateTime.of(year, month, day, hour, minute, second);
 	}
 	
+	@Override
+	@Transactional
+	public Patient mapIdentifier(String patientUuid, Pedido pedido) throws IllegalArgumentException, IllegalStateException {
+		log.debug("Starting mapIdentifier with patientUuid: {}", patientUuid);
+		
+		// Enhanced validation
+		validateMappingInputs(patientUuid, pedido);
+		
+		// Validate pedido state
+		validatePedidoState(pedido);
+		
+		// Get and validate patient
+		Patient patient = getAndValidatePatient(patientUuid);
+		
+		// Handle NID identifier mapping
+		handleNidIdentifierMapping(patient, pedido);
+		
+		log.debug("Successfully completed mapIdentifier for patient: {}", patient.getPatientId());
+		return patient;
+	}
+	
+	private void validateMappingInputs(String patientUuid, Pedido pedido) {
+		if (StringUtils.isBlank(patientUuid)) {
+			throw new IllegalArgumentException("Patient UUID cannot be null or empty");
+		}
+		
+		if (pedido == null) {
+			throw new IllegalArgumentException("Pedido cannot be null");
+		}
+		
+		if (pedido.getDadosUtente() == null) {
+			throw new IllegalArgumentException("DadosUtente cannot be null");
+		}
+		
+		String nid = pedido.getDadosUtente().getNid();
+		if (StringUtils.isBlank(nid)) {
+			throw new IllegalArgumentException("NID cannot be null or empty");
+		}
+		
+		log.debug("Input validation passed - NID: {}", nid);
+	}
+	
+	private void validatePedidoState(Pedido pedido) {
+		String estado = pedido.getEstado();
+		String causa = pedido.getCausa();
+		
+		log.debug("Validating pedido state - Estado: {}, Causa: {}", estado, causa);
+		
+		if (!ESTADO_NAO_PROCESSADO.equals(estado) || !CAUSA_NID_NAO_ENCONTRADO.equals(causa)) {
+			String labResultStatus = messageSourceService.getMessage("sespct.status." + estado);
+			throw new IllegalStateException(String.format(
+			    "Pedido is not in a valid state for mapping. Current state: %s, Cause: %s", estado, causa));
+		}
+	}
+	
+	private Patient getAndValidatePatient(String patientUuid) {
+		PatientService patientService = Context.getPatientService();
+		Patient patient = patientService.getPatientByUuid(patientUuid);
+		
+		if (patient == null) {
+			throw new IllegalArgumentException("Patient not found with UUID: " + patientUuid);
+		}
+		
+		log.debug("Patient found: {}", patient.getPatientId());
+		return patient;
+	}
+	
+	private void handleNidIdentifierMapping(Patient patient, Pedido pedido) {
+		PatientService patientService = Context.getPatientService();
+		String nid = pedido.getDadosUtente().getNid();
+		
+		// Get NID identifier type
+		PatientIdentifierType nidIdentifierType = patientService.getPatientIdentifierTypeByUuid(NID_SCT);
+		if (nidIdentifierType == null) {
+			throw new IllegalStateException("NID SCT identifier type not found");
+		}
+		
+		// Check if patient already has NID identifier
+		if (!hasNidIdentifier(patient, nidIdentifierType)) {
+			createAndSaveNidIdentifier(patient, nid, nidIdentifierType);
+			
+			// Reschedule result in separate transaction to avoid rollback issues
+			try {
+				rescheduleResultAsync(pedido.getId());
+			}
+			catch (Exception e) {
+				log.error("Failed to reschedule result for pedido: {}", pedido.getId(), e);
+				// Don't fail the main operation if rescheduling fails
+			}
+		} else {
+			log.debug("Patient already has NID identifier, skipping creation");
+		}
+	}
+	
+	private boolean hasNidIdentifier(Patient patient, PatientIdentifierType nidIdentifierType) {
+		List<PatientIdentifier> activeIdentifiers = patient.getActiveIdentifiers();
+		
+		if (activeIdentifiers == null || activeIdentifiers.isEmpty()) {
+			log.debug("No active identifiers found for patient");
+			return false;
+		}
+		
+		for (PatientIdentifier identifier : activeIdentifiers) {
+			if (nidIdentifierType.equals(identifier.getIdentifierType())) {
+				log.debug("Patient already has NID identifier: {}", identifier.getIdentifier());
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	private void createAndSaveNidIdentifier(Patient patient, String nid, PatientIdentifierType nidIdentifierType) {
+		PatientService patientService = Context.getPatientService();
+		
+		Location location = determineLocation(patient);
+		if (location == null) {
+			throw new IllegalStateException("Could not determine location for patient identifier");
+		}
+		
+		PatientIdentifier patientIdentifier = new PatientIdentifier();
+		patientIdentifier.setPatient(patient);
+		patientIdentifier.setIdentifier(nid);
+		patientIdentifier.setIdentifierType(nidIdentifierType);
+		patientIdentifier.setLocation(location);
+		
+		log.debug("Creating new PatientIdentifier with NID: {}", nid);
+		patientService.savePatientIdentifier(patientIdentifier);
+		log.debug("PatientIdentifier saved successfully");
+	}
+	
+	private Location determineLocation(Patient patient) {
+		LocationService locationService = Context.getLocationService();
+		
+		// Try to get location from patient's existing identifiers
+		List<PatientIdentifier> activeIdentifiers = patient.getActiveIdentifiers();
+		if (activeIdentifiers != null && !activeIdentifiers.isEmpty()) {
+			for (PatientIdentifier identifier : activeIdentifiers) {
+				Location location = identifier.getLocation();
+				if (location != null) {
+					log.debug("Using location from existing identifier: {}", location.getName());
+					return location;
+				}
+			}
+		}
+		
+		// Fallback to default location (could be configurable)
+		Location defaultLocation = getDefaultLocation(locationService);
+		if (defaultLocation != null) {
+			log.debug("Using default location: {}", defaultLocation.getName());
+			return defaultLocation;
+		}
+		
+		return null;
+	}
+	
+	private Location getDefaultLocation(LocationService locationService) {
+		// This should ideally be configurable via global property
+		String defaultLocationUuid = Context.getAdministrationService().getGlobalProperty("sespct.default.location.uuid");
+		
+		if (StringUtils.isNotBlank(defaultLocationUuid)) {
+			return locationService.getLocationByUuid(defaultLocationUuid);
+		}
+		
+		// Ultimate fallback
+		List<Location> allLocations = locationService.getAllLocations(false);
+		return allLocations.isEmpty() ? null : allLocations.get(0);
+	}
+	
+	@Async
+	public void rescheduleResultAsync(Integer pedidoId) {
+		if (pedidoId == null) {
+			log.warn("Cannot reschedule result: pedido ID is null");
+			return;
+		}
+		
+		try {
+			Pedido pedido = getPedidoById(pedidoId);
+			if (pedido != null) {
+				pedido.setEstado(ESTADO_SEM_RESPOSTA);
+				pedido.setCausa(null);
+				savePedido(pedido);
+				log.debug("Pedido {} rescheduled successfully", pedidoId);
+			} else {
+				log.warn("Could not reschedule: pedido {} not found", pedidoId);
+			}
+		}
+		catch (Exception e) {
+			log.error("Error rescheduling pedido {}", pedidoId, e);
+		}
+	}
 }
