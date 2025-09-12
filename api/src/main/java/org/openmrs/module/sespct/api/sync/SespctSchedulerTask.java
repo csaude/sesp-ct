@@ -97,8 +97,8 @@ public class SespctSchedulerTask extends AbstractTask {
 	}
 	
 	private void processPedidos() {
-		List<Pedido> pedidos = pedidoService.getPedidosByEstado(Constants.PEDIDO_STATUS_SEM_RESPOSTA);
-		log.info("Found {} pedidos with status '{}'", pedidos.size(), Constants.PEDIDO_STATUS_SEM_RESPOSTA);
+		List<Pedido> pedidos = pedidoService.getPedidosByEstado(Constants.ESTADO_SEM_RESPOSTA);
+		log.info("Found {} pedidos with status '{}'", pedidos.size(), Constants.ESTADO_SEM_RESPOSTA);
 		
 		if (pedidos.isEmpty()) {
 			log.info("No pending pedidos to process");
@@ -138,7 +138,7 @@ public class SespctSchedulerTask extends AbstractTask {
 		}
 		
 		try {
-			Optional<Patient> patient = findPatientByIdentifier(identifier);
+			Optional<Patient> patient = findPatientByIdentifier(pedido, identifier);
 			
 			if (!patient.isPresent()) {
 				handlePatientNotFound(pedido, identifier);
@@ -164,25 +164,48 @@ public class SespctSchedulerTask extends AbstractTask {
 		}
 	}
 	
-	private Optional<Patient> findPatientByIdentifier(String identifier) {
+	private Optional<Patient> findPatientByIdentifier(Pedido pedido, String identifier) {
 		List<Patient> patients = Context.getPatientService().getPatients(null, identifier, null, true);
 		
 		if (patients == null || patients.isEmpty()) {
-			return Optional.empty();
+		      log.warn("No patient found with NID={} for Pedido id={}", identifier, pedido.getId());
+		        try {
+		            pedido.setEstado(Constants.PEDIDO_STATUS_NOT_PROCESSED);
+		            pedido.setCausa(Constants.PEDIDO_STATUS_PATIENT_NOT_FOUND);
+		            pedidoService.savePedido(pedido);
+		            log.info("Pedido id={} marcado como PATIENT_NOT_FOUND", pedido.getId());
+		        } catch (Exception e) {
+		            log.error("Erro ao atualizar estado do Pedido id={} (NOT_FOUND)", pedido.getId(), e);
+		        }
+		        return Optional.empty();
 		}
 		
 		if (patients.size() > 1) {
-			log.warn("Multiple patients found with identifier={}. Using first one.", identifier);
+		       log.warn("Duplicate NID={} found ({} patients) for Pedido id={}", 
+		                 identifier, patients.size(), pedido.getId());
+		        try {
+		            pedido.setEstado(Constants.PEDIDO_STATUS_NOT_PROCESSED);
+		            pedido.setCausa(Constants.PEDIDO_STATUS_DUPLICATE_NID);
+		            pedidoService.savePedido(pedido);
+		            log.info("Pedido id={} marcado como DUPLICATE_NID", pedido.getId());
+		        } catch (Exception e) {
+		            log.error("Erro ao atualizar estado do Pedido id={} (DUPLICATE_NID)", pedido.getId(), e);
+		        }
+		        return Optional.empty();
 		}
 		
-		return Optional.of(patients.get(0));
+		// Caso normal: apenas 1 paciente encontrado
+	    Patient patient = patients.get(0);
+	    log.debug("Found Patient id={} for NID={} (Pedido id={})", patient.getPatientId(), identifier, pedido.getId());
+	    return Optional.of(patient);
 	}
 	
 	private void handlePatientNotFound(Pedido pedido, String identifier) {
 		log.warn("No patient found with identifier={} for Pedido id={}", identifier, pedido.getId());
 		
 		try {
-			pedido.setEstado(Constants.PEDIDO_STATUS_PATIENT_NOT_FOUND);
+			pedido.setEstado(Constants.PEDIDO_STATUS_NOT_PROCESSED);
+			pedido.setCausa(Constants.PEDIDO_STATUS_PATIENT_NOT_FOUND);
 			pedidoService.savePedido(pedido);
 			log.info("Marked Pedido id={} as patient not found", pedido.getId());
 		}
@@ -278,8 +301,6 @@ public class SespctSchedulerTask extends AbstractTask {
 		
 		// Linha Solicitada
 		obsBuilder.addLinhaSolicitadaObs(pedido.getLinhaSolicitada().getLinha());
-		
-		// Resposta do Comite Terapêutico
 	}
 	
 	private Encounter buildEncounter(Pedido pedido, Patient patient) {

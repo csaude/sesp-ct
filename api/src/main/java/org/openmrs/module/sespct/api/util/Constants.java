@@ -9,15 +9,19 @@ public class Constants {
 	public static final String CT_ENCOUNTER_TYPE               = "45277526-85a1-497a-93ce-30240d4d5acb";
 	public static final String PRIMARY_USER                    = "generic.provider";
 	public static final String FALLBACK_USER                   = "provedor.desconhecido";
-	public static final String PEDIDO_STATUS_SEM_RESPOSTA      = "Sem_resposta";
 	public static final String PEDIDO_STATUS_NOT_PROCESSED     = "NOT_PROCESSED";
 	public static final String PEDIDO_STATUS_PATIENT_NOT_FOUND = "NID_NOT_FOUND";
+	public static final String PEDIDO_STATUS_DUPLICATE_NID   = "DUPLICATE_NID";
 	
 	public static final String SIM_UUID             = "1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	public static final String NAO_UUID             = "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	public static final String SIM             = "Sim";
 	public static final String NAO             = "Nao";
+	
+	public static final String ESTADO_SEM_RESPOSTA   = "Sem resposta";
+	public static final String ESTADO_APROVADO       = "Aprovado";
+	public static final String ESTADO_ADIADO         = "Adiado";
 	
 	// Dados do utente
 	public static final String INICIAIS_UTENTE_UUID = "397ebb22-925f-413a-b9f0-2d84553686dc";
@@ -83,5 +87,15 @@ public class Constants {
     public static final String SEGUNDA_LINHA_UUID            = "7f367983-9911-4f8c-bbfc-a85678801f64";
     public static final String TERCEIRA_LINHA_UUID           = "ade7656f-0ce3-461b-b7d8-121932dcd6a2";
     public static final String REGIME_INDIVIDUALIZADO_UUID   = "160050AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    
+    // Resposta do Comite Terapeutico 
+    public static final String RESPOSTA_COMITE_GROUP_UUID   = "bb25dc01-ea37-42a7-ae51-ecce1bdd7d3c";
+    public static final String RESPOSTA_ESTADO_UUID         = "3dba5068-fc4d-46f5-a338-78548761a21c";
+    public static final String RESPOSTA_LINHA_UUID          = "fdff0637-b36f-4dce-90c7-fe9f1ec586f0";
+    public static final String RESPOSTA_COMENTARIO_UUID     = "e1d9d498-1d5f-11e0-b929-000c29ad1d07";
+    public static final String RESPOSTA_AUTOR_UUID          = "8e96e54b-9c2b-462f-ac2a-9e085ba9d179";
 
+    public static final String ESTADO_SEM_RESPOSTA_UUID     = "e1dc9ce6-1d5f-11e0-b929-000c29ad1d07";
+    public static final String ESTADO_APROVADO_UUID        = "1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String ESTADO_ADIADO_UUID          = "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 }

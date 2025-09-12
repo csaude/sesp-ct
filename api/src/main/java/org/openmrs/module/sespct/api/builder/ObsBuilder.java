@@ -204,7 +204,67 @@ public class ObsBuilder {
 
 	    return this;
 	}
+	
+	public ObsBuilder addRespostaComiteObs(String estado, String linha, String comentario, Date dataResposta, String autor) {
+		Obs group = createBaseObs(Constants.RESPOSTA_COMITE_GROUP_UUID);
+		
+		if (estado != null) {
+			Obs estadoObs = createBaseObs(Constants.RESPOSTA_ESTADO_UUID);
+			switch (estado.trim().toUpperCase()) {
+            case "SEM RESPOSTA":
+                estadoObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.ESTADO_SEM_RESPOSTA_UUID));
+                break;
+            case "APROVADO":
+                estadoObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.ESTADO_APROVADO_UUID));
+                break;
+            case "ADIADO":
+                estadoObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.ESTADO_ADIADO_UUID));
+                break;
+            default:
+                log.warn("Estado do comité desconhecido: {}", estado);
+			}
+			group.addGroupMember(estadoObs);
+		}
+		
+		if (linha != null) {
+	        Obs linhaObs = createBaseObs(Constants.RESPOSTA_LINHA_UUID);
+	        switch (linha.trim().toUpperCase()) {
+	            case "SEGUNDA LINHA":
+	                linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.SEGUNDA_LINHA_UUID));
+	                break;
+	            case "TERCEIRA LINHA":
+	                linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.TERCEIRA_LINHA_UUID));
+	                break;
+	            case "REGIME INDIVIDUALIZADO":
+	                linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.REGIME_INDIVIDUALIZADO_UUID));
+	                break;
+	            default:
+	                log.warn("Linha terapêutica da resposta do comité desconhecida: {}", linha);
+	        }
+	        group.addGroupMember(linhaObs);
+	    }
+		
+		// Comentario + Data da Resposta
+		if ((comentario != null && !comentario.trim().isEmpty()) || dataResposta != null) {
+	        Obs comentarioObs = createBaseObs(Constants.RESPOSTA_COMENTARIO_UUID);
+	        if (comentario != null && !comentario.trim().isEmpty()) {
+	            comentarioObs.setValueText(comentario.trim());
+	        }
+	        if (dataResposta != null) {
+	            comentarioObs.setObsDatetime(dataResposta);
+	        }
+	        group.addGroupMember(comentarioObs);
+	    }
+		
+		if (autor != null && !autor.trim().isEmpty()) {
+	        Obs autorObs = createBaseObs(Constants.RESPOSTA_AUTOR_UUID);
+	        autorObs.setValueText(autor.trim());
+	        group.addGroupMember(autorObs);
+	    }
 
+	    encounter.addObs(group);
+	    return this;
+	}
 
 	private String mapEstadioToUuid(String estadioOms) {
 		switch (estadioOms.toUpperCase()) {
