@@ -8,11 +8,8 @@ import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.module.sespct.api.dao.PedidoDao;
 import org.openmrs.module.sespct.api.model.Pedido;
 
-import java.lang.reflect.Method;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class PedidoDaoImpl implements PedidoDao {
 	
@@ -97,6 +94,62 @@ public class PedidoDaoImpl implements PedidoDao {
 		        .setParameter("endDateTime", endDateTime);
 		
 		// 2. Use the .list() method, which is correct for Hibernate 4
+		return query.list();
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<Pedido> searchPedidos(LocalDateTime startDateTime, LocalDateTime endDateTime, String estado, String ncft, String nid, String usCode) {
+		// Use StringBuilder for efficient string manipulation
+		StringBuilder hql = new StringBuilder("FROM Pedido p WHERE p.voided = false ");
+
+		// Use a map to safely add parameters and avoid HQL injection
+		Map<String, Object> parameters = new HashMap<>();
+
+		if (startDateTime != null) {
+			hql.append("AND p.dataSubmissao >= :startDateTime ");
+			parameters.put("startDateTime", startDateTime);
+		}
+
+		if (endDateTime != null) {
+			hql.append("AND p.dataSubmissao <= :endDateTime ");
+			parameters.put("endDateTime", endDateTime);
+		}
+
+		// Check for state, ignoring the "ALL" value
+		if (estado != null && !estado.trim().isEmpty() && !"ALL".equalsIgnoreCase(estado)) {
+			hql.append("AND p.estado = :estado ");
+			parameters.put("estado", estado);
+		}
+
+		if (ncft != null && !ncft.trim().isEmpty()) {
+			hql.append("AND p.pedidoId = :ncft ");
+			parameters.put("ncft", ncft);
+		}
+
+		if (nid != null && !nid.trim().isEmpty()) {
+			hql.append("AND p.dadosUtente.nid = :nid ");
+			parameters.put("nid", nid);
+		}
+
+		// Check for US code, ignoring the "ALL" value
+		if (usCode != null && !usCode.trim().isEmpty() && !"ALL".equalsIgnoreCase(usCode)) {
+			// Assuming the 'origem' field holds the US code
+			hql.append("AND p.origem = :usCode ");
+			parameters.put("usCode", usCode);
+		}
+
+		// Always order by submission date descending, as per requirements
+		hql.append("ORDER BY p.dataSubmissao DESC");
+
+		// Create the query
+		final Query query = this.getCurrentSession().createQuery(hql.toString());
+
+		// Bind all the parameters from our map
+		for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+			query.setParameter(entry.getKey(), entry.getValue());
+		}
+
 		return query.list();
 	}
 }

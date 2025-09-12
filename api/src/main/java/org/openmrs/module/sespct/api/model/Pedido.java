@@ -248,4 +248,5 @@ public class Pedido extends BaseOpenmrsData {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 		return dataSubmissao.format(formatter);
 	}
+	
 }

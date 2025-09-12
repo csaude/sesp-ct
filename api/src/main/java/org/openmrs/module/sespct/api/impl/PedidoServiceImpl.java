@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -80,6 +81,21 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	@Transactional
 	public void deletePedido(Pedido pedido) {
 		pedidoDao.deletePedido(pedido);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public List<Pedido> searchPedidos(LocalDate startDate, LocalDate endDate, String estado, String ncft, String nid,
+	        String usCode) {
+		// Convert LocalDate to LocalDateTime for the database query
+		// Start date becomes the very beginning of that day (00:00:00)
+		LocalDateTime startDateTime = (startDate != null) ? startDate.atStartOfDay() : null;
+		
+		// End date becomes the very end of that day (23:59:59) to include all records on that day
+		LocalDateTime endDateTime = (endDate != null) ? endDate.atTime(23, 59, 59) : null;
+		
+		// The service's job is done, pass the prepared data to the DAO
+		return pedidoDao.searchPedidos(startDateTime, endDateTime, estado, ncft, nid, usCode);
 	}
 	
 	// And implement it in your PedidoServiceImpl
