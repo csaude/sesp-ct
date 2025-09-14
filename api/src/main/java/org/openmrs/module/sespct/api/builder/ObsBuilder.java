@@ -108,101 +108,101 @@ public class ObsBuilder {
 		Obs group = createBaseObs(Constants.HISTORIA_TARV_GROUP_UUID);
 		
 		if (dataInicio != null) {
-	        Obs inicio = createBaseObs(Constants.TARV_DATA_INICIO_UUID);
-	        inicio.setValueDatetime(dataInicio);
-	        group.addGroupMember(inicio);
-	    }
-
-	    if (dataFim != null) {
-	        Obs fim = createBaseObs(Constants.TARV_DATA_FIM_UUID);
-	        fim.setValueDatetime(dataFim);
-	        group.addGroupMember(fim);
-	    }
-
-	    String esquemaTarvUuid = TarvUtils.mapEsquemaTarvToUuid(esquemaTarv);
-	    Obs esquemaObs = createBaseObs(Constants.TARV_ESQUEMA_UUID);
-	    if (esquemaTarvUuid != null) {
-	        esquemaObs.setValueCoded(Context.getConceptService().getConceptByUuid(esquemaTarvUuid));
-	    } else {
-	        esquemaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.OUTRO_UUID));
-	    }
-	    group.addGroupMember(esquemaObs);
-
-	    encounter.addObs(group);
-	    return this;
+			Obs inicio = createBaseObs(Constants.TARV_DATA_INICIO_UUID);
+			inicio.setValueDatetime(dataInicio);
+			group.addGroupMember(inicio);
+		}
+		
+		if (dataFim != null) {
+			Obs fim = createBaseObs(Constants.TARV_DATA_FIM_UUID);
+			fim.setValueDatetime(dataFim);
+			group.addGroupMember(fim);
+		}
+		
+		String esquemaTarvUuid = TarvUtils.mapEsquemaTarvToUuid(esquemaTarv);
+		Obs esquemaObs = createBaseObs(Constants.TARV_ESQUEMA_UUID);
+		if (esquemaTarvUuid != null) {
+			esquemaObs.setValueCoded(Context.getConceptService().getConceptByUuid(esquemaTarvUuid));
+		} else {
+			esquemaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.OUTRO_UUID));
+		}
+		group.addGroupMember(esquemaObs);
+		
+		encounter.addObs(group);
+		return this;
 	}
 	
 	public ObsBuilder addCd4Obs(Date data, Double absoluto, Double percentual) {
-	    Obs group = createBaseObs(Constants.HISTORIA_CD4_GROUP_UUID);
-
-	    if (data != null) {
-	        Obs dataObs = createBaseObs(Constants.CD4_DATA_UUID);
-	        dataObs.setValueDatetime(data);
-	        group.addGroupMember(dataObs);
-	    }
-
-	    if (absoluto != null && absoluto > 0) {
-	        Obs absObs = createBaseObs(Constants.CD4_ABSOLUTO_UUID);
-	        absObs.setValueNumeric(absoluto);
-	        group.addGroupMember(absObs);
-	    }
-
-	    if (percentual != null && percentual > 0) {
-	        Obs percObs = createBaseObs(Constants.CD4_PERCENTUAL_UUID);
-	        percObs.setValueNumeric(percentual);
-	        group.addGroupMember(percObs);
-	    }
-
-	    encounter.addObs(group);
-	    return this;
+		Obs group = createBaseObs(Constants.HISTORIA_CD4_GROUP_UUID);
+		
+		if (data != null) {
+			Obs dataObs = createBaseObs(Constants.CD4_DATA_UUID);
+			dataObs.setValueDatetime(data);
+			group.addGroupMember(dataObs);
+		}
+		
+		if (absoluto != null && absoluto > 0) {
+			Obs absObs = createBaseObs(Constants.CD4_ABSOLUTO_UUID);
+			absObs.setValueNumeric(absoluto);
+			group.addGroupMember(absObs);
+		}
+		
+		if (percentual != null && percentual > 0) {
+			Obs percObs = createBaseObs(Constants.CD4_PERCENTUAL_UUID);
+			percObs.setValueNumeric(percentual);
+			group.addGroupMember(percObs);
+		}
+		
+		encounter.addObs(group);
+		return this;
 	}
 	
 	public ObsBuilder addCargaViralObs(Date data, Double valor) {
-	    Obs group = createBaseObs(Constants.HISTORIA_CARGA_VIRAL_GROUP_UUID);
-
-	    if (data != null) {
-	        Obs dataObs = createBaseObs(Constants.CV_DATA_UUID);
-	        dataObs.setValueDatetime(data);
-	        group.addGroupMember(dataObs);
-	    }
-
-	    if (valor != null && valor > 0) {
-	        Obs valorObs = createBaseObs(Constants.CV_VALOR_UUID);
-	        valorObs.setValueNumeric(valor);
-	        group.addGroupMember(valorObs);
-	    }
-
-	    encounter.addObs(group);
-	    return this;
+		Obs group = createBaseObs(Constants.HISTORIA_CARGA_VIRAL_GROUP_UUID);
+		
+		if (data != null) {
+			Obs dataObs = createBaseObs(Constants.CV_DATA_UUID);
+			dataObs.setValueDatetime(data);
+			group.addGroupMember(dataObs);
+		}
+		
+		if (valor != null && valor > 0) {
+			Obs valorObs = createBaseObs(Constants.CV_VALOR_UUID);
+			valorObs.setValueNumeric(valor);
+			group.addGroupMember(valorObs);
+		}
+		
+		encounter.addObs(group);
+		return this;
 	}
 	
 	public ObsBuilder addLinhaSolicitadaObs(String linha) {
-	    if (linha == null || linha.trim().isEmpty()) {
-	        return this;
-	    }
-
-	    Obs group = createBaseObs(Constants.LINHA_SOLICITADA_GROUP_UUID);
-	    Obs linhaObs = createBaseObs(Constants.LINHA_SOLICITADA_UUID);
-
-	    switch (linha.trim().toUpperCase()) {
-	        case "SEGUNDA LINHA":
-	            linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.SEGUNDA_LINHA_UUID));
-	            break;
-	        case "TERCEIRA LINHA":
-	            linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.TERCEIRA_LINHA_UUID));
-	            break;
-	        case "REGIME INDIVIDUALIZADO":
-	            linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.REGIME_INDIVIDUALIZADO_UUID));
-	            break;
-	        default:
-	            log.warn("Linha solicitada desconhecida: {}", linha);
-	            return this;
-	    }
-
-	    group.addGroupMember(linhaObs);
-	    encounter.addObs(group);
-
-	    return this;
+		if (linha == null || linha.trim().isEmpty()) {
+			return this;
+		}
+		
+		Obs group = createBaseObs(Constants.LINHA_SOLICITADA_GROUP_UUID);
+		Obs linhaObs = createBaseObs(Constants.LINHA_SOLICITADA_UUID);
+		
+		switch (linha.trim().toUpperCase()) {
+			case "SEGUNDA LINHA":
+				linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.SEGUNDA_LINHA_UUID));
+				break;
+			case "TERCEIRA LINHA":
+				linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.TERCEIRA_LINHA_UUID));
+				break;
+			case "REGIME INDIVIDUALIZADO":
+				linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.REGIME_INDIVIDUALIZADO_UUID));
+				break;
+			default:
+				log.warn("Linha solicitada desconhecida: {}", linha);
+				return this;
+		}
+		
+		group.addGroupMember(linhaObs);
+		encounter.addObs(group);
+		
+		return this;
 	}
 	
 	public ObsBuilder addRespostaComiteObs(String estado, String linha, String comentario, Date dataResposta, String autor) {
@@ -211,61 +211,63 @@ public class ObsBuilder {
 		if (estado != null) {
 			Obs estadoObs = createBaseObs(Constants.RESPOSTA_ESTADO_UUID);
 			switch (estado.trim().toUpperCase()) {
-            case "SEM RESPOSTA":
-                estadoObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.ESTADO_SEM_RESPOSTA_UUID));
-                break;
-            case "APROVADO":
-                estadoObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.ESTADO_APROVADO_UUID));
-                break;
-            case "ADIADO":
-                estadoObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.ESTADO_ADIADO_UUID));
-                break;
-            default:
-                log.warn("Estado do comité desconhecido: {}", estado);
+				case "SEM RESPOSTA":
+					estadoObs
+					        .setValueCoded(Context.getConceptService().getConceptByUuid(Constants.ESTADO_SEM_RESPOSTA_UUID));
+					break;
+				case "APROVADO":
+					estadoObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.ESTADO_APROVADO_UUID));
+					break;
+				case "ADIADO":
+					estadoObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.ESTADO_ADIADO_UUID));
+					break;
+				default:
+					log.warn("Estado do comité desconhecido: {}", estado);
 			}
 			group.addGroupMember(estadoObs);
 		}
 		
 		if (linha != null) {
-	        Obs linhaObs = createBaseObs(Constants.RESPOSTA_LINHA_UUID);
-	        switch (linha.trim().toUpperCase()) {
-	            case "SEGUNDA LINHA":
-	                linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.SEGUNDA_LINHA_UUID));
-	                break;
-	            case "TERCEIRA LINHA":
-	                linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.TERCEIRA_LINHA_UUID));
-	                break;
-	            case "REGIME INDIVIDUALIZADO":
-	                linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.REGIME_INDIVIDUALIZADO_UUID));
-	                break;
-	            default:
-	                log.warn("Linha terapêutica da resposta do comité desconhecida: {}", linha);
-	        }
-	        group.addGroupMember(linhaObs);
-	    }
+			Obs linhaObs = createBaseObs(Constants.RESPOSTA_LINHA_UUID);
+			switch (linha.trim().toUpperCase()) {
+				case "SEGUNDA LINHA":
+					linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.SEGUNDA_LINHA_UUID));
+					break;
+				case "TERCEIRA LINHA":
+					linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.TERCEIRA_LINHA_UUID));
+					break;
+				case "REGIME INDIVIDUALIZADO":
+					linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(
+					    Constants.REGIME_INDIVIDUALIZADO_UUID));
+					break;
+				default:
+					log.warn("Linha terapêutica da resposta do comité desconhecida: {}", linha);
+			}
+			group.addGroupMember(linhaObs);
+		}
 		
 		// Comentario + Data da Resposta
 		if ((comentario != null && !comentario.trim().isEmpty()) || dataResposta != null) {
-	        Obs comentarioObs = createBaseObs(Constants.RESPOSTA_COMENTARIO_UUID);
-	        if (comentario != null && !comentario.trim().isEmpty()) {
-	            comentarioObs.setValueText(comentario.trim());
-	        }
-	        if (dataResposta != null) {
-	            comentarioObs.setObsDatetime(dataResposta);
-	        }
-	        group.addGroupMember(comentarioObs);
-	    }
+			Obs comentarioObs = createBaseObs(Constants.RESPOSTA_COMENTARIO_UUID);
+			if (comentario != null && !comentario.trim().isEmpty()) {
+				comentarioObs.setValueText(comentario.trim());
+			}
+			if (dataResposta != null) {
+				comentarioObs.setObsDatetime(dataResposta);
+			}
+			group.addGroupMember(comentarioObs);
+		}
 		
 		if (autor != null && !autor.trim().isEmpty()) {
-	        Obs autorObs = createBaseObs(Constants.RESPOSTA_AUTOR_UUID);
-	        autorObs.setValueText(autor.trim());
-	        group.addGroupMember(autorObs);
-	    }
-
-	    encounter.addObs(group);
-	    return this;
+			Obs autorObs = createBaseObs(Constants.RESPOSTA_AUTOR_UUID);
+			autorObs.setValueText(autor.trim());
+			group.addGroupMember(autorObs);
+		}
+		
+		encounter.addObs(group);
+		return this;
 	}
-
+	
 	private String mapEstadioToUuid(String estadioOms) {
 		switch (estadioOms.toUpperCase()) {
 			case Constants.ESTADIO_I:

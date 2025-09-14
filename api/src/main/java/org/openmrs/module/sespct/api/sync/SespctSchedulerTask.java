@@ -1,6 +1,7 @@
 package org.openmrs.module.sespct.api.sync;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,8 +17,11 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.sespct.api.PedidoService;
 import org.openmrs.module.sespct.api.builder.ObsBuilder;
 import org.openmrs.module.sespct.api.model.Pedido;
+import org.openmrs.module.sespct.api.model.Resposta;
+import org.openmrs.module.sespct.api.model.RespostaComite;
 import org.openmrs.module.sespct.api.util.Constants;
 import org.openmrs.module.sespct.api.util.DateTimeUtils;
+import org.openmrs.module.sespct.api.util.EncounterUtils;
 import org.openmrs.scheduler.tasks.AbstractTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,6 +150,13 @@ public class SespctSchedulerTask extends AbstractTask {
 				return false;
 			}
 			
+			// Aqui entra a verificação para não duplicar encounters
+	        Encounter existing = EncounterUtils.findEncounterByPedidoId(pedido.getPedidoId());
+	        if (existing != null) {
+	            log.warn("Encounter já existe para Pedido id={}, não vamos criar duplicado", pedido.getPedidoId());
+	            return false;
+	        }
+			
 			createEncounterForPedido(pedido, patient.get());
 			log.info("Successfully processed Pedido id={} for Patient NID={}", pedido.getId(), identifier);
 			return true;
@@ -169,36 +180,37 @@ public class SespctSchedulerTask extends AbstractTask {
 		List<Patient> patients = Context.getPatientService().getPatients(null, identifier, null, true);
 		
 		if (patients == null || patients.isEmpty()) {
-		      log.warn("No patient found with NID={} for Pedido id={}", identifier, pedido.getId());
-		        try {
-		            pedido.setEstado(Constants.PEDIDO_STATUS_NOT_PROCESSED);
-		            pedido.setCausa(Constants.PEDIDO_STATUS_PATIENT_NOT_FOUND);
-		            pedidoService.savePedido(pedido);
-		            log.info("Pedido id={} marcado como PATIENT_NOT_FOUND", pedido.getId());
-		        } catch (Exception e) {
-		            log.error("Erro ao atualizar estado do Pedido id={} (NOT_FOUND)", pedido.getId(), e);
-		        }
-		        return Optional.empty();
+			log.warn("No patient found with NID={} for Pedido id={}", identifier, pedido.getId());
+			try {
+				pedido.setEstado(Constants.PEDIDO_STATUS_NOT_PROCESSED);
+				pedido.setCausa(Constants.PEDIDO_STATUS_PATIENT_NOT_FOUND);
+				pedidoService.savePedido(pedido);
+				log.info("Pedido id={} marcado como PATIENT_NOT_FOUND", pedido.getId());
+			}
+			catch (Exception e) {
+				log.error("Erro ao atualizar estado do Pedido id={} (NOT_FOUND)", pedido.getId(), e);
+			}
+			return Optional.empty();
 		}
 		
 		if (patients.size() > 1) {
-		       log.warn("Duplicate NID={} found ({} patients) for Pedido id={}", 
-		                 identifier, patients.size(), pedido.getId());
-		        try {
-		            pedido.setEstado(Constants.PEDIDO_STATUS_NOT_PROCESSED);
-		            pedido.setCausa(Constants.PEDIDO_STATUS_DUPLICATE_NID);
-		            pedidoService.savePedido(pedido);
-		            log.info("Pedido id={} marcado como DUPLICATE_NID", pedido.getId());
-		        } catch (Exception e) {
-		            log.error("Erro ao atualizar estado do Pedido id={} (DUPLICATE_NID)", pedido.getId(), e);
-		        }
-		        return Optional.empty();
+			log.warn("Duplicate NID={} found ({} patients) for Pedido id={}", identifier, patients.size(), pedido.getId());
+			try {
+				pedido.setEstado(Constants.PEDIDO_STATUS_NOT_PROCESSED);
+				pedido.setCausa(Constants.PEDIDO_STATUS_DUPLICATE_NID);
+				pedidoService.savePedido(pedido);
+				log.info("Pedido id={} marcado como DUPLICATE_NID", pedido.getId());
+			}
+			catch (Exception e) {
+				log.error("Erro ao atualizar estado do Pedido id={} (DUPLICATE_NID)", pedido.getId(), e);
+			}
+			return Optional.empty();
 		}
 		
 		// Caso normal: apenas 1 paciente encontrado
-	    Patient patient = patients.get(0);
-	    log.debug("Found Patient id={} for NID={} (Pedido id={})", patient.getPatientId(), identifier, pedido.getId());
-	    return Optional.of(patient);
+		Patient patient = patients.get(0);
+		log.debug("Found Patient id={} for NID={} (Pedido id={})", patient.getPatientId(), identifier, pedido.getId());
+		return Optional.of(patient);
 	}
 	
 	private void handlePatientNotFound(Pedido pedido, String identifier) {
@@ -233,7 +245,7 @@ public class SespctSchedulerTask extends AbstractTask {
 		obsBuilder.addNumericObs(Constants.PESO_UUID, pedido.getDadosUtente().getPeso());
 		obsBuilder.addBooleanObs(Constants.GESTANTE_UUID, pedido.getDadosUtente().isGestante());
 		obsBuilder.addBooleanObs(Constants.LACTANTE_UUID, pedido.getDadosUtente().isLactante());
-		obsBuilder.addNumericObs(Constants.ID_PEDIDO_UUID, Double.valueOf(pedido.getPedidoId()));
+		obsBuilder.addNumericObs(Constants.ID_PEDIDO_UUID, pedido.getPedidoId() != null ? Double.valueOf(pedido.getPedidoId()) : null);
 		obsBuilder.addEstadioOmsObs(pedido.getDadosUtente().getEstadioOms());
 		obsBuilder.addTextObs(Constants.ESTADIO_OMS_MOTIVO, pedido.getDadosUtente().getEstadioOmsMotivo());
 		
@@ -302,13 +314,42 @@ public class SespctSchedulerTask extends AbstractTask {
 		
 		// Linha Solicitada
 		obsBuilder.addLinhaSolicitadaObs(pedido.getLinhaSolicitada().getLinha());
+		
+		// Resposta do Comité (estado inicial do Pedido)
+		if (pedido.getRespostas() == null || pedido.getRespostas().isEmpty()) {
+		    // Nenhuma resposta ainda → cria ObsGroup com estado inicial
+		    obsBuilder.addRespostaComiteObs(
+		        pedido.getEstado(),     // SEM_RESPOSTA
+		        null,                   
+		        null,                   
+		        DateTimeUtils.toDate(pedido.getDataSubmissao()),
+		        null
+		    );
+		} else {
+			// Já existem respostas → pega a última resposta do comité
+			Resposta respostaMaisRecente = pedido.getRespostas()
+			        .stream()
+			        .max(Comparator.comparing(r -> r.getMetadados().getTimestamp()))
+			        .orElse(null);
+			
+			if (respostaMaisRecente != null) {
+		        RespostaComite rc = respostaMaisRecente.getRespostaComite();
+		        obsBuilder.addRespostaComiteObs(
+		            rc.getRespostaTexto(), 
+		            rc.getLinhaTerapeutica(),
+		            rc.getComentario(),
+		            rc.getDataResposta() != null ? java.sql.Timestamp.valueOf(rc.getDataResposta()) : null,
+		            rc.getAutorizante()
+		        );
+		    }
+		}
 	}
 	
 	private Encounter buildEncounter(Pedido pedido, Patient patient) {
 		Encounter encounter = new Encounter();
 		encounter.setPatient(patient);
 		if (pedido.getDataSubmissao() != null) {
-			encounter.setEncounterDatetime(DateTimeUtils.toDate(pedido.getDataSubmissao())); 
+			encounter.setEncounterDatetime(DateTimeUtils.toDate(pedido.getDataSubmissao()));
 		}
 		
 		EncounterType encounterType = Context.getEncounterService().getEncounterTypeByUuid(Constants.CT_ENCOUNTER_TYPE);

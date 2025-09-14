@@ -23,7 +23,7 @@ import org.openmrs.module.sespct.api.util.LocalDateTimeAttributeConverter;
 public class DadosUtente extends BaseOpenmrsData {
 	
 	private static final long serialVersionUID = 1L;
-
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "dados_utente_id")

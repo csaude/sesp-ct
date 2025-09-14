@@ -20,13 +20,12 @@ import javax.persistence.Transient;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.module.sespct.api.util.LocalDateTimeAttributeConverter;
 
-
 @Entity
 @Table(name = "sespct_pedido")
 public class Pedido extends BaseOpenmrsData {
 	
 	private static final long serialVersionUID = 1L;
-
+	
 	public Pedido() {
 		this.dadosUtente = new DadosUtente();
 		this.reportarFalencia = new ReportarFalencia();
