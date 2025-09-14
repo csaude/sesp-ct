@@ -1,15 +1,29 @@
 package org.openmrs.module.sespct.api.model;
 
-import javax.persistence.*;
+import java.time.LocalDateTime;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.openmrs.BaseOpenmrsData;
 import org.openmrs.module.sespct.api.util.Constants;
-
-import java.util.Date;
+import org.openmrs.module.sespct.api.util.LocalDateTimeAttributeConverter;
 
 @Entity
 @Table(name = "sespct_dados_utente")
-public class DadosUtente {
+public class DadosUtente extends BaseOpenmrsData {
 	
+	private static final long serialVersionUID = 1L;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "dados_utente_id")
@@ -59,15 +73,15 @@ public class DadosUtente {
 	private String gestante;
 	
 	@Column(name = "data_provavel_parto")
-	@Temporal(TemporalType.DATE)
-	private Date dataProvavelParto;
+	@Convert(converter = LocalDateTimeAttributeConverter.class)
+	private LocalDateTime dataProvavelParto;
 	
 	@Column(name = "lactante", length = 10)
 	private String lactante;
 	
 	@Column(name = "data_parto")
-	@Temporal(TemporalType.DATE)
-	private Date dataParto;
+	@Convert(converter = LocalDateTimeAttributeConverter.class)
+	private LocalDateTime dataParto;
 	
 	@Transient
 	public boolean isGestante() {
@@ -80,6 +94,17 @@ public class DadosUtente {
 	}
 	
 	// --- Getters and Setters ---
+	
+	@Override
+	public Integer getId() {
+		return id;
+	}
+	
+	@Override
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	
 	public Pedido getPedido() {
 		return pedido;
 	}
@@ -192,11 +217,11 @@ public class DadosUtente {
 		this.gestante = gestante;
 	}
 	
-	public Date getDataProvavelParto() {
+	public LocalDateTime getDataProvavelParto() {
 		return dataProvavelParto;
 	}
 	
-	public void setDataProvavelParto(Date dataProvavelParto) {
+	public void setDataProvavelParto(LocalDateTime dataProvavelParto) {
 		this.dataProvavelParto = dataProvavelParto;
 	}
 	
@@ -208,11 +233,11 @@ public class DadosUtente {
 		this.lactante = lactante;
 	}
 	
-	public Date getDataParto() {
+	public LocalDateTime getDataParto() {
 		return dataParto;
 	}
 	
-	public void setDataParto(Date dataParto) {
+	public void setDataParto(LocalDateTime dataParto) {
 		this.dataParto = dataParto;
 	}
 }

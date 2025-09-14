@@ -9,11 +9,14 @@
  */
 package org.openmrs.module.sespct;
 
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.module.sespct.api.PedidoService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.BaseModuleActivator;
+import org.openmrs.module.sespct.api.PedidoService;
+import org.openmrs.module.sespct.api.model.Pedido;
 
 /**
  * This class contains the logic that is run every time this module is either started or shutdown
@@ -38,12 +41,7 @@ public class SESPCTActivator extends BaseModuleActivator {
 		System.out.println("### Starting SESP-CT Module");
 		log.info("SESP-CT Module started");
 		try {
-			// Get the service that handles our business logic
-			PedidoService pedidoService = Context.getService(PedidoService.class);
-			System.out.println(pedidoService);
-			// Create tables and populate with dummy data
-			pedidoService.initializeModule();
-			
+			initializeModule();
 			log.info("SESP-CT Module initialization completed successfully");
 		}
 		catch (Exception e) {
@@ -58,4 +56,25 @@ public class SESPCTActivator extends BaseModuleActivator {
 	public void stopped() {
 		log.info("SESP-CT Module stopped");
 	}
+	
+	private void initializeModule() {
+		log.info("Initializing SESP-CT Module...");
+		
+		try {
+			PedidoService pedidoService = Context.getService(PedidoService.class);
+			
+			List<Pedido> existingPedidos = pedidoService.getAllPedidos();
+			if (existingPedidos.isEmpty() || existingPedidos.size() > 20) {
+				log.info("No existing data found. Creating dummy data...");
+				pedidoService.createDummyData(); // Move createDummyData to service
+			} else {
+				log.info("Found " + existingPedidos.size() + " existing pedidos. Skipping dummy data creation.");
+			}
+		}
+		catch (Exception e) {
+			log.error("Failed to initialize module data", e);
+			throw e;
+		}
+	}
+	
 }

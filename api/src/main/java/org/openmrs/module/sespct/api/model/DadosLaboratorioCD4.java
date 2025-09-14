@@ -1,8 +1,10 @@
 package org.openmrs.module.sespct.api.model;
 
 import org.openmrs.BaseOpenmrsData;
+import org.openmrs.module.sespct.api.util.LocalDateTimeAttributeConverter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -19,8 +21,8 @@ public class DadosLaboratorioCD4 extends BaseOpenmrsData {
 	private Pedido pedido;
 	
 	@Column(name = "data_exame")
-	@Temporal(TemporalType.DATE)
-	private Date data;
+	@Convert(converter = LocalDateTimeAttributeConverter.class)
+	private LocalDateTime data;
 	
 	@Column(name = "cd4")
 	private Integer cd4;
@@ -50,11 +52,11 @@ public class DadosLaboratorioCD4 extends BaseOpenmrsData {
 		this.pedido = pedido;
 	}
 	
-	public Date getData() {
+	public LocalDateTime getData() {
 		return data;
 	}
 	
-	public void setData(Date data) {
+	public void setData(LocalDateTime data) {
 		this.data = data;
 	}
 	

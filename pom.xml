@@ -38,6 +38,16 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+			<dependency>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi</artifactId>
+				<version>${my.poi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi-ooxml</artifactId>
+				<version>${my.poi.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -204,5 +214,6 @@
 
 	<properties>
 		<openmrsPlatformVersion>2.3.3</openmrsPlatformVersion>
+		<my.poi.version>5.2.3</my.poi.version>
 	</properties>
 </project>

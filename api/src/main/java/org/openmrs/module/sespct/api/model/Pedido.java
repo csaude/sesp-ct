@@ -1,10 +1,12 @@
 package org.openmrs.module.sespct.api.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -13,10 +15,11 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.openmrs.BaseOpenmrsData;
+import org.openmrs.module.sespct.api.util.LocalDateTimeAttributeConverter;
+
 
 @Entity
 @Table(name = "sespct_pedido")
@@ -29,6 +32,7 @@ public class Pedido extends BaseOpenmrsData {
 		this.reportarFalencia = new ReportarFalencia();
 		this.dadosClinico = new DadosClinico();
 		this.linhaSolicitada = new LinhaSolicitada();
+		this.respostas = new java.util.ArrayList<>();
 		this.historiaTarv = new java.util.ArrayList<>();
 		this.dadosLaboratorioCD4 = new java.util.ArrayList<>();
 		this.dadosLaboratorioCargaViral = new java.util.ArrayList<>();
@@ -36,6 +40,7 @@ public class Pedido extends BaseOpenmrsData {
 		this.dadosClinico.setPedido(this);
 		this.linhaSolicitada.setPedido(this);
 		this.reportarFalencia.setPedido(this);
+
 	}
 	
 	@Id
@@ -48,8 +53,8 @@ public class Pedido extends BaseOpenmrsData {
 	private String pedidoId;
 	
 	@Column(name = "data_submissao")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date dataSubmissao;
+	@Convert(converter = LocalDateTimeAttributeConverter.class)
+	private LocalDateTime dataSubmissao;
 	
 	@Column(name = "versao", length = 10)
 	private String versao;
@@ -92,6 +97,9 @@ public class Pedido extends BaseOpenmrsData {
 	@OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<DadosLaboratorioCargaViral> dadosLaboratorioCargaViral;
 	
+	@OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<Resposta> respostas;
+	
 	// --- Required Overrides ---
 	@Override
 	public Integer getId() {
@@ -120,11 +128,11 @@ public class Pedido extends BaseOpenmrsData {
 		this.pedidoId = pedidoId;
 	}
 	
-	public Date getDataSubmissao() {
+	public LocalDateTime getDataSubmissao() {
 		return dataSubmissao;
 	}
 	
-	public void setDataSubmissao(Date dataSubmissao) {
+	public void setDataSubmissao(LocalDateTime dataSubmissao) {
 		this.dataSubmissao = dataSubmissao;
 	}
 	
@@ -222,5 +230,23 @@ public class Pedido extends BaseOpenmrsData {
 	
 	public void setDadosLaboratorioCargaViral(List<DadosLaboratorioCargaViral> dadosLaboratorioCargaViral) {
 		this.dadosLaboratorioCargaViral = dadosLaboratorioCargaViral;
+	}
+	
+	public List<Resposta> getRespostas() {
+		return respostas;
+	}
+	
+	public void setRespostas(List<Resposta> respostas) {
+		this.respostas = respostas;
+	}
+	
+	@Transient
+	public String getFormattedDataSubmissao() {
+		if (dataSubmissao == null) {
+			return "";
+		}
+		// This formatter will produce "04/09/2025"
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		return dataSubmissao.format(formatter);
 	}
 }

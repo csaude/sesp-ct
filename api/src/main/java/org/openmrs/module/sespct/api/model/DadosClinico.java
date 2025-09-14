@@ -1,10 +1,12 @@
 package org.openmrs.module.sespct.api.model;
 
+import org.openmrs.BaseOpenmrsData;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "sespct_dados_clinico")
-public class DadosClinico {
+public class DadosClinico extends BaseOpenmrsData {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +30,15 @@ public class DadosClinico {
 	private String email;
 	
 	// --- Getters and Setters ---
+	@Override
+	public Integer getId() {
+		return id;
+	}
+	
+	@Override
+	public void setId(Integer id) {
+		this.id = id;
+	}
 	
 	public String getNome() {
 		return nome;
@@ -74,4 +85,5 @@ public class DadosClinico {
 		return "DadosClinico{" + "nome='" + nome + '\'' + ", categoriaProfissional='" + categoriaProfissional + '\''
 		        + ", telefone='" + telefone + '\'' + ", email='" + email + '\'' + '}';
 	}
+	
 }

@@ -17,6 +17,7 @@ import org.openmrs.module.sespct.api.PedidoService;
 import org.openmrs.module.sespct.api.builder.ObsBuilder;
 import org.openmrs.module.sespct.api.model.Pedido;
 import org.openmrs.module.sespct.api.util.Constants;
+import org.openmrs.module.sespct.api.util.DateTimeUtils;
 import org.openmrs.scheduler.tasks.AbstractTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -240,8 +241,8 @@ public class SespctSchedulerTask extends AbstractTask {
 		if (pedido.getHistoriaTarv() != null) {
 		    pedido.getHistoriaTarv().forEach(regime -> {
 		        obsBuilder.addTarvRegimeObs(
-		        		regime.getDataInicio(),
-		        		regime.getDataTermino(),
+		        		DateTimeUtils.toDate(regime.getDataInicio()),
+		        		DateTimeUtils.toDate(regime.getDataTermino()),
 		        		regime.getEsquemaTarv());
 		    });
 		}
@@ -250,7 +251,7 @@ public class SespctSchedulerTask extends AbstractTask {
 		if (pedido.getDadosLaboratorioCD4() != null) {
 		    pedido.getDadosLaboratorioCD4().forEach(cd4 -> {
 		        obsBuilder.addCd4Obs(
-		            cd4.getData(),
+		            DateTimeUtils.toDate(cd4.getData()), 
 		            cd4.getCd4().doubleValue(),
 		            cd4.getCd4Percentagem()
 		        );
@@ -263,7 +264,7 @@ public class SespctSchedulerTask extends AbstractTask {
 		        Double valor = cv.getCargaViral() != null ? cv.getCargaViral().doubleValue() : null;
 
 		        obsBuilder.addCargaViralObs(
-		            cv.getData(),
+		            DateTimeUtils.toDate(cv.getData()), 
 		            valor
 		        );
 		    });
@@ -306,7 +307,9 @@ public class SespctSchedulerTask extends AbstractTask {
 	private Encounter buildEncounter(Pedido pedido, Patient patient) {
 		Encounter encounter = new Encounter();
 		encounter.setPatient(patient);
-		encounter.setEncounterDatetime(pedido.getDataSubmissao());
+		if (pedido.getDataSubmissao() != null) {
+			encounter.setEncounterDatetime(DateTimeUtils.toDate(pedido.getDataSubmissao())); 
+		}
 		
 		EncounterType encounterType = Context.getEncounterService().getEncounterTypeByUuid(Constants.CT_ENCOUNTER_TYPE);
 		
