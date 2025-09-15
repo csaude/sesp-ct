@@ -14,12 +14,20 @@
     <bean id="pedidoDao" class="org.openmrs.module.sespct.api.dao.impl.PedidoDaoImpl">
         <property name="dbSessionFactory" ref="dbSessionFactory" />
     </bean>
+    
+    <bean id="sespct.RespostaDao" class="org.openmrs.module.sespct.api.dao.RespostaDaoImpl">
+    	<property name="sessionFactory" ref="sessionFactory"/>
+	</bean>
 
     <!-- Define the service implementation -->
     <bean id="pedidoServiceImpl"
           class="org.openmrs.module.sespct.api.impl.PedidoServiceImpl">
         <property name="pedidoDao" ref="pedidoDao" />
     </bean>
+    
+    <bean id="sespct.RespostaService" class="org.openmrs.module.sespct.api.impl.RespostaServiceImpl">
+    	<property name="respostaDao" ref="sespct.RespostaDao"/>
+	</bean>
 
     <!-- Register the service with OpenMRS Context -->
     <bean parent="serviceContext">
