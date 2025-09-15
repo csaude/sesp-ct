@@ -15,7 +15,7 @@
         <property name="dbSessionFactory" ref="dbSessionFactory" />
     </bean>
     
-    <bean id="sespct.RespostaDao" class="org.openmrs.module.sespct.api.dao.RespostaDaoImpl">
+    <bean id="sespct.RespostaDao" class="org.openmrs.module.sespct.api.dao.impl.RespostaDaoImpl">
     	<property name="sessionFactory" ref="sessionFactory"/>
 	</bean>
 

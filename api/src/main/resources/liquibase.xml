@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
-                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog">
 
     <!-- Create main Pedido table -->
     <changeSet id="sespct-1.0.0-1" author="sespct">
@@ -753,6 +750,22 @@
                 referencedColumnNames="resposta_id"
                 constraintName="fk_notificacoes_resposta"/>
     </changeSet>
+    
+    <changeSet id="sespct-1.0.0-13" author="sespct">
+	    <preConditions onFail="MARK_RAN">
+	        <not>
+	            <columnExists tableName="sespct_resposta" columnName="sincronizado"/>
+	        </not>
+	    </preConditions>
+	    <comment>Add sincronizado column to sespct_resposta</comment>
+
+	    <addColumn tableName="sespct_resposta">
+	        <column name="sincronizado" type="boolean" defaultValueBoolean="false">
+	            <constraints nullable="false"/>
+	        </column>
+	    </addColumn>
+	</changeSet>
+    
 
 
 </databaseChangeLog>

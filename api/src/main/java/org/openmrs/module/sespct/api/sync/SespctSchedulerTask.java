@@ -148,11 +148,11 @@ public class SespctSchedulerTask extends AbstractTask {
 			}
 			
 			// Aqui entra a verificação para não duplicar encounters
-	        Encounter existing = EncounterUtils.findEncounterByPedidoId(pedido.getPedidoId());
-	        if (existing != null) {
-	            log.warn("Encounter já existe para Pedido id={}, não vamos criar duplicado", pedido.getPedidoId());
-	            return false;
-	        }
+			Encounter existing = EncounterUtils.findEncounterByPedidoId(pedido.getPedidoId());
+			if (existing != null) {
+				log.warn("Encounter já existe para Pedido id={}, não vamos criar duplicado", pedido.getPedidoId());
+				return false;
+			}
 			
 			createEncounterForPedido(pedido, patient.get());
 			log.info("Successfully processed Pedido id={} for Patient NID={}", pedido.getId(), identifier);
