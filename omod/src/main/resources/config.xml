@@ -29,8 +29,7 @@
 	<aware_of_modules>
 		<aware_of_module>org.openmrs.module.legacyui</aware_of_module>
 	</aware_of_modules>
-	
-	
+
 	<!-- AOP
 	<advice>
 		<point>org.openmrs.api.FormService</point>
@@ -78,6 +77,19 @@
 		<description>
 			A chave pública completa usada para o registo do cliente. Copie o valor inteiro aqui.
 		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>sespct.api.privateKey</property>
+		<defaultValue>-----BEGIN PRIVATE KEY-----...-----END PRIVATE KEY-----</defaultValue>
+		<description>
+			A chave privada (PKCS#8 format) da Unidade Sanitária, usada para assinar os pedidos. MANTER EM SEGREDO.
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>sespct.api.serverPublicKey</property>
+		<defaultValue></defaultValue> <description>
+		A chave pública do servidor middleware. Este valor é obtido e guardado automaticamente após o registo do cliente.
+	</description>
 	</globalProperty>
 	<globalProperty>
 		<property>sespct.api.salt</property>
