@@ -205,31 +205,47 @@
         if (exportButton) {
             exportButton.addEventListener("click", function (event) {
                 event.preventDefault();
-                
-                // Obter os elementos
-                const startDateElement = document.getElementById("startDate");
-                const endDateElement = document.getElementById("endDate");
-                
-                // Verificar se os elementos existem primeiro
-                if (!startDateElement || !endDateElement) {
-                    showAlertMessage("Campos de data não encontrados. Faça primeiro uma pesquisa.");
-                    return;
-                }
-                
-                // Obter os valores e verificar se estão preenchidos
-                const startDate = startDateElement.value ? startDateElement.value.trim() : '';
-                const endDate = endDateElement.value ? endDateElement.value.trim() : '';
-                
+
+                // 1. Get date values and perform mandatory check (this part is unchanged)
+                const startDate = document.getElementById("startDate").value.trim();
+                const endDate = document.getElementById("endDate").value.trim();
+
                 if (!startDate || !endDate) {
                     showAlertMessage("Para exportar dados, efectue primeiro uma pesquisa informando o periodo de submissão do pedido (a Data Início e Fim)");
                     return;
                 }
 
-                const url = "${pageContext.request.contextPath}/module/sespct/manageftcases/export.form"
-                          + "?startDate=" + encodeURIComponent(startDate)
-                          + "&endDate=" + encodeURIComponent(endDate);
+                // 2. Get the rest of the filter values from the form
+                const estado = document.getElementById('estado').value;
+                const ncft = document.getElementById('ncft').value;
+                const nid = document.getElementById('nid').value;
+                const usCode = document.getElementById('us').value; // The ID of your <select> is 'us'
 
-                window.location.href = url;
+                // 3. Build the URL parameter list dynamically
+                const baseUrl = "${pageContext.request.contextPath}/module/sespct/manageftcases/export.form";
+                const params = [];
+
+                // Add the mandatory date parameters first
+                params.push('startDate=' + encodeURIComponent(startDate));
+                params.push('endDate=' + encodeURIComponent(endDate));
+
+                // Add the other parameters only if they have a value
+                if (estado) {
+                    params.push('estado=' + encodeURIComponent(estado));
+                }
+                if (ncft) {
+                    params.push('ncft=' + encodeURIComponent(ncft));
+                }
+                if (nid) {
+                    params.push('nid=' + encodeURIComponent(nid));
+                }
+                if (usCode) {
+                    params.push('usCode=' + encodeURIComponent(usCode));
+                }
+
+                // 4. Construct the final URL and trigger the download
+                const finalUrl = baseUrl + '?' + params.join('&');
+                window.location.href = finalUrl;
             });
         }
     });

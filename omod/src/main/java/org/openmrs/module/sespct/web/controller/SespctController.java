@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,7 +29,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/module/sespct/")
@@ -43,32 +46,87 @@ public class SespctController {
 	private static final Logger log = LoggerFactory.getLogger(SespctController.class);
 	
 	@RequestMapping(value = "sespct.form", method = RequestMethod.GET)
-	public String showMainPage(@Valid Pedido pedido, ModelMap model,
+	public String showMainPage(ModelMap model, @RequestParam(value = "startDate", required = false) String startDateStr,
+	        @RequestParam(value = "endDate", required = false) String endDateStr,
 	        @RequestParam(value = "estado", required = false) String estado,
-	        @RequestParam(value = "flashMessage", required = false) String flashMessage, HttpServletRequest request) {
+	        @RequestParam(value = "ncft", required = false) String ncft,
+	        @RequestParam(value = "nid", required = false) String nid,
+	        @RequestParam(value = "usCode", required = false) String usCode,
+	        @RequestParam(value = "flashMessage", required = false) String flashMessage) {
+		
+		DateTimeFormatter ptFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		DateTimeFormatter enFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+		DateTimeFormatter isoFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
+		
+		LocalDate startDate = null;
+		LocalDate endDate = null;
 		
 		try {
-			// Handle flash message from URL parameter (similar to your existing DISA module)
 			if (flashMessage != null && !flashMessage.trim().isEmpty()) {
 				model.addAttribute("flashMessage", flashMessage);
-				log.info("Flash message received: {}", flashMessage);
 			}
 			
-			List<Pedido> requests;
-			if (estado != null && !estado.trim().isEmpty()) {
-				requests = pedidoService.getPedidosByEstado(estado);
-			} else {
-				requests = pedidoService.getAllPedidos();
+			if (startDateStr != null && !startDateStr.trim().isEmpty()) {
+				try {
+					startDate = LocalDate.parse(startDateStr, ptFormatter);
+				}
+				catch (DateTimeParseException e1) {
+					try {
+						startDate = LocalDate.parse(startDateStr, enFormatter);
+					}
+					catch (DateTimeParseException e2) {
+						// Fallback to the ISO standard format
+						startDate = LocalDate.parse(startDateStr, isoFormatter);
+					}
+				}
 			}
 			
+			if (endDateStr != null && !endDateStr.trim().isEmpty()) {
+				try {
+					endDate = LocalDate.parse(endDateStr, ptFormatter);
+				}
+				catch (DateTimeParseException e1) {
+					try {
+						endDate = LocalDate.parse(endDateStr, enFormatter);
+					}
+					catch (DateTimeParseException e2) {
+						// Fallback to the ISO standard format
+						endDate = LocalDate.parse(endDateStr, isoFormatter);
+					}
+				}
+			}
+			
+			// Remove spaces from free text fields as per requirements
+			String trimmedNcft = (ncft != null) ? ncft.trim() : null;
+			String trimmedNid = (nid != null) ? nid.trim() : null;
+			
+			// Call our new, powerful search method!
+			List<Pedido> requests = pedidoService.searchPedidos(startDate, endDate, estado, trimmedNcft, trimmedNid, usCode);
+			
+			// Add all results and search parameters back to the model
+			// This is important to re-populate the form fields after submission
 			model.addAttribute("pedidos", requests);
+			model.addAttribute("startDate", startDateStr);
+			model.addAttribute("endDate", endDateStr);
 			model.addAttribute("selectedEstado", estado);
+			model.addAttribute("ncft", trimmedNcft);
+			model.addAttribute("nid", trimmedNid);
+			model.addAttribute("selectedUsCode", usCode);
 			
-			log.info("Loaded " + requests.size() + " SESP-CT requests for display");
+			// You'll also need to load the Unidades Sanitarias for the dropdown
+			// List<UnidadeSanitaria> unidades = someOtherService.getAllUnidadesSanitarias();
+			// model.addAttribute("unidadesSanitarias", unidades);
+			
+			log.info("Found " + requests.size() + " SESP-CT requests based on search criteria");
 			
 		}
+		catch (DateTimeParseException e) {
+			// This will now catch a failure only if NONE of the three formats match
+			log.error("Invalid date format submitted", e);
+			model.addAttribute("errorMessage", "Formato de data inválido. Use dd-MM-yyyy, MM/dd/yyyy, ou yyyy-MM-dd.");
+		}
 		catch (DataAccessException e) {
-			log.error("Error loading SESP-CT requests", e);
+			log.error("Error searching SESP-CT requests", e);
 			model.addAttribute("errorMessage",
 			    Context.getMessageSourceService().getMessage("sespct.error.loadingData") + e.getMessage());
 		}
@@ -102,22 +160,49 @@ public class SespctController {
 	 * Export functionality
 	 */
 	@RequestMapping(value = "manageftcases/export.form", method = RequestMethod.GET)
-	public ResponseEntity<byte[]> downloadExcel(@RequestParam("startDate") String startDateString,
-	        @RequestParam("endDate") String endDateString) {
+	public ResponseEntity<byte[]> downloadExcel(@RequestParam(value = "startDate", required = false) String startDateString,
+	        @RequestParam(value = "endDate", required = false) String endDateString,
+	        @RequestParam(value = "estado", required = false) String estado,
+	        @RequestParam(value = "ncft", required = false) String ncft,
+	        @RequestParam(value = "nid", required = false) String nid,
+	        @RequestParam(value = "usCode", required = false) String usCode) {
 		try {
-			log.info("Starting export with date strings: {} to {}", startDateString, endDateString);
+			log.info("Starting Excel export with provided filters.");
 			
-			DateRange dateRange = parseAndValidateDateRange(startDateString, endDateString);
-			log.info("Parsed dates successfully. Range: {}", dateRange);
+			// --- Date Parsing (this logic is correct) ---
+			LocalDate startDate = null;
+			if (startDateString != null && !startDateString.trim().isEmpty()) {
+				startDate = parseLocalDateMultiFormat(startDateString);
+			}
 			
-			List<Pedido> pedidos = pedidoService.getPedidosByDateTimeRange(dateRange.startDateTime(),
-			    dateRange.endDateTime());
-			log.info("Retrieved {} pedidos", pedidos.size());
+			LocalDate endDate = null;
+			if (endDateString != null && !endDateString.trim().isEmpty()) {
+				endDate = parseLocalDateMultiFormat(endDateString);
+			}
 			
+			// --- Clean up other parameters ---
+			String trimmedNcft = (ncft != null) ? ncft.trim() : null;
+			String trimmedNid = (nid != null) ? nid.trim() : null;
+			
+			// --- Call the comprehensive search service ---
+			List<Pedido> pedidos = pedidoService.searchPedidos(startDate, endDate, estado, trimmedNcft, trimmedNid, usCode);
+			System.out.println(pedidos);
+			log.info("Retrieved {} pedidos based on search criteria for export.", pedidos.size());
+			
+			//			// --- Package filters for the report generator's subtitle ---
+			//			Map<String, String> searchFilters = new LinkedHashMap<>();
+			//			if (startDateString != null && !startDateString.isEmpty()) searchFilters.put("Data Início", startDateString);
+			//			if (endDateString != null && !endDateString.isEmpty()) searchFilters.put("Data Fim", endDateString);
+			//			if (estado != null && !estado.isEmpty() && !"ALL".equalsIgnoreCase(estado)) searchFilters.put("Estado", estado);
+			//			if (trimmedNcft != null && !trimmedNcft.isEmpty()) searchFilters.put("NCFT", trimmedNcft);
+			//			if (trimmedNid != null && !trimmedNid.isEmpty()) searchFilters.put("NID", trimmedNid);
+			//			if (usCode != null && !usCode.isEmpty() && !"ALL".equalsIgnoreCase(usCode)) searchFilters.put("US", usCode);
+			
+			// --- Generate the report ---
 			byte[] excelBytes = exportService.generatePedidoReport(pedidos, startDateString, endDateString);
 			log.info("Generated Excel file with {} bytes", excelBytes.length);
 			
-			return createSuccessResponse(excelBytes, dateRange);
+			return createSuccessResponse(excelBytes, startDate, endDate);
 			
 		}
 		catch (DateTimeParseException e) {
@@ -158,29 +243,32 @@ public class SespctController {
 	}
 	
 	/**
-	 * This is the new helper method requested by the code review. It encapsulates all date parsing
-	 * and object creation logic.
-	 */
-	private DateRange parseAndValidateDateRange(String startDateString, String endDateString) {
-		LocalDate startDate = parseLocalDateMultiFormat(startDateString);
-		LocalDate endDate = parseLocalDateMultiFormat(endDateString);
-		
-		// Create and return the new DateRange object
-		return new DateRange(startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX));
-	}
-	
-	/**
 	 * Helper to build the final file download response.
 	 */
-	private ResponseEntity<byte[]> createSuccessResponse(byte[] excelBytes, DateRange dateRange) {
-		// Define the desired format. This object is thread-safe and reusable.
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+	private ResponseEntity<byte[]> createSuccessResponse(byte[] excelBytes, LocalDate startDate, LocalDate endDate) {
+		// This formatter is for the filename, so it should be a standard, clean format.
+		DateTimeFormatter filenameFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+		String filename;
 		
-		// Format the dates from the DateRange object.
-		String startDateFormatted = dateRange.startDateTime().format(formatter);
-		String endDateFormatted = dateRange.endDateTime().format(formatter);
-		
-		String filename = String.format("SESP_SCT_Export_%s_to_%s.xlsx", startDateFormatted, endDateFormatted);
+		// Logic to build the filename based on which dates are available
+		if (startDate != null && endDate != null) {
+			// Case 1: Both dates are provided
+			String start = startDate.format(filenameFormatter);
+			String end = endDate.format(filenameFormatter);
+			filename = String.format("SESP_SCT_Export_%s_to_%s.xlsx", start, end);
+		} else if (startDate != null) {
+			// Case 2: Only start date is provided
+			String start = startDate.format(filenameFormatter);
+			filename = String.format("SESP_SCT_Export_from_%s.xlsx", start);
+		} else if (endDate != null) {
+			// Case 3: Only end date is provided
+			String end = endDate.format(filenameFormatter);
+			filename = String.format("SESP_SCT_Export_until_%s.xlsx", end);
+		} else {
+			// Case 4: No dates are provided (fallback)
+			String today = LocalDate.now().format(filenameFormatter);
+			filename = String.format("SESP_SCT_Export_AllData_%s.xlsx", today);
+		}
 		
 		return ResponseEntity.ok()
 		        .contentType(new MediaType("application", "vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
