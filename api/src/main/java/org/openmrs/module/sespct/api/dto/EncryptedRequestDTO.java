@@ -1,5 +1,7 @@
 package org.openmrs.module.sespct.api.dto;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EncryptedRequestDTO {
     private String data;
     private String signature;
