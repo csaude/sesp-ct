@@ -20,6 +20,8 @@ import org.openmrs.module.sespct.api.dto.MarkConsumedPayload;
 import org.openmrs.module.sespct.api.dto.PedidoDTO;
 import org.openmrs.module.sespct.api.dto.RespostaDTO;
 import org.openmrs.module.sespct.api.util.MiddlewareCryptoUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -34,10 +36,10 @@ import java.util.Map;
 /**
  * Implementation of the MiddlewareApiService.
  */
-@Service("sespct.MiddlewareApiService")
+@Service
 public class MiddlewareApiServiceImpl extends BaseOpenmrsService implements MiddlewareApiService {
 
-    private final Log log = LogFactory.getLog(this.getClass());
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private String baseUrl;
     private String usCode;
