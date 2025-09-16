@@ -1,5 +1,6 @@
 package org.openmrs.module.sespct.api;
 
+import org.openmrs.Patient;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.sespct.api.model.Pedido;
 
@@ -22,6 +23,8 @@ public interface PedidoService extends OpenmrsService {
 	List<Pedido> getPedidosByDateTimeRange(LocalDateTime startDateTime, LocalDateTime endDateTime);
 	
 	void deletePedido(Pedido pedido);
+	
+	Patient mapIdentifier(String patientUuid, Pedido pedido);
 	
 	void createDummyData();
 	

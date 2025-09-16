@@ -12,6 +12,8 @@ public interface PedidoDao {
 	
 	Pedido getPedidoById(Integer id);
 	
+	Pedido getPedidoByIdAndStatus(Integer id, String estado);
+	
 	Pedido getPedidoByExternalId(String externalId);
 	
 	List<Pedido> getAllPedidos();

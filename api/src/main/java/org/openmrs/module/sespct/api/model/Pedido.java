@@ -12,6 +12,20 @@ import java.util.List;
 @Table(name = "sespct_pedido")
 public class Pedido extends BaseOpenmrsData {
 	
+	public static final String ESTADO_NAO_PROCESSADO = "Não Processado";
+	
+	public static final String ESTADO_SEM_RESPOSTA = "Sem resposta";
+	
+	public static final String ESTADO_APROVADO = "Aprovado";
+	
+	public static final String CAUSA_NID_NAO_ENCONTRADO = "NID não encontrado";
+	
+	public static final String CAUSA_NID_DUPLICADO = "NID duplicado";
+	
+	public static final String SEXO_MASCULINO = "masculino";
+	
+	public static final String SEXO_FEMININO = "feminino";
+	
 	public Pedido() {
 		this.dadosUtente = new DadosUtente();
 		this.reportarFalencia = new ReportarFalencia();

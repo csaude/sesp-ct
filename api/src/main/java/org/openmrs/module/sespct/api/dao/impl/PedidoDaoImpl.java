@@ -44,6 +44,16 @@ public class PedidoDaoImpl implements PedidoDao {
 	}
 	
 	@Override
+	public Pedido getPedidoByIdAndStatus(Integer id, String estado) {
+		String hql = "FROM Pedido p WHERE p.id = :id AND p.estado = :status";
+		final Query query = this.getCurrentSession().createQuery(hql).setParameter("id", id).setParameter("estado", estado);
+		
+		@SuppressWarnings("unchecked")
+		List<Pedido> results = query.list();
+		return results.isEmpty() ? null : results.get(0);
+	}
+	
+	@Override
 	public Pedido getPedidoByExternalId(String externalId) {
 		final String hql = "FROM Pedido WHERE pedidoExternalId = :externalId AND voided = 0";
 		final Query query = this.getCurrentSession().createQuery(hql).setParameter("externalId", externalId);
