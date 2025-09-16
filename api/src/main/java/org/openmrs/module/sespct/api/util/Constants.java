@@ -57,13 +57,13 @@ public class Constants {
 	
 	public static final String ESTADIO_OMS_MOTIVO = "e1e09526-1d5f-11e0-b929-000c29ad1d07";
 	
-	public static final String ESTADIO_I = "Estadio I";
+	public static final String ESTADIO_I = "ESTADIO I";
 	
-	public static final String ESTADIO_II = "Estadio II";
+	public static final String ESTADIO_II = "ESTADIO II";
 	
-	public static final String ESTADIO_III = "Estadio III";
+	public static final String ESTADIO_III = "ESTADIO III";
 	
-	public static final String ESTADIO_IV = "Estadio VI";
+	public static final String ESTADIO_IV = "ESTADIO VI";
 	
 	// Historia tarv
 	public static final String HISTORIA_TARV_GROUP_UUID = "b5df02e4-991c-4320-9aaf-d3132f3aacfa";

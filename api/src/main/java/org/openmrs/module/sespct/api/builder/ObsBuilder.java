@@ -270,13 +270,13 @@ public class ObsBuilder {
 	
 	private String mapEstadioToUuid(String estadioOms) {
 		switch (estadioOms.toUpperCase()) {
-			case Constants.ESTADIO_I:
+			case "ESTADIO I":
 				return Constants.ESTADIO_I_UUID;
-			case Constants.ESTADIO_II:
+			case "ESTADIO II":
 				return Constants.ESTADIO_II_UUID;
-			case Constants.ESTADIO_III:
+			case "ESTADIO III":
 				return Constants.ESTADIO_III_UUID;
-			case Constants.ESTADIO_IV:
+			case "ESTADIO VI":
 				return Constants.ESTADIO_IV_UUID;
 			default:
 				log.warn("Estádio OMS desconhecido: {}", estadioOms);
