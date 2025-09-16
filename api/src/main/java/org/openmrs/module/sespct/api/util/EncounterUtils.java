@@ -33,6 +33,8 @@ public class EncounterUtils {
 		List<Encounter> encounters = session.createQuery(hql).setParameter("conceptUuid", Constants.ID_PEDIDO_UUID)
 		        .setParameter("pedidoId", Double.valueOf(pedidoId)).list();
 		
+		log.info("HQL Query: {} [conceptUuid={}, pedidoId={}]", hql, Constants.ID_PEDIDO_UUID, pedidoId);
+		
 		if (encounters.isEmpty()) {
 			log.info("No encounter found for PedidoId={}", pedidoId);
 			return null;

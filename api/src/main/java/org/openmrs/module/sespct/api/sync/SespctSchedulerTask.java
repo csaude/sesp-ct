@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterRole;
 import org.openmrs.EncounterType;
+import org.openmrs.Form;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
@@ -191,7 +192,7 @@ public class SespctSchedulerTask extends AbstractTask {
 		}
 		
 		if (patients.size() > 1) {
-			log.warn("Duplicate NID={} found ({} patients) for Pedido id={}", identifier, patients.size(), pedido.getId());
+			log.warn("Duplicate NID detected ({} patients) for Pedido id={}", patients.size(), pedido.getId());
 			try {
 				pedido.setEstado(Constants.PEDIDO_STATUS_NOT_PROCESSED);
 				pedido.setCausa(Constants.PEDIDO_STATUS_DUPLICATE_NID);
@@ -206,12 +207,13 @@ public class SespctSchedulerTask extends AbstractTask {
 		
 		// Caso normal: apenas 1 paciente encontrado
 		Patient patient = patients.get(0);
-		log.debug("Found Patient id={} for NID={} (Pedido id={})", patient.getPatientId(), identifier, pedido.getId());
+		log.debug("Found Patient id={} for Pedido id={}", patient.getPatientId(), pedido.getId());
+		
 		return Optional.of(patient);
 	}
 	
 	private void handlePatientNotFound(Pedido pedido, String identifier) {
-		log.warn("No patient found with identifier={} for Pedido id={}", identifier, pedido.getId());
+		log.warn("No patient found for Pedido id={}", pedido.getId());
 		
 		try {
 			pedido.setEstado(Constants.PEDIDO_STATUS_NOT_PROCESSED);
@@ -238,26 +240,27 @@ public class SespctSchedulerTask extends AbstractTask {
 		ObsBuilder obsBuilder = new ObsBuilder(encounter, patient);
 		
 		// Dados do utente
-		obsBuilder.addTextObs(Constants.INICIAIS_UTENTE_UUID, pedido.getDadosUtente().getIniciais());
+		obsBuilder.addTextObs(Constants.INICIAIS_UTENTE_UUID, pedido.getDadosUtente().getIniciais().trim());
 		obsBuilder.addNumericObs(Constants.PESO_UUID, pedido.getDadosUtente().getPeso());
 		obsBuilder.addBooleanObs(Constants.GESTANTE_UUID, pedido.getDadosUtente().isGestante());
 		obsBuilder.addBooleanObs(Constants.LACTANTE_UUID, pedido.getDadosUtente().isLactante());
-		obsBuilder.addNumericObs(Constants.ID_PEDIDO_UUID, pedido.getPedidoId() != null ? Double.valueOf(pedido.getPedidoId()) : null);
-		obsBuilder.addEstadioOmsObs(pedido.getDadosUtente().getEstadioOms());
-		obsBuilder.addTextObs(Constants.ESTADIO_OMS_MOTIVO, pedido.getDadosUtente().getEstadioOmsMotivo());
+		obsBuilder.addNumericObs(Constants.ID_PEDIDO_UUID,
+		    pedido.getPedidoId() != null ? Double.valueOf(pedido.getPedidoId()) : null);
+		obsBuilder.addEstadioOmsObs(pedido.getDadosUtente().getEstadioOms().trim());
+		obsBuilder.addTextObs(Constants.ESTADIO_OMS_MOTIVO, pedido.getDadosUtente().getEstadioOmsMotivo().trim());
 		
 		// Historia TARV
-		if (pedido.getHistoriaTarv() != null) {
+		/*if (pedido.getHistoriaTarv() != null) {
 		    pedido.getHistoriaTarv().forEach(regime -> {
 		        obsBuilder.addTarvRegimeObs(
 		        		DateTimeUtils.toDate(regime.getDataInicio()),
 		        		DateTimeUtils.toDate(regime.getDataTermino()),
 		        		regime.getEsquemaTarv());
 		    });
-		}
+		}*/
 		
 		// Historia Laboratorial CD4
-		if (pedido.getDadosLaboratorioCD4() != null) {
+		/*if (pedido.getDadosLaboratorioCD4() != null) {
 		    pedido.getDadosLaboratorioCD4().forEach(cd4 -> {
 		        obsBuilder.addCd4Obs(
 		            DateTimeUtils.toDate(cd4.getData()), 
@@ -265,10 +268,10 @@ public class SespctSchedulerTask extends AbstractTask {
 		            cd4.getCd4Percentagem()
 		        );
 		    });
-		}
+		}*/
 		
 		// Historia Laboratorial Carga Viral
-		if (pedido.getDadosLaboratorioCargaViral() != null) {
+		/*if (pedido.getDadosLaboratorioCargaViral() != null) {
 		    pedido.getDadosLaboratorioCargaViral().forEach(cv -> {
 		        Double valor = cv.getCargaViral() != null ? cv.getCargaViral().doubleValue() : null;
 
@@ -277,15 +280,15 @@ public class SespctSchedulerTask extends AbstractTask {
 		            valor
 		        );
 		    });
-		}
+		}*/
 		
 		// Resumo História Clínica
-		obsBuilder.addTextObs(Constants.HISTORIA_CLINICA_UUID, pedido.getReportarFalencia().getHistoriaClinica());
+		/*obsBuilder.addTextObs(Constants.HISTORIA_CLINICA_UUID, pedido.getReportarFalencia().getHistoriaClinica());
 		obsBuilder.addTextObs(Constants.HISTORIA_ADESAO_UUID, pedido.getReportarFalencia().getHistoriaAdesao());
-		obsBuilder.addBooleanObs(Constants.TRATAMENTO_TB_UUID, pedido.getReportarFalencia().isEmTratamentoTb());
-
+		obsBuilder.addBooleanObs(Constants.TRATAMENTO_TB_UUID, pedido.getReportarFalencia().isEmTratamentoTb());*/
+		
 		// Dados do clínico
-		obsBuilder.addTextObs(Constants.CLINICO_NOME_UUID, pedido.getDadosClinico().getNome());
+		/*obsBuilder.addTextObs(Constants.CLINICO_NOME_UUID, pedido.getDadosClinico().getNome());
 		obsBuilder.addTextObs(Constants.CLINICO_TELEFONE_UUID, pedido.getDadosClinico().getTelefone());
 		obsBuilder.addTextObs(Constants.CLINICO_EMAIL_UUID, pedido.getDadosClinico().getEmail());
 		
@@ -307,19 +310,18 @@ public class SespctSchedulerTask extends AbstractTask {
 		        default:
 		            log.warn("Categoria profissional desconhecida: {}", categoria);
 		    }
-		}
+		}*/
 		
 		// Linha Solicitada
-		obsBuilder.addLinhaSolicitadaObs(pedido.getLinhaSolicitada().getLinha());
+		//obsBuilder.addLinhaSolicitadaObs(pedido.getLinhaSolicitada().getLinha());
 		
 		// Resposta do Comité (estado inicial do Pedido)
-		obsBuilder.addRespostaComiteObs(
-		    pedido.getEstado(),              // SEM_RESPOSTA
-		    null,                            // sem linha ainda
-		    null,                            // sem comentário
+		/*obsBuilder.addRespostaComiteObs(pedido.getEstado(), // SEM_RESPOSTA
+		    null, // sem linha ainda
+		    null, // sem comentário
 		    DateTimeUtils.toDate(pedido.getDataSubmissao()), // data submissão
-		    null                             // sem autor
-		);
+		    null // sem autor
+				);*/
 	}
 	
 	private Encounter buildEncounter(Pedido pedido, Patient patient) {
@@ -351,6 +353,15 @@ public class SespctSchedulerTask extends AbstractTask {
 		}
 		
 		encounter.setProvider(encounterRole, this.provider);
+		
+		Form form = Context.getFormService().getFormByUuid(Constants.SESPCT_FORM_UUID);
+		if (form != null) {
+			encounter.setForm(form);
+			log.debug("Form {} set on Encounter for Pedido id={}", form.getName(), pedido.getPedidoId());
+		} else {
+			log.warn("No form found with UUID={} while creating Encounter for Pedido id={}", Constants.SESPCT_FORM_UUID,
+			    pedido.getPedidoId());
+		}
 		
 		return encounter;
 	}
