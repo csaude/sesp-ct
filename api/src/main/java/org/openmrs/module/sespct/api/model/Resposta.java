@@ -46,18 +46,18 @@ public class Resposta extends BaseOpenmrsData {
 	@Column(name = "sincronizado")
 	private Boolean sincronizado = false;
 	
-	// Getters and Setters
-	@Override
-	public Integer getId() {
-		return id;
-	}
-	
 	public Boolean getSincronizado() {
 		return sincronizado;
 	}
 	
 	public void setSincronizado(Boolean sincronizado) {
 		this.sincronizado = sincronizado;
+	}
+	
+	// Getters and Setters
+	@Override
+	public Integer getId() {
+		return id;
 	}
 	
 	@Override

@@ -62,7 +62,7 @@ public class RespostaSchedulerTask extends AbstractTask {
 				    "Encounter não encontrado para Pedido id={} (Resposta id={}), será tentado novamente no próximo ciclo",
 				    pedido.getPedidoId(), resposta.getId());
 				
-				resposta.setSincronizado(false); // mantém como pendente
+				//resposta.setSincronizado(false); // mantém como pendente
 				respostaService.saveResposta(resposta);
 				continue;
 			}
@@ -80,7 +80,7 @@ public class RespostaSchedulerTask extends AbstractTask {
 				respostaSyncService.updateEncounterWithRespostas(pedido, encounter, ultimasRespostas);
 				
 				// Marca como sincronizado
-				resposta.setSincronizado(true);
+				//resposta.setSincronizado(true);
 				respostaService.saveResposta(resposta);
 				
 				log.info("Resposta id={} aplicada com sucesso ao Encounter do Pedido id={}", resposta.getId(),
@@ -89,7 +89,7 @@ public class RespostaSchedulerTask extends AbstractTask {
 			}
 			catch (Exception e) {
 				log.error("Erro ao aplicar Resposta id={} ao Pedido id={}", resposta.getId(), pedido.getPedidoId(), e);
-				resposta.setSincronizado(false); // garante retry
+				//resposta.setSincronizado(false); // garante retry
 				respostaService.saveResposta(resposta);
 			}
 		}

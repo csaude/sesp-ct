@@ -754,8 +754,19 @@
                 constraintName="fk_notificacoes_resposta"/>
     </changeSet>
     
+    <changeSet id="sespct-1.0.0-13" author="sespct">
+	    <preConditions onFail="MARK_RAN">
+	        <not>
+	            <columnExists tableName="sespct_resposta" columnName="sincronizado"/>
+	        </not>
+	    </preConditions>
+    	<comment>Add sincronizado column to sespct_resposta</comment>
 
+	    <addColumn tableName="sespct_resposta">
+	        <column name="sincronizado" type="boolean" defaultValueBoolean="false">
+	            <constraints nullable="false"/>
+	        </column>
+	    </addColumn>
+	</changeSet>
     
-
-
 </databaseChangeLog>
