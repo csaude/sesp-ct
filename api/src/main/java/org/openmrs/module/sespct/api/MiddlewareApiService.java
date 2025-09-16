@@ -1,5 +1,8 @@
 package org.openmrs.module.sespct.api;
 
+import org.openmrs.module.sespct.api.dto.PedidoDTO;
+import org.openmrs.module.sespct.api.dto.RespostaDTO;
+
 import java.util.List;
 
 public interface MiddlewareApiService {
