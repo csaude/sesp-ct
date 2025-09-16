@@ -12,9 +12,13 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.messagesource.MessageSourceService;
+import org.openmrs.module.sespct.api.MiddlewareApiService;
 import org.openmrs.module.sespct.api.PedidoService;
 import org.openmrs.module.sespct.api.dao.PedidoDao;
+import org.openmrs.module.sespct.api.dto.PedidoDTO;
+import org.openmrs.module.sespct.api.dto.RespostaDTO;
 import org.openmrs.module.sespct.api.model.*;
+import org.openmrs.module.sespct.api.util.SespctMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +29,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoService {
 	
@@ -38,6 +43,9 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	
 	@Autowired
 	private PedidoDao pedidoDao;
+
+	@Autowired
+	private MiddlewareApiService middlewareApiService;
 	
 	private MessageSourceService messageSourceService;
 	
@@ -574,4 +582,87 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 			log.error("Error rescheduling pedido {}", pedidoId, e);
 		}
 	}
+
+	@Override
+	public void synchronizeMiddlewareData() {
+		log.info("Starting SESP-CT middleware synchronization...");
+
+		// Step 1: Login to the API to get an auth token
+		String authToken = middlewareApiService.login();
+		if (authToken == null) {
+			log.error("Synchronization failed: Could not log in to the middleware.");
+			// You could throw an exception here to notify the controller
+			throw new RuntimeException("Authentication with middleware failed.");
+		}
+
+		// Step 2: Fetch and process new Pedidos
+		List<PedidoDTO> pedidoDtos = middlewareApiService.fetchPedidos(authToken);
+		if (!pedidoDtos.isEmpty()) {
+			processPedidos(pedidoDtos);
+
+			// Step 2b: Mark Pedidos as consumed
+			List<String> consumedPedidoUuids = pedidoDtos.stream()
+					.map(PedidoDTO::getId).collect(Collectors.toList());
+			middlewareApiService.markPedidosAsConsumed(consumedPedidoUuids, authToken);
+		} else {
+			log.info("No new pedidos to synchronize.");
+		}
+
+		// Step 3: Fetch and process new Respostas
+		List<RespostaDTO> respostaDtos = middlewareApiService.fetchRespostas(authToken);
+		if (!respostaDtos.isEmpty()) {
+			processRespostas(respostaDtos);
+
+			// Step 3b: Mark Respostas as consumed
+			List<String> consumedRespostaIds = respostaDtos.stream()
+					.map(dto -> dto.getMetadados().getRespostaId())
+					.collect(Collectors.toList());
+			middlewareApiService.markRespostasAsConsumed(consumedRespostaIds, authToken);
+		} else {
+			log.info("No new respostas to synchronize.");
+		}
+
+		log.info("Middleware synchronization finished.");
+	}
+
+	private void processPedidos(List<PedidoDTO> dtos) {
+		log.info("Processing " + dtos.size() + " fetched pedidos...");
+		for (PedidoDTO dto : dtos) {
+			// IDEMPOTENCY CHECK: Only save if it's a new pedido
+			if (!pedidoDao.doesPedidoExist(dto.getMetadadosPedidoDTO().getPedidoId())) {
+				Pedido newPedido = SespctMapper.toPedidoEntity(dto);
+				if (newPedido != null) {
+					pedidoDao.savePedido(newPedido);
+					log.info("Saved new pedido with ID: " + newPedido.getPedidoId());
+				}
+			} else {
+				log.warn("Skipping already existing pedido with ID: " + dto.getMetadadosPedidoDTO().getPedidoId());
+			}
+		}
+	}
+
+	private void processRespostas(List<RespostaDTO> dtos) {
+		log.info("Processing " + dtos.size() + " fetched respostas...");
+		for (RespostaDTO dto : dtos) {
+			String externalPedidoId = dto.getMetadados().getPedidoId();
+			String externalRespostaId = dto.getMetadados().getRespostaId();
+
+			// IDEMPOTENCY CHECK: Only save if it's a new resposta
+			if (!pedidoDao.doesRespostaExist(externalRespostaId)) {
+				Pedido parentPedido = pedidoDao.getPedidoByExternalId(externalPedidoId);
+
+				if (parentPedido != null) {
+					Resposta newResposta = SespctMapper.toRespostaEntity(dto, parentPedido);
+					parentPedido.getRespostas().add(newResposta);
+					pedidoDao.savePedido(parentPedido); // Save the parent to cascade the save to the new Resposta
+					log.info("Saved new resposta " + externalRespostaId + " for pedido " + externalPedidoId);
+				} else {
+					log.warn("Could not find parent pedido with ID: " + externalPedidoId + ". Cannot save resposta " + externalRespostaId);
+				}
+			} else {
+				log.warn("Skipping already existing resposta with ID: " + externalRespostaId);
+			}
+		}
+	}
+
 }

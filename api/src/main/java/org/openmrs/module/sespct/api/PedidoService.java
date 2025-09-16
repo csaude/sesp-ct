@@ -40,7 +40,9 @@ public interface PedidoService extends OpenmrsService {
 	 * @return a list of matching Pedidos
 	 */
 	List<Pedido> searchPedidos(LocalDate startDate, LocalDate endDate, String estado, String ncft, String nid, String usCode);
-	
-	// Method to get US (Unidade Sanitária) options
-	
+
+	/**
+	 * Runs the full synchronization process with the central middleware.
+	 */
+	void synchronizeMiddlewareData();
 }

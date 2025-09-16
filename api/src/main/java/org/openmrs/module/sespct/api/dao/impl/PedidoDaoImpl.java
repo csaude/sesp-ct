@@ -152,4 +152,23 @@ public class PedidoDaoImpl implements PedidoDao {
 
 		return query.list();
 	}
+
+	@Override
+	public boolean doesPedidoExist(String externalPedidoId) {
+		// We can reuse your existing method. If it returns a non-null object, it exists.
+		return getPedidoByExternalId(externalPedidoId) != null;
+	}
+
+	@Override
+	public boolean doesRespostaExist(String externalRespostaId) {
+		// For this, we need a specific query to check the Resposta's external ID.
+		// I'm assuming your Resposta has a field 'respostaId' in its 'metadados' object.
+		String hql = "SELECT count(r.id) FROM Resposta r WHERE r.metadados.respostaId = :externalId";
+
+		final Query query = this.getCurrentSession().createQuery(hql).setParameter("externalId", externalRespostaId);
+
+		Long count = (Long) query.uniqueResult();
+
+		return count != null && count > 0;
+	}
 }
