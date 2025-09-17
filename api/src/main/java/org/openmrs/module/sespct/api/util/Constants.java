@@ -34,6 +34,8 @@ public class Constants {
 	
 	public static final String SESPCT_FORM_UUID = "69385e04-f01d-4db3-9086-c7fdef228e85";
 	
+	public static final String OUTRO_TEXT_UUID = "5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
 	// Dados do utente
 	public static final String INICIAIS_UTENTE_UUID = "397ebb22-925f-413a-b9f0-2d84553686dc";
 	
@@ -57,14 +59,6 @@ public class Constants {
 	
 	public static final String ESTADIO_OMS_MOTIVO = "e1e09526-1d5f-11e0-b929-000c29ad1d07";
 	
-	public static final String ESTADIO_I = "ESTADIO I";
-	
-	public static final String ESTADIO_II = "ESTADIO II";
-	
-	public static final String ESTADIO_III = "ESTADIO III";
-	
-	public static final String ESTADIO_IV = "ESTADIO VI";
-	
 	// Historia tarv
 	public static final String HISTORIA_TARV_GROUP_UUID = "b5df02e4-991c-4320-9aaf-d3132f3aacfa";
 	
@@ -74,7 +68,7 @@ public class Constants {
 	
 	public static final String TARV_ESQUEMA_UUID = "e1d83e4e-1d5f-11e0-b929-000c29ad1d07";
 	
-	public static final String OUTRO_UUID = "5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	public static final String OUTRO_UUID = "e1e59e0e-1d5f-11e0-b929-000c29ad1d07";
 	
 	// Historia Laboratorial CD4
 	public static final String HISTORIA_CD4_GROUP_UUID = "e3530ef0-74f5-49fc-9abd-e2b9e845cd74";

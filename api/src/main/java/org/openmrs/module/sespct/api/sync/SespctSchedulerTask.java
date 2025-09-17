@@ -250,17 +250,17 @@ public class SespctSchedulerTask extends AbstractTask {
 		obsBuilder.addTextObs(Constants.ESTADIO_OMS_MOTIVO, pedido.getDadosUtente().getEstadioOmsMotivo().trim());
 		
 		// Historia TARV
-		/*if (pedido.getHistoriaTarv() != null) {
+		if (pedido.getHistoriaTarv() != null) {
 		    pedido.getHistoriaTarv().forEach(regime -> {
 		        obsBuilder.addTarvRegimeObs(
 		        		DateTimeUtils.toDate(regime.getDataInicio()),
 		        		DateTimeUtils.toDate(regime.getDataTermino()),
 		        		regime.getEsquemaTarv());
 		    });
-		}*/
+		}
 		
 		// Historia Laboratorial CD4
-		/*if (pedido.getDadosLaboratorioCD4() != null) {
+		if (pedido.getDadosLaboratorioCD4() != null) {
 		    pedido.getDadosLaboratorioCD4().forEach(cd4 -> {
 		        obsBuilder.addCd4Obs(
 		            DateTimeUtils.toDate(cd4.getData()), 
@@ -268,10 +268,10 @@ public class SespctSchedulerTask extends AbstractTask {
 		            cd4.getCd4Percentagem()
 		        );
 		    });
-		}*/
+		}
 		
 		// Historia Laboratorial Carga Viral
-		/*if (pedido.getDadosLaboratorioCargaViral() != null) {
+		if (pedido.getDadosLaboratorioCargaViral() != null) {
 		    pedido.getDadosLaboratorioCargaViral().forEach(cv -> {
 		        Double valor = cv.getCargaViral() != null ? cv.getCargaViral().doubleValue() : null;
 
@@ -280,15 +280,15 @@ public class SespctSchedulerTask extends AbstractTask {
 		            valor
 		        );
 		    });
-		}*/
+		}
 		
 		// Resumo História Clínica
-		/*obsBuilder.addTextObs(Constants.HISTORIA_CLINICA_UUID, pedido.getReportarFalencia().getHistoriaClinica());
+		obsBuilder.addTextObs(Constants.HISTORIA_CLINICA_UUID, pedido.getReportarFalencia().getHistoriaClinica());
 		obsBuilder.addTextObs(Constants.HISTORIA_ADESAO_UUID, pedido.getReportarFalencia().getHistoriaAdesao());
-		obsBuilder.addBooleanObs(Constants.TRATAMENTO_TB_UUID, pedido.getReportarFalencia().isEmTratamentoTb());*/
+		obsBuilder.addBooleanObs(Constants.TRATAMENTO_TB_UUID, pedido.getReportarFalencia().isEmTratamentoTb());
 		
 		// Dados do clínico
-		/*obsBuilder.addTextObs(Constants.CLINICO_NOME_UUID, pedido.getDadosClinico().getNome());
+		obsBuilder.addTextObs(Constants.CLINICO_NOME_UUID, pedido.getDadosClinico().getNome());
 		obsBuilder.addTextObs(Constants.CLINICO_TELEFONE_UUID, pedido.getDadosClinico().getTelefone());
 		obsBuilder.addTextObs(Constants.CLINICO_EMAIL_UUID, pedido.getDadosClinico().getEmail());
 		
@@ -310,18 +310,18 @@ public class SespctSchedulerTask extends AbstractTask {
 		        default:
 		            log.warn("Categoria profissional desconhecida: {}", categoria);
 		    }
-		}*/
+		}
 		
 		// Linha Solicitada
-		//obsBuilder.addLinhaSolicitadaObs(pedido.getLinhaSolicitada().getLinha());
+		obsBuilder.addLinhaSolicitadaObs(pedido.getLinhaSolicitada().getLinha());
 		
 		// Resposta do Comité (estado inicial do Pedido)
-		/*obsBuilder.addRespostaComiteObs(pedido.getEstado(), // SEM_RESPOSTA
+		obsBuilder.addRespostaComiteObs(pedido.getEstado(), // SEM_RESPOSTA
 		    null, // sem linha ainda
 		    null, // sem comentário
-		    DateTimeUtils.toDate(pedido.getDataSubmissao()), // data submissão
+		    null, // data submissão
 		    null // sem autor
-				);*/
+				);
 	}
 	
 	private Encounter buildEncounter(Pedido pedido, Patient patient) {

@@ -125,6 +125,10 @@ public class ObsBuilder {
 			esquemaObs.setValueCoded(Context.getConceptService().getConceptByUuid(esquemaTarvUuid));
 		} else {
 			esquemaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.OUTRO_UUID));
+			
+			Obs outroObs = createBaseObs(Constants.OUTRO_TEXT_UUID);
+			outroObs.setValueText(esquemaTarv);
+			group.addGroupMember(outroObs);
 		}
 		group.addGroupMember(esquemaObs);
 		
@@ -185,10 +189,10 @@ public class ObsBuilder {
 		Obs linhaObs = createBaseObs(Constants.LINHA_SOLICITADA_UUID);
 		
 		switch (linha.trim().toUpperCase()) {
-			case "SEGUNDA LINHA":
+			case "2 LINHA":
 				linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.SEGUNDA_LINHA_UUID));
 				break;
-			case "TERCEIRA LINHA":
+			case "3 LINHA":
 				linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.TERCEIRA_LINHA_UUID));
 				break;
 			case "REGIME INDIVIDUALIZADO":

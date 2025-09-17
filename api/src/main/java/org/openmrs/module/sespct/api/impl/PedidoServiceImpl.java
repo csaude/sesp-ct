@@ -91,13 +91,13 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 		String[] FIRST_NAMES = {"João", "Maria", "Pedro", "Ana", "Carlos", "Luisa", "António", "Isabel", "Manuel", "Rosa", "Francisco", "Teresa", "José", "Catarina", "Miguel"};
 		String[] LAST_NAMES = {"Silva", "Santos", "Oliveira", "Pereira", "Costa", "Rodrigues", "Martins", "Jesus", "Soares", "Ferreira", "Alves", "Monteiro", "Ribeiro", "Rocha", "Nunes"};
 		// FIXED: Simplified statuses to make response generation logic work correctly
-		String[] REQUEST_STATUSES = {"Aprovado", "Não Processado", "Adiado", "Sem resposta"};
-		String[] REJECTION_CAUSES = {"NID não encontrado", "NID duplicado",};
+		String[] REQUEST_STATUSES = {"Aprovado", "Nao Processado", "Adiado", "Sem resposta"};
+		String[] REJECTION_CAUSES = {"NID nao encontrado", "NID duplicado",};
 		String[] WHO_STAGES = {"Estadio I", "Estadio II", "Estadio III", "Estadio IV"};
 		String[] PROVINCES = {"Maputo", "Gaza", "Inhambane", "Sofala", "Manica", "Tete", "Zambézia", "Nampula", "Cabo Delgado", "Niassa"};
 		String[] DISTRICTS = {"Maputo", "Matola", "Boane", "Marracuene", "Manhiça", "Magude", "Moamba", "Namaacha", "Xai-Xai", "Chibuto"};
 		String[] US_NAMES = {"Hospital Central de Maputo", "Hospital Geral de Mavalane", "Centro de Saúde da Polana", "Hospital Rural de Manhiça", "Centro de Saúde de Marracuene"};
-		String[] YES_NO = {"Sim", "Não"};
+		String[] YES_NO = {"Sim", "Nao"};
 		String[] PROFESSIONAL_CATEGORIES = {"Médico", "Enfermeiro", "Técnico de Medicina", "Farmacêutico"};
 		String[] ART_REGIMENS = {"TDF+3TC+EFV", "AZT+3TC+NVP", "ABC+3TC+EFV", "TDF+3TC+DTG", "AZT+3TC+EFV"};
 		String[] APPROVED_REGIMENS = {"ATV/r+TDF+3TC", "LPV/r+AZT+3TC", "DTG+ABC+3TC", "DRV/r+TDF+FTC"};
@@ -128,11 +128,11 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 
 				// --- Special Case Logic for NID mapping ---
 				if (i < nidNotFoundCount) {
-					pedido.setEstado("Não Processado");
-					pedido.setCausa("NID não encontrado");
+					pedido.setEstado("Nao Processado");
+					pedido.setCausa("NID nao encontrado");
 				} else {
 					pedido.setEstado(getRandomElement(REQUEST_STATUSES, rand));
-					if ("Não Processado".equals(pedido.getEstado())) {
+					if ("Nao Processado".equals(pedido.getEstado())) {
 						// Ensure a cause is set if "Não Processado" but not the special NID case
 						String cause = getRandomElement(REJECTION_CAUSES, rand);
 						pedido.setCausa(cause);
@@ -170,18 +170,18 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 					if (isGestante) {
 						utente.setGestante("Sim");
 						utente.setDataProvavelParto(getRandomLocalDateTime(rand, 2025, 2026));
-						utente.setLactante("Não");
+						utente.setLactante("Nao");
 					} else {
-						utente.setGestante("Não");
+						utente.setGestante("Nao");
 						boolean isLactante = rand.nextBoolean();
-						utente.setLactante(isLactante ? "Sim" : "Não");
+						utente.setLactante(isLactante ? "Sim" : "Nao");
 						if (isLactante) {
 							utente.setDataParto(getRandomLocalDateTime(rand, 2024, 2025));
 						}
 					}
 				} else {
-					utente.setGestante("Não");
-					utente.setLactante("Não");
+					utente.setGestante("Nao");
+					utente.setLactante("Nao");
 				}
 				pedido.setDadosUtente(utente);
 
@@ -205,7 +205,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 				// --- 5. Populate LinhaSolicitada (One-to-One) ---
 				LinhaSolicitada linha = new LinhaSolicitada();
 				linha.setPedido(pedido);
-				linha.setLinha(rand.nextBoolean() ? "Segunda Linha" : "Terceira Linha");
+				linha.setLinha(rand.nextBoolean() ? "2 Linha" : "3 Linha");
 				pedido.setLinhaSolicitada(linha);
 
 				// --- 6. Populate HistoriaTarv (One-to-Many) ---
@@ -265,7 +265,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 				// FIXED: Changed Set to List and HashSet to ArrayList
 				List<Resposta> respostasList = new ArrayList<>();
 				// FIXED: Corrected logic to generate responses for "Aprovado" or "Não Processado" statuses
-				if ("Aprovado".equals(pedido.getEstado()) || "Não Processado".equals(pedido.getEstado())) {
+				if ("Aprovado".equals(pedido.getEstado()) || "Nao Processado".equals(pedido.getEstado())) {
 					Resposta resposta = new Resposta();
 //					resposta.setUuid(UUID.randomUUID().toString());
 					resposta.setCreator(Context.getAuthenticatedUser());
