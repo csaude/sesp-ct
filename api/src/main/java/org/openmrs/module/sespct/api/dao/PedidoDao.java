@@ -1,6 +1,7 @@
 package org.openmrs.module.sespct.api.dao;
 
 import org.openmrs.module.sespct.api.model.Pedido;
+import org.openmrs.module.sespct.api.model.Resposta;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -8,6 +9,8 @@ import java.util.List;
 public interface PedidoDao {
 	
 	Pedido savePedido(Pedido pedido);
+	
+	Resposta saveResposta(Resposta resposta);
 	
 	Pedido getPedidoById(Integer id);
 	

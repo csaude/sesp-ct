@@ -3,6 +3,8 @@ package org.openmrs.module.sespct.api;
 import org.openmrs.Patient;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.sespct.api.model.Pedido;
+import org.openmrs.module.sespct.api.model.Resposta;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,6 +13,8 @@ import java.util.List;
 public interface PedidoService extends OpenmrsService {
 	
 	Pedido savePedido(Pedido pedido);
+	
+	Resposta saveResposta(Resposta resposta);
 	
 	Pedido getPedidoById(Integer id);
 	
@@ -25,8 +29,6 @@ public interface PedidoService extends OpenmrsService {
 	void deletePedido(Pedido pedido);
 	
 	Patient mapIdentifier(String patientUuid, Pedido pedido);
-	
-	void createDummyData();
 	
 	/**
 	 * Searches for Pedidos based on a set of filter criteria.
@@ -44,5 +46,6 @@ public interface PedidoService extends OpenmrsService {
 	/**
 	 * Runs the full synchronization process with the central middleware.
 	 */
+	
 	void synchronizeMiddlewareData();
 }

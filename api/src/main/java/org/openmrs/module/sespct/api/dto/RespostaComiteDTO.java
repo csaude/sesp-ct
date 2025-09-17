@@ -1,6 +1,7 @@
 package org.openmrs.module.sespct.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RespostaComiteDTO {
@@ -8,6 +9,7 @@ public class RespostaComiteDTO {
 	public RespostaComiteDTO() {
 	}
 	
+	@JsonProperty("resposta")
 	private String resposta_texto;
 	
 	private String linhaTerapeutica;

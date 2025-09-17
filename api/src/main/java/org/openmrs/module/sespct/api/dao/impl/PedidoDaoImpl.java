@@ -1,5 +1,6 @@
 package org.openmrs.module.sespct.api.dao.impl;
 
+import org.openmrs.module.sespct.api.model.Resposta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.hibernate.Query;
@@ -33,6 +34,12 @@ public class PedidoDaoImpl implements PedidoDao {
 	public Pedido savePedido(Pedido pedido) {
 		this.getCurrentSession().saveOrUpdate(pedido);
 		return pedido;
+	}
+	
+	@Override
+	public Resposta saveResposta(Resposta resposta) {
+		this.getCurrentSession().saveOrUpdate(resposta);
+		return resposta;
 	}
 	
 	@Override

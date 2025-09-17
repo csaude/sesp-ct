@@ -59,22 +59,6 @@ public class SESPCTActivator extends BaseModuleActivator {
 	
 	private void initializeModule() {
 		log.info("Initializing SESP-CT Module...");
-		
-		//		try {
-		//			PedidoService pedidoService = Context.getService(PedidoService.class);
-		//
-		//			List<Pedido> existingPedidos = pedidoService.getAllPedidos();
-		//			if (existingPedidos.isEmpty() || existingPedidos.size() > 20) {
-		//				log.info("No existing data found. Creating dummy data...");
-		//				pedidoService.createDummyData(); // Move createDummyData to service
-		//			} else {
-		//				log.info("Found " + existingPedidos.size() + " existing pedidos. Skipping dummy data creation.");
-		//			}
-		//		}
-		//		catch (Exception e) {
-		//			log.error("Failed to initialize module data", e);
-		//			throw e;
-		//		}
 	}
 	
 }

@@ -253,11 +253,32 @@ public class MiddlewareApiServiceImpl extends BaseOpenmrsService implements Midd
 		String url = baseUrl + "/respostas/?facilityCode=" + this.usCode;
 		try {
 			String decryptedJson = fetchAndDecrypt(url, authToken);
+			
 			JsonNode rootNode = objectMapper.readTree(decryptedJson);
 			JsonNode contentArrayNode = rootNode.path("content");
-			
-			return objectMapper.convertValue(contentArrayNode,
-			    objectMapper.getTypeFactory().constructCollectionType(List.class, RespostaDTO.class));
+
+			// STAGE 1: Parse the outer structure to get the payload strings
+			List<MiddlewareRespostaDTO> middlewareRespostas = objectMapper.convertValue(
+					contentArrayNode,
+					objectMapper.getTypeFactory().constructCollectionType(List.class, MiddlewareRespostaDTO.class)
+			);
+
+			// STAGE 2: Loop through, parse the inner payload, and build the final list
+			List<RespostaDTO> finalRespostas = new ArrayList<>();
+			for (MiddlewareRespostaDTO middlewareResposta : middlewareRespostas) {
+				String payloadJson = middlewareResposta.getPayload();
+				JsonNode payloadRootNode = objectMapper.readTree(payloadJson);
+
+				// Navigate into the "dadosResposta" object
+				JsonNode dadosRespostaNode = payloadRootNode.path("dadosResposta");
+
+				// Convert the "dadosResposta" object into your final RespostaDTO
+				RespostaDTO resposta = objectMapper.treeToValue(dadosRespostaNode, RespostaDTO.class);
+				finalRespostas.add(resposta);
+			}
+
+			return finalRespostas;
+
 		}
 		catch (Exception e) {
 			log.error("Failed to fetch or decrypt Respostas", e);

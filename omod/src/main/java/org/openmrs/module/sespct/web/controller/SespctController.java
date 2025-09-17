@@ -1,5 +1,6 @@
 package org.openmrs.module.sespct.web.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.sespct.api.ExportService;
 import org.openmrs.module.sespct.api.PedidoService;
@@ -100,7 +101,6 @@ public class SespctController {
 			String trimmedNcft = (ncft != null) ? ncft.trim() : null;
 			String trimmedNid = (nid != null) ? nid.trim() : null;
 			
-			// Call our new, powerful search method!
 			List<Pedido> requests = pedidoService.searchPedidos(startDate, endDate, estado, trimmedNcft, trimmedNid, usCode);
 			
 			// Add all results and search parameters back to the model

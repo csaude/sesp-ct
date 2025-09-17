@@ -5,6 +5,7 @@ import org.openmrs.module.sespct.api.util.LocalDateTimeAttributeConverter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 @Entity
@@ -103,5 +104,24 @@ public class MetadadosResposta extends BaseOpenmrsData {
 	
 	public void setUltimaSincronizacao(LocalDateTime ultimaSincronizacao) {
 		this.ultimaSincronizacao = ultimaSincronizacao;
+	}
+	
+	@Transient
+	public String getFormattedTimestamp() {
+		if (timestamp == null) {
+			return "";
+		}
+		// This formatter will produce "04/09/2025"
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		return timestamp.format(formatter);
+	}
+	
+	public String getFormattedUltimaSincronizacao() {
+		if (ultimaSincronizacao == null) {
+			return "";
+		}
+		// This formatter will produce "04/09/2025"
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		return ultimaSincronizacao.format(formatter);
 	}
 }
