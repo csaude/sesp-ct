@@ -36,17 +36,18 @@ public interface PedidoDao {
 	 */
 	List<Pedido> searchPedidos(LocalDateTime startDateTime, LocalDateTime endDateTime, String estado, String ncft,
 	        String nid, String usCode);
-
-
+	
 	/**
 	 * Checks if a Pedido with the given external ID already exists.
+	 * 
 	 * @param externalPedidoId The external ID from the middleware.
 	 * @return true if the pedido exists, false otherwise.
 	 */
 	boolean doesPedidoExist(String externalPedidoId);
-
+	
 	/**
 	 * Checks if a Resposta with the given external ID already exists.
+	 * 
 	 * @param externalRespostaId The external ID from the middleware.
 	 * @return true if the resposta exists, false otherwise.
 	 */

@@ -3,10 +3,17 @@ package org.openmrs.module.sespct.api.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RespostaDTO{
+public class RespostaDTO {
+	
+	public RespostaDTO() {
+	}
+	
 	private String pedidoId;
+	
 	private MetadadosRespostaDTO metadados;
+	
 	private RespostaComiteDTO respostaComite;
+	
 	private NotificacoesDTO notificacoes;
 	
 	public String getPedidoId() {

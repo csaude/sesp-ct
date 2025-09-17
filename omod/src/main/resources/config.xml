@@ -98,6 +98,13 @@
 			O valor 'salt' usado no registo do cliente no middleware.
 		</description>
 	</globalProperty>
+	<globalProperty>
+		<property>sespct.api.clientRegistered</property>
+		<defaultValue>false</defaultValue>
+		<description>
+			Indica se o cliente foi registrado com sucesso no middleware.
+		</description>
+	</globalProperty>
 
 	<!-- Required Global Properties 
 	<globalProperty>

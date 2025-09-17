@@ -3,10 +3,17 @@ package org.openmrs.module.sespct.api.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DadosClinicoDTO{
+public class DadosClinicoDTO {
+	
+	public DadosClinicoDTO() {
+	}
+	
 	private String nome;
+	
 	private String categoriaProfissional;
+	
 	private String telefone;
+	
 	private String email;
 	
 	public String getNome() {
@@ -24,7 +31,7 @@ public class DadosClinicoDTO{
 	public void setCategoriaProfissional(String categoriaProfissional) {
 		this.categoriaProfissional = categoriaProfissional;
 	}
-
+	
 	public String getTelefone() {
 		return telefone;
 	}
@@ -40,6 +47,5 @@ public class DadosClinicoDTO{
 	public void setEmail(String email) {
 		this.email = email;
 	}
-
 	
 }

@@ -3,9 +3,15 @@ package org.openmrs.module.sespct.api.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DadosLaboratorioCD4DTO{
+public class DadosLaboratorioCD4DTO {
+	
+	public DadosLaboratorioCD4DTO() {
+	}
+	
 	private String data;
+	
 	private Integer cd4;
+	
 	private Double cd4Percentagem;
 	
 	public String getData() {

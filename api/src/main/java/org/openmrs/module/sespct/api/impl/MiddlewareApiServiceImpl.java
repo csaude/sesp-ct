@@ -2,9 +2,6 @@ package org.openmrs.module.sespct.api.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -12,13 +9,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.openmrs.GlobalProperty;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.context.UserContext;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.sespct.api.MiddlewareApiService;
-import org.openmrs.module.sespct.api.dto.EncryptedRequestDTO;
-import org.openmrs.module.sespct.api.dto.MarkConsumedPayload;
-import org.openmrs.module.sespct.api.dto.PedidoDTO;
-import org.openmrs.module.sespct.api.dto.RespostaDTO;
+import org.openmrs.module.sespct.api.dto.*;
 import org.openmrs.module.sespct.api.util.MiddlewareCryptoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,64 +24,96 @@ import javax.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Implementation of the MiddlewareApiService.
  */
 @Service
 public class MiddlewareApiServiceImpl extends BaseOpenmrsService implements MiddlewareApiService {
-
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
-
-    private String baseUrl;
-    private String usCode;
-    private String clientId;
-    private String clientSecret;
-
-    private PrivateKey ourPrivateKey;
-    private PublicKey serverPublicKey;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    /**
-     * This method is called by Spring after the bean is created.
-     * It loads all necessary configuration from Global Properties.
-     */
-    @PostConstruct
-    private void initialize() {
-        log.info("Initializing MiddlewareApiService...");
-        try {
-            baseUrl = getGP("sespct.api.baseUrl");
-            usCode = getGP("sespct.api.usCode");
-            clientId = getGP("sespct.api.clientId");
-            clientSecret = getGP("sespct.api.clientSecret");
-
-            String ourPrivatePem = getGP("sespct.api.privateKey");
-            String serverPublicPem = getGP("sespct.api.serverPublicKey");
-
-            if (ourPrivatePem == null || ourPrivatePem.isEmpty()) {
-                log.error("Our private key ('sespct.api.privateKey') is not configured. Service cannot function.");
-                return;
-            }
-            ourPrivateKey = MiddlewareCryptoUtil.readPrivateKeyPem(ourPrivatePem);
-
-            if (serverPublicPem != null && !serverPublicPem.isEmpty()) {
-                serverPublicKey = MiddlewareCryptoUtil.readPublicKeyPem(serverPublicPem);
-            } else {
-                log.warn("Server public key ('sespct.api.serverPublicKey') is not yet configured. Some operations will fail.");
-            }
-            log.info("MiddlewareApiService initialized successfully.");
-        } catch (Exception e) {
-            log.error("Failed to initialize MiddlewareApiService from Global Properties", e);
-        }
-    }
-
-    @Override
+	
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	
+	private String baseUrl;
+	
+	private String usCode;
+	
+	private String clientId;
+	
+	private String clientSecret;
+	
+	private PrivateKey ourPrivateKey;
+	
+	private PublicKey serverPublicKey;
+	
+	private final ObjectMapper objectMapper = new ObjectMapper();
+	
+	private volatile boolean initialized = false;
+	
+	/**
+	 * This method is called by Spring after the bean is created. It loads all necessary
+	 * configuration from Global Properties.
+	 */
+	// Remove @PostConstruct and make it lazy initialization
+	private synchronized void ensureInitialized() {
+		if (!initialized) {
+			initialize();
+		}
+	}
+	
+	private void initialize() {
+		log.info("Initializing MiddlewareApiService...");
+		// Check if Context is ready
+		if (!Context.isSessionOpen()) {
+			log.warn("OpenMRS Context is not ready yet. Skipping initialization.");
+			return;
+		}
+		
+		try {
+			baseUrl = getGP("sespct.api.baseUrl");
+			usCode = getGP("sespct.api.usCode");
+			clientId = getGP("sespct.api.clientId");
+			clientSecret = getGP("sespct.api.clientSecret");
+			
+			String ourPrivatePem = getGP("sespct.api.privateKey");
+			String serverPublicPem = getGP("sespct.api.serverPublicKey");
+			
+			if (ourPrivatePem == null || ourPrivatePem.isEmpty()) {
+				log.error("Our private key ('sespct.api.privateKey') is not configured. Service cannot function.");
+				return;
+			}
+			ourPrivateKey = MiddlewareCryptoUtil.readPrivateKeyPem(ourPrivatePem);
+			
+			String registrationStatus = getGP("sespct.api.clientRegistered");
+			// Always attempt client registration first to ensure we have the latest server public key
+			
+			if (!"true".equals(registrationStatus)) {
+				log.info("Client not yet registered. Attempting registration...");
+				if (registerClient()) {
+					log.info("Client registration completed successfully.");
+					serverPublicPem = getGP("sespct.api.serverPublicKey");
+				} else {
+					log.warn("Client registration failed. Will try to use existing server public key if available.");
+				}
+			}
+			
+			if (serverPublicPem != null && !serverPublicPem.isEmpty()) {
+				serverPublicKey = MiddlewareCryptoUtil.readPublicKeyPem(serverPublicPem);
+				log.info("Server public key loaded successfully.");
+			} else {
+				log.info("No server public key available. Encrypted operations will fail.");
+			}
+			initialized = true;
+			log.info("MiddlewareApiService initialized successfully.");
+		}
+		catch (Exception e) {
+			log.error("Failed to initialize MiddlewareApiService from Global Properties", e);
+		}
+	}
+	
+	@Override
     public String login() {
+		ensureInitialized();
         String url = baseUrl + "/login";
         log.info("Attempting to login at: " + url);
 
@@ -100,15 +128,23 @@ public class MiddlewareApiServiceImpl extends BaseOpenmrsService implements Midd
 
             post.setEntity(new StringEntity(jsonPayload));
 
+			post.setEntity(new StringEntity(jsonPayload, StandardCharsets.UTF_8));
+
             HttpResponse response = httpClient.execute(post);
             int statusCode = response.getStatusLine().getStatusCode();
 
             if (statusCode == 200) {
                 String jsonResponse = EntityUtils.toString(response.getEntity());
                 JsonNode rootNode = objectMapper.readTree(jsonResponse);
-                String token = rootNode.path("token").asText();
-                log.info("Successfully logged in and received auth token.");
-                return token;
+                String token = rootNode.path("access_token").asText();
+				if (token != null && !token.isEmpty()) {
+					log.info("Successfully logged in and received auth token.");
+					return token;
+				} else {
+					log.error("Login response did not contain access_token");
+					log.debug("Login response: " + jsonResponse);
+					return null;
+				}
             } else {
                 log.error("Login failed. Status code: " + statusCode);
                 return null;
@@ -118,60 +154,150 @@ public class MiddlewareApiServiceImpl extends BaseOpenmrsService implements Midd
             return null;
         }
     }
+	
+	public boolean registerClient() {
+		String url = baseUrl + "/clients";
+		log.info("Registering client at: " + url);
 
-    @Override
-    public List<PedidoDTO> fetchPedidos(String authToken) {
-        String url = baseUrl + "/pedidos/?facilityCode=" + this.usCode;
-        try {
-            String decryptedJson = fetchAndDecrypt(url, authToken);
-            return objectMapper.readValue(decryptedJson, objectMapper.getTypeFactory().constructCollectionType(List.class, PedidoDTO.class));
-        } catch (Exception e) {
-            log.error("Failed to fetch or decrypt Pedidos", e);
-            return Collections.emptyList();
-        }
-    }
+		try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+			HttpPost post = new HttpPost(url);
+			post.setHeader("Content-Type", "application/json");
 
-    @Override
-    public List<RespostaDTO> fetchRespostas(String authToken) {
-        String url = baseUrl + "/respostas/?facilityCode=" + this.usCode;
-        try {
-            String decryptedJson = fetchAndDecrypt(url, authToken);
-            return objectMapper.readValue(decryptedJson, objectMapper.getTypeFactory().constructCollectionType(List.class, RespostaDTO.class));
-        } catch (Exception e) {
-            log.error("Failed to fetch or decrypt Respostas", e);
-            return Collections.emptyList();
-        }
-    }
+			String ourPublicKeyPem = getGP("sespct.api.publicKey");
+			if (ourPublicKeyPem == null || ourPublicKeyPem.isEmpty()) {
+				log.error("Public key not configured for client registration");
+				return false;
+			}
 
-    @Override
-    public boolean markPedidosAsConsumed(List<String> pedidoUuids, String authToken) {
-        String url = baseUrl + "/pedidos/mark-consumed";
-        MarkConsumedPayload payload = new MarkConsumedPayload();
-        payload.setPedidoUuids(pedidoUuids);
-        try {
-            return encryptAndPost(url, payload, authToken);
-        } catch (Exception e) {
-            log.error("Failed to mark Pedidos as consumed", e);
-            return false;
-        }
-    }
+			Map<String, String> payload = new HashMap<>();
+			payload.put("usCode", this.usCode);
+			payload.put("clientId", this.clientId);
+			payload.put("clientSecret", this.clientSecret);
+			payload.put("publicKey", ourPublicKeyPem);
+			payload.put("salt", getGP("sespct.api.salt"));
 
-    @Override
-    public boolean markRespostasAsConsumed(List<String> respostaUuids, String authToken) {
-        String url = baseUrl + "/respostas/mark-consumed";
-        MarkConsumedPayload payload = new MarkConsumedPayload();
-        payload.setRespostaUuids(respostaUuids);
-        try {
-            return encryptAndPost(url, payload, authToken);
-        } catch (Exception e) {
-            log.error("Failed to mark Respostas as consumed", e);
-            return false;
-        }
-    }
+			String jsonPayload = objectMapper.writeValueAsString(payload);
+			post.setEntity(new StringEntity(jsonPayload, StandardCharsets.UTF_8));
 
-    // --- PRIVATE HELPER METHODS ---
+			HttpResponse response = httpClient.execute(post);
+			int statusCode = response.getStatusLine().getStatusCode();
+			String responseBody = EntityUtils.toString(response.getEntity());
 
-    private String fetchAndDecrypt(String url, String authToken) throws Exception {
+			log.info("Registration response - Status: " + statusCode);
+
+			if (statusCode >= 200 && statusCode < 300) {
+				JsonNode rootNode = objectMapper.readTree(responseBody);
+				JsonNode dataNode = rootNode.path("data");
+				String serverPublicKey = dataNode.path("publicKey").asText();
+				try {
+					Context.getAdministrationService().setGlobalProperty("sespct.api.serverPublicKey", serverPublicKey);
+					Context.getAdministrationService().setGlobalProperty("sespct.api.clientRegistered", "true");
+					Context.flushSession();
+					log.info("Server public key and registration status saved successfully.");
+					return true;
+				} catch (Exception e) {
+					log.error("Failed to save global properties", e);
+					return false;
+				}
+
+			} else {
+				log.error("Client registration failed. Status: " + statusCode + ", Response: " + responseBody);
+				return false;
+			}
+		} catch (Exception e) {
+			log.error("Error during client registration", e);
+			return false;
+		}
+	}
+	
+	@Override
+	public List<PedidoDTO> fetchPedidos(String authToken) {
+		ensureInitialized();
+		String url = baseUrl + "/pedidos/?facilityCode=" + this.usCode;
+		try {
+			String decryptedJson = fetchAndDecrypt(url, authToken);
+
+			JsonNode rootNode = objectMapper.readTree(decryptedJson);
+			JsonNode contentArrayNode = rootNode.path("content");
+
+			List<MiddlewarePedidoDTO> middlewarePedidos = objectMapper.convertValue(
+					contentArrayNode,
+					objectMapper.getTypeFactory().constructCollectionType(List.class, MiddlewarePedidoDTO.class)
+			);
+
+			List<PedidoDTO> finalPedidos = new ArrayList<>();
+			for (MiddlewarePedidoDTO middlewarePedido : middlewarePedidos) {
+				String payloadJson = middlewarePedido.getPayload();
+				JsonNode payloadRootNode = objectMapper.readTree(payloadJson);
+				JsonNode dadosPedidoNode = payloadRootNode.path("dadosPedido");
+				PedidoDTO pedido = objectMapper.treeToValue(dadosPedidoNode, PedidoDTO.class);
+
+				if (payloadRootNode.has("id")) {
+					pedido.setId(payloadRootNode.get("id").asText());
+				}
+
+				finalPedidos.add(pedido);
+			}
+
+			return finalPedidos;
+		}
+		catch (Exception e) {
+			log.error("Failed to fetch or decrypt Pedidos", e);
+			return Collections.emptyList();
+		}
+	}
+	
+	@Override
+	public List<RespostaDTO> fetchRespostas(String authToken) {
+		ensureInitialized();
+		String url = baseUrl + "/respostas/?facilityCode=" + this.usCode;
+		try {
+			String decryptedJson = fetchAndDecrypt(url, authToken);
+			JsonNode rootNode = objectMapper.readTree(decryptedJson);
+			JsonNode contentArrayNode = rootNode.path("content");
+			
+			return objectMapper.convertValue(contentArrayNode,
+			    objectMapper.getTypeFactory().constructCollectionType(List.class, RespostaDTO.class));
+		}
+		catch (Exception e) {
+			log.error("Failed to fetch or decrypt Respostas", e);
+			return Collections.emptyList();
+		}
+	}
+	
+	@Override
+	public boolean markPedidosAsConsumed(List<String> pedidoUuids, String authToken) {
+		ensureInitialized();
+		String url = baseUrl + "/pedidos/mark-consumed";
+		MarkConsumedPayload payload = new MarkConsumedPayload();
+		payload.setPedidoUuids(pedidoUuids);
+		try {
+			return encryptAndPost(url, payload, authToken);
+		}
+		catch (Exception e) {
+			log.error("Failed to mark Pedidos as consumed", e);
+			return false;
+		}
+	}
+	
+	@Override
+	public boolean markRespostasAsConsumed(List<String> respostaUuids, String authToken) {
+		ensureInitialized();
+		String url = baseUrl + "/respostas/mark-consumed";
+		MarkConsumedPayload payload = new MarkConsumedPayload();
+		payload.setRespostaUuids(respostaUuids);
+		try {
+			return encryptAndPost(url, payload, authToken);
+		}
+		catch (Exception e) {
+			log.error("Failed to mark Respostas as consumed", e);
+			return false;
+		}
+	}
+	
+	// --- PRIVATE HELPER METHODS ---
+	
+	private String fetchAndDecrypt(String url, String authToken) throws Exception {
         log.info("Fetching encrypted data from: " + url);
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpGet get = new HttpGet(url);
@@ -201,8 +327,8 @@ public class MiddlewareApiServiceImpl extends BaseOpenmrsService implements Midd
             return decryptedJson;
         }
     }
-
-    private boolean encryptAndPost(String url, Object payload, String authToken) throws Exception {
+	
+	private boolean encryptAndPost(String url, Object payload, String authToken) throws Exception {
         log.info("Encrypting and posting data to: " + url);
 
         // 1. Convert payload object to JSON string
@@ -237,8 +363,8 @@ public class MiddlewareApiServiceImpl extends BaseOpenmrsService implements Midd
             }
         }
     }
-
-    private String getGP(String property) {
-        return Context.getAdministrationService().getGlobalProperty(property);
-    }
+	
+	private String getGP(String property) {
+		return Context.getAdministrationService().getGlobalProperty(property);
+	}
 }

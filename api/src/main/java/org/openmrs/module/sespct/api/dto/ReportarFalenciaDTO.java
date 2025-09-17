@@ -1,13 +1,19 @@
 package org.openmrs.module.sespct.api.dto;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReportarFalenciaDTO {
+	
+	public ReportarFalenciaDTO() {
+	}
+	
 	private String historiaClinica;
+	
 	private String historiaAdesao;
-
+	
 	private String tratamentoTbAtivo;
-
+	
 	public String getHistoriaClinica() {
 		return historiaClinica;
 	}
@@ -31,5 +37,5 @@ public class ReportarFalenciaDTO {
 	public void setTratamentoTbAtivo(String tratamentoTbAtivo) {
 		this.tratamentoTbAtivo = tratamentoTbAtivo;
 	}
-
+	
 }

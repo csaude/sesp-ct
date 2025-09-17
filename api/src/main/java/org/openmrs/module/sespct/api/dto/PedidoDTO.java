@@ -2,39 +2,50 @@ package org.openmrs.module.sespct.api.dto;
 
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PedidoDTO{
+public class PedidoDTO {
+	
+	public PedidoDTO() {
+	}
+	
 	private String id;
+	
+	@JsonProperty("metadados")
 	private MetadadosPedidoDTO metadadosPedidoDTO;
+	
 	private DadosUtenteDTO dadosUtente;
+	
 	private DadosClinicoDTO dadosClinico;
+	
+	@JsonProperty("resumoHistoriaClinica")
 	private ReportarFalenciaDTO reportarFalencia;
-
+	
 	private LinhaSolicitadaDTO linhaSolicitada;
-
+	
 	private List<HistoriaTarvDTO> historiaTarv;
-
+	
 	private List<DadosLaboratorioCD4DTO> dadosLaboratorioCD4;
-
+	
 	private List<DadosLaboratorioCargaViralDTO> dadosLaboratorioCargaViral;
-
-
+	
 	public String getId() {
 		return id;
 	}
+	
 	public void setId(String id) {
 		this.id = id;
 	}
-
+	
 	public MetadadosPedidoDTO getMetadadosPedidoDTO() {
 		return metadadosPedidoDTO;
 	}
-
+	
 	public void setMetadadosPedidoDTO(MetadadosPedidoDTO metadadosPedidoDTO) {
 		this.metadadosPedidoDTO = metadadosPedidoDTO;
 	}
-
+	
 	public DadosUtenteDTO getDadosUtente() {
 		return dadosUtente;
 	}
@@ -82,6 +93,7 @@ public class PedidoDTO{
 	public void setDadosLaboratorioCD4(List<DadosLaboratorioCD4DTO> dadosLaboratorioCD4) {
 		this.dadosLaboratorioCD4 = dadosLaboratorioCD4;
 	}
+	
 	public List<DadosLaboratorioCargaViralDTO> getDadosLaboratorioCargaViral() {
 		return dadosLaboratorioCargaViral;
 	}

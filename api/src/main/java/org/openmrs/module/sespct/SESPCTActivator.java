@@ -9,12 +9,11 @@
  */
 package org.openmrs.module.sespct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.BaseModuleActivator;
 import org.openmrs.module.sespct.api.PedidoService;
-import org.openmrs.module.sespct.api.dao.PedidoDao;
 import org.openmrs.module.sespct.api.model.*;
 
 import java.util.*;
@@ -24,7 +23,7 @@ import java.util.*;
  */
 public class SESPCTActivator extends BaseModuleActivator {
 	
-	private Log log = LogFactory.getLog(this.getClass());
+	private static final Logger log = LoggerFactory.getLogger(SESPCTActivator.class);
 	
 	public void willRefreshContext() {
 		log.info("Refreshing SESP-CT Module");
@@ -61,21 +60,21 @@ public class SESPCTActivator extends BaseModuleActivator {
 	private void initializeModule() {
 		log.info("Initializing SESP-CT Module...");
 		
-		try {
-			PedidoService pedidoService = Context.getService(PedidoService.class);
-			
-			List<Pedido> existingPedidos = pedidoService.getAllPedidos();
-			if (existingPedidos.isEmpty() || existingPedidos.size() > 20) {
-				log.info("No existing data found. Creating dummy data...");
-				pedidoService.createDummyData(); // Move createDummyData to service
-			} else {
-				log.info("Found " + existingPedidos.size() + " existing pedidos. Skipping dummy data creation.");
-			}
-		}
-		catch (Exception e) {
-			log.error("Failed to initialize module data", e);
-			throw e;
-		}
+		//		try {
+		//			PedidoService pedidoService = Context.getService(PedidoService.class);
+		//
+		//			List<Pedido> existingPedidos = pedidoService.getAllPedidos();
+		//			if (existingPedidos.isEmpty() || existingPedidos.size() > 20) {
+		//				log.info("No existing data found. Creating dummy data...");
+		//				pedidoService.createDummyData(); // Move createDummyData to service
+		//			} else {
+		//				log.info("Found " + existingPedidos.size() + " existing pedidos. Skipping dummy data creation.");
+		//			}
+		//		}
+		//		catch (Exception e) {
+		//			log.error("Failed to initialize module data", e);
+		//			throw e;
+		//		}
 	}
 	
 }

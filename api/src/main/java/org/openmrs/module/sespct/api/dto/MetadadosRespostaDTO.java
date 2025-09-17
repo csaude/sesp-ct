@@ -1,21 +1,25 @@
 package org.openmrs.module.sespct.api.dto;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MetadadosRespostaDTO{
-
+public class MetadadosRespostaDTO {
+	
+	public MetadadosRespostaDTO() {
+	}
+	
 	private String respostaId;
-
+	
 	private String pedidoId;
-
+	
 	private String versao;
-
+	
 	private String timestamp;
-
+	
 	private String processadoPor;
-
+	
 	private String ultimaSincronizacao;
-
+	
 	public String getRespostaId() {
 		return respostaId;
 	}

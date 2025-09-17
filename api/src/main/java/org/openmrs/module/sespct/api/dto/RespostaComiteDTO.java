@@ -1,28 +1,33 @@
 package org.openmrs.module.sespct.api.dto;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RespostaComiteDTO {
+	
+	public RespostaComiteDTO() {
+	}
+	
 	private String resposta_texto;
-
+	
 	private String linhaTerapeutica;
-
+	
 	private String esquemaAprovado;
-
+	
 	private String dataResposta;
-
+	
 	private String comentario;
-
+	
 	private String autorizante;
-
+	
 	private String email;
-
+	
 	private String contacto;
-
+	
 	private String nivelAutorizacao;
-
+	
 	private String dataAprovacao;
-
+	
 	public String getRespostaTexto() {
 		return resposta_texto;
 	}

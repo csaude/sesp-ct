@@ -1,13 +1,17 @@
 package org.openmrs.module.sespct.api.dto;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class HistoriaTarvDTO{
-
+public class HistoriaTarvDTO {
+	
+	public HistoriaTarvDTO() {
+	}
+	
 	private String dataInicio;
-
+	
 	private String dataTermino;
-
+	
 	private String esquemaTarv;
 	
 	public String getDataInicio() {

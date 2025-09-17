@@ -1,12 +1,17 @@
 package org.openmrs.module.sespct.api.dto;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class LinhaSolicitadaDTO{
+public class LinhaSolicitadaDTO {
+	
+	public LinhaSolicitadaDTO() {
+	}
+	
 	private String linha;
-
+	
 	private String anexo;
-
+	
 	public String getLinha() {
 		return linha;
 	}

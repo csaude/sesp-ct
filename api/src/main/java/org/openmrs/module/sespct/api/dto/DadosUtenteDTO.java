@@ -1,43 +1,47 @@
 package org.openmrs.module.sespct.api.dto;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DadosUtenteDTO{
-
+public class DadosUtenteDTO {
+	
+	public DadosUtenteDTO() {
+	}
+	
 	private String nomeCompleto;
-
+	
 	private String iniciais;
-
+	
 	private String nid;
-
+	
 	private Double idade;
-
+	
 	private String estadioOms;
-
+	
 	private String estadioOmsMotivo;
-
+	
 	private String provincia;
-
+	
 	private String distrito;
-
+	
 	private String unidadeSanitaria;
-
+	
 	private String codigoUnidadeSanitaria;
-
+	
 	private Double peso;
-
+	
 	private String sexo;
-
+	
 	private String gestante;
-
+	
 	private String dataProvavelParto;
-
+	
 	private String lactante;
-
+	
 	private String dataParto;
 	
 	// --- Getters and Setters ---
-
+	
 	public String getNomeCompleto() {
 		return nomeCompleto;
 	}

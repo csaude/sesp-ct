@@ -3,9 +3,13 @@ package org.openmrs.module.sespct.api.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DadosLaboratorioCargaViralDTO{
-
+public class DadosLaboratorioCargaViralDTO {
+	
+	public DadosLaboratorioCargaViralDTO() {
+	}
+	
 	private String data;
+	
 	private Long cargaViral;
 	
 	public String getData() {

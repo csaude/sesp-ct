@@ -1,15 +1,21 @@
 package org.openmrs.module.sespct.api.dto;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class NotificacoesDTO{
+public class NotificacoesDTO {
+	
+	public NotificacoesDTO() {
+	}
+	
 	private Boolean webhookEntregue;
-
+	
 	private Boolean emailEnviado;
-
+	
 	private Boolean smsEnviado;
+	
 	private String dataNotificacao;
-
+	
 	public Boolean getWebhookEntregue() {
 		return webhookEntregue;
 	}
