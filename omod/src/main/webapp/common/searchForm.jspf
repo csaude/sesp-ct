@@ -23,10 +23,10 @@
 			<label for="estado"><openmrs:message code="sespct.search.status" /></label>
 			<select id="estado" name="estado">
 				<option value="ALL" ${selectedEstado == 'ALL' || empty selectedEstado ? 'selected' : ''}><openmrs:message code="sespct.search.status.ALL" /></option>
-				<option value="SEM_RESPOSTA" ${selectedEstado == 'SEM_RESPOSTA' ? 'selected' : ''}><openmrs:message code="sespct.search.status.SEM_RESPOSTA" /></option>
-				<option value="APROVADO" ${selectedEstado == 'APROVADO' ? 'selected' : ''}><openmrs:message code="sespct.search.status.APROVADO" /></option>
-				<option value="ADIADO" ${selectedEstado == 'ADIADO' ? 'selected' : ''}><openmrs:message code="sespct.search.status.ADIADO" /></option>
-				<option value="NAO_PROCESSADO" ${selectedEstado == 'NAO_PROCESSADO' ? 'selected' : ''}><openmrs:message code="sespct.search.status.NAO_PROCESSADO" /></option>
+				<option value=${Pedido.ESTADO_SEM_RESPOSTA} ${selectedEstado == Pedido.ESTADO_SEM_RESPOSTA ? 'selected' : ''}><openmrs:message code="sespct.search.status.SEM_RESPOSTA" /></option>
+				<option value=${Pedido.ESTADO_APROVADO} ${selectedEstado == Pedido.ESTADO_APROVADO ? 'selected' : ''}><openmrs:message code="sespct.search.status.APROVADO" /></option>
+				<option value=${Pedido.ESTADO_ADIADO} ${selectedEstado == Pedido.ESTADO_ADIADO ? 'selected' : ''}><openmrs:message code="sespct.search.status.ADIADO" /></option>
+				<option value=${Pedido.ESTADO_NAO_PROCESSADO} ${selectedEstado == Pedido.ESTADO_NAO_PROCESSADO ? 'selected' : ''}><openmrs:message code="sespct.search.status.NAO_PROCESSADO" /></option>
 			</select>
 		</div>
 
@@ -50,9 +50,11 @@
 			<label for="us"><openmrs:message code="sespct.search.us" /></label>
 			<select id="us" name="usCode">
 				<option value="ALL" ${selectedUsCode == 'ALL' || empty selectedUsCode ? 'selected' : ''}><openmrs:message code="sespct.search.us.ALL" /></option>
-				<c:forEach var="us" items="${unidadesSanitarias}">
-					<option value="${us.code}" ${selectedUsCode == us.code ? 'selected' : ''}>${us.name} (${us.code})</option>
-				</c:forEach>
+				<option value=${unidadesSanitaria} ${selectedUsCode == unidadesSanitaria ? 'selected' : ''}>${unidadesSanitaria}</option>
+
+<%--				<c:forEach var="us" items="${unidadesSanitarias}">--%>
+<%--					<option value="${us.code}" ${selectedUsCode == us.code ? 'selected' : ''}>${us.name} (${us.code})</option>--%>
+<%--				</c:forEach>--%>
 			</select>
 		</div>
 

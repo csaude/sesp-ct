@@ -114,8 +114,8 @@ public class SespctController {
 			model.addAttribute("selectedUsCode", usCode);
 			
 			// You'll also need to load the Unidades Sanitarias for the dropdown
-			// List<UnidadeSanitaria> unidades = someOtherService.getAllUnidadesSanitarias();
-			// model.addAttribute("unidadesSanitarias", unidades);
+			String unidadesSanitaria = Context.getAdministrationService().getGlobalProperty("sespct.api.usCode");
+			model.addAttribute("unidadesSanitaria", unidadesSanitaria);
 			
 			log.info("Found " + requests.size() + " SESP-CT requests based on search criteria");
 			
