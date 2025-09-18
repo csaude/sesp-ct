@@ -1,8 +1,14 @@
 package org.openmrs.module.sespct.api.impl;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
+
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
@@ -14,17 +20,23 @@ import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.sespct.api.PedidoService;
 import org.openmrs.module.sespct.api.dao.PedidoDao;
-import org.openmrs.module.sespct.api.model.*;
+import org.openmrs.module.sespct.api.model.DadosClinico;
+import org.openmrs.module.sespct.api.model.DadosLaboratorioCD4;
+import org.openmrs.module.sespct.api.model.DadosLaboratorioCargaViral;
+import org.openmrs.module.sespct.api.model.DadosUtente;
+import org.openmrs.module.sespct.api.model.HistoriaTarv;
+import org.openmrs.module.sespct.api.model.LinhaSolicitada;
+import org.openmrs.module.sespct.api.model.MetadadosResposta;
+import org.openmrs.module.sespct.api.model.Notificacoes;
+import org.openmrs.module.sespct.api.model.Pedido;
+import org.openmrs.module.sespct.api.model.ReportarFalencia;
+import org.openmrs.module.sespct.api.model.Resposta;
+import org.openmrs.module.sespct.api.model.RespostaComite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.*;
 
 public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoService {
 	
