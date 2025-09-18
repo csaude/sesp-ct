@@ -26,11 +26,11 @@ public class Constants {
 	
 	public static final String NAO = "Nao";
 	
-	public static final String ESTADO_SEM_RESPOSTA = "Sem resposta";
+	public static final String ESTADO_SEM_RESPOSTA = "sem_resposta";
 	
-	public static final String ESTADO_APROVADO = "Aprovado";
+	public static final String ESTADO_APROVADO = "aprovado";
 	
-	public static final String ESTADO_ADIADO = "Adiado";
+	public static final String ESTADO_ADIADO = "adiado";
 	
 	public static final String SESPCT_FORM_UUID = "69385e04-f01d-4db3-9086-c7fdef228e85";
 	

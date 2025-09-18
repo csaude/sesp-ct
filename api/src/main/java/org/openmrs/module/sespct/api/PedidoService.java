@@ -18,7 +18,7 @@ public interface PedidoService extends OpenmrsService {
 	
 	List<Pedido> getAllPedidos();
 	
-	List<Pedido> getPedidosByEstado(String estado);
+	List<Pedido> getPedidosByEstado(List<String> estado);
 	
 	List<Pedido> getPedidosByDateTimeRange(LocalDateTime startDateTime, LocalDateTime endDateTime);
 	

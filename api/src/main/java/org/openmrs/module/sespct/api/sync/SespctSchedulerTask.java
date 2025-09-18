@@ -1,5 +1,6 @@
 package org.openmrs.module.sespct.api.sync;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -100,7 +101,8 @@ public class SespctSchedulerTask extends AbstractTask {
 	}
 	
 	private void processPedidos() {
-		List<Pedido> pedidos = pedidoService.getPedidosByEstado(Constants.ESTADO_SEM_RESPOSTA);
+		List<Pedido> pedidos = pedidoService.getPedidosByEstado(Arrays.asList(Constants.ESTADO_SEM_RESPOSTA,
+		    Constants.ESTADO_APROVADO, Constants.ESTADO_ADIADO));
 		log.info("Found {} pedidos with status '{}'", pedidos.size(), Constants.ESTADO_SEM_RESPOSTA);
 		
 		if (pedidos.isEmpty()) {

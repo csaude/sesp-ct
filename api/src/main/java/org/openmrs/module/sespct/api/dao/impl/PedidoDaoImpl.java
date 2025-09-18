@@ -70,9 +70,14 @@ public class PedidoDaoImpl implements PedidoDao {
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<Pedido> getPedidosByEstado(String estado) {
-		final String hql = "FROM Pedido WHERE estado = :estado AND voided = 0 ORDER BY dateCreated DESC";
-		final Query query = this.getCurrentSession().createQuery(hql).setParameter("estado", estado);
+	public List<Pedido> getPedidosByEstado(List<String> estados) {
+		if (estados == null || estados.isEmpty()) {
+			return java.util.Collections.emptyList();
+		}
+		
+		final String hql = "FROM Pedido WHERE estado IN (:estados) AND voided = 0 ORDER BY dateCreated DESC";
+		final Query query = this.getCurrentSession().createQuery(hql).setParameterList("estados", estados);
+		
 		return query.list();
 	}
 	

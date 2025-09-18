@@ -73,7 +73,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	
 	@Override
 	@Transactional(readOnly = true)
-	public List<Pedido> getPedidosByEstado(String estado) {
+	public List<Pedido> getPedidosByEstado(List<String> estado) {
 		return pedidoDao.getPedidosByEstado(estado);
 	}
 	
