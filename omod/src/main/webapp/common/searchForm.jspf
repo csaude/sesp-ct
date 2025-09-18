@@ -4,7 +4,7 @@
 		<div>
 			<label for="startDate"><openmrs:message code="sespct.search.startDate" /></label>
 			<div class="input-wrapper">
-				<input type="text" size="10" id="startDate" onclick="showCalendar(this);" autocomplete="off" placeholder="" />
+				<input type="text" size="10" id="startDate" name="startDate" value="${startDate}" onclick="showCalendar(this);" autocomplete="off" placeholder="" />
 				<div class="clear">&#10005;</div>
 			</div>
 		</div>
@@ -12,7 +12,7 @@
 		<div>
 			<label for="endDate"><openmrs:message code="sespct.search.endDate" /></label>
 			<div class="input-wrapper">
-				<input type="text" size="10" id="endDate" onclick="showCalendar(this);" autocomplete="off" placeholder="" />
+				<input type="text" size="10" id="endDate" value="${endDate}" name="endDate" onclick="showCalendar(this);" autocomplete="off" placeholder="" />
 				<div class="clear">&#10005;</div>
 			</div>
 		</div>
@@ -22,18 +22,18 @@
 		<div>
 			<label for="estado"><openmrs:message code="sespct.search.status" /></label>
 			<select id="estado" name="estado">
-				<option value="ALL"><openmrs:message code="sespct.search.status.ALL" /></option>
-				<option value="SEM_RESPOSTA"><openmrs:message code="sespct.search.status.SEM_RESPOSTA" /></option>
-				<option value="APROVADO"><openmrs:message code="sespct.search.status.APROVADO" /></option>
-				<option value="ADIADO"><openmrs:message code="sespct.search.status.ADIADO" /></option>
-				<option value="NAO_PROCESSADO"><openmrs:message code="sespct.search.status.NAO_PROCESSADO" /></option>
+				<option value="ALL" ${selectedEstado == 'ALL' || empty selectedEstado ? 'selected' : ''}><openmrs:message code="sespct.search.status.ALL" /></option>
+				<option value="SEM_RESPOSTA" ${selectedEstado == 'SEM_RESPOSTA' ? 'selected' : ''}><openmrs:message code="sespct.search.status.SEM_RESPOSTA" /></option>
+				<option value="APROVADO" ${selectedEstado == 'APROVADO' ? 'selected' : ''}><openmrs:message code="sespct.search.status.APROVADO" /></option>
+				<option value="ADIADO" ${selectedEstado == 'ADIADO' ? 'selected' : ''}><openmrs:message code="sespct.search.status.ADIADO" /></option>
+				<option value="NAO_PROCESSADO" ${selectedEstado == 'NAO_PROCESSADO' ? 'selected' : ''}><openmrs:message code="sespct.search.status.NAO_PROCESSADO" /></option>
 			</select>
 		</div>
 
 		<div>
 			<label for="ncft"><openmrs:message code="sespct.search.ncft" /></label>
 			<div class="input-wrapper">
-				<input type="text" size="22" maxlength="30" id="ncft" name="ncft" placeholder="" />
+				<input type="text" size="22" maxlength="30" value="${ncft}" id="ncft" name="ncft" placeholder="" />
 				<div class="clear">&#10005;</div>
 			</div>
 		</div>
@@ -41,7 +41,7 @@
 		<div>
 			<label for="nid"><openmrs:message code="sespct.search.nid" /></label>
 			<div class="input-wrapper">
-				<input type="text" size="22" maxlength="31" id="nid" name="nid" placeholder="" />
+				<input type="text" size="22" maxlength="31" value="${nid}" id="nid" name="nid" placeholder="" />
 				<div class="clear">&#10005;</div>
 			</div>
 		</div>
@@ -49,7 +49,10 @@
 		<div>
 			<label for="us"><openmrs:message code="sespct.search.us" /></label>
 			<select id="us" name="usCode">
-				<option value="ALL"><openmrs:message code="sespct.search.us.ALL" /></option>
+				<option value="ALL" ${selectedUsCode == 'ALL' || empty selectedUsCode ? 'selected' : ''}><openmrs:message code="sespct.search.us.ALL" /></option>
+				<c:forEach var="us" items="${unidadesSanitarias}">
+					<option value="${us.code}" ${selectedUsCode == us.code ? 'selected' : ''}>${us.name} (${us.code})</option>
+				</c:forEach>
 			</select>
 		</div>
 

@@ -64,7 +64,7 @@ public class ExcelExportServiceImpl implements ExportService {
             // Row 3: Headers (previously row 2)
             Row headerRow = sheet.createRow(rowNum++);
             headerRow.setHeightInPoints(20); // MODIFICATION: Increased header row height for wrapped text.
-            String[] headers = {"US", "NID", "NCFT", "Iniciais", "Sexo", "Idade", "Submissão", "Data de resposta",
+            String[] headers = {"US", "NID", "NCFT", "Iniciais", "Sexo", "Idade", "Gestante", "Lactante", "Submissão", "Data de resposta",
                     "Sincronização", "Estado", "Causa de Não processamento", "Linha Terap. (resposta)", "Solicitante email",
                     "Solicitante Tel.", "Email do aprovador"};
 
@@ -137,6 +137,19 @@ public class ExcelExportServiceImpl implements ExportService {
 		} else {
 			createCell(row, colNum++, "", centeredDataStyle);
 		}
+		
+		// Gestante
+		String gestanteValue = pedido.getDadosUtente() != null ? pedido.getDadosUtente().getGestante() : "";
+		String gestante = "Nao".equals(gestanteValue) ? "Não" : ("Sim".equals(gestanteValue) ? "Sim" : pedido
+		        .getDadosUtente().getGestante());
+		createCell(row, colNum++, gestante, centeredDataStyle);
+		
+		// Lactante
+		String lactanteValue = pedido.getDadosUtente() != null ? pedido.getDadosUtente().getLactante() : "";
+		String lactante = "Nao".equals(lactanteValue) ? "Não" : ("Sim".equals(lactanteValue) ? "Sim" : pedido
+		        .getDadosUtente().getLactante());
+		
+		createCell(row, colNum++, lactante, centeredDataStyle);
 		
 		// Submissão
 		createDateCell(row, colNum++, pedido.getDataSubmissao(), dateCellStyle);

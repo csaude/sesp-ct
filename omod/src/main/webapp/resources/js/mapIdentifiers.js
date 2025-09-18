@@ -1,5 +1,5 @@
 const nidTarv = (i) =>
-  i.identifierType.uuid === "e2b966d0-1d5f-11e0-b929-000c29ad1d07";
+  i.identifierType.uuid === "ac75ec91-bc27-4681-97d0-7db08937b2d7";
 
 function MapIdentifiers(disaEl, patientListEl, { locale, searchSuggestion }) {
   new DataTable(disaEl, {
@@ -25,7 +25,7 @@ function MapIdentifiers(disaEl, patientListEl, { locale, searchSuggestion }) {
     order: [],
     pagingType: "simple",
     language: {
-      url: `/openmrs/moduleResources/disa/js/datatables.net/1.13.2/i18n/${locale}.json`,
+      url: `/openmrs/moduleResources/sespct/js/datatables.net/1.13.2/i18n/${locale}.json`,
     },
     processing: true,
     serverSide: true,
