@@ -215,7 +215,7 @@ public class ObsBuilder {
 		if (estado != null) {
 			Obs estadoObs = createBaseObs(Constants.RESPOSTA_ESTADO_UUID);
 			switch (estado.trim().toUpperCase()) {
-				case "SEM RESPOSTA":
+				case "SEM_RESPOSTA":
 					estadoObs
 					        .setValueCoded(Context.getConceptService().getConceptByUuid(Constants.ESTADO_SEM_RESPOSTA_UUID));
 					break;

@@ -300,13 +300,13 @@ public class SespctSchedulerTask extends AbstractTask {
 		        case "MEDICO":
 		            obsBuilder.addCodedObs(Constants.CLINICO_CATEGORIA_UUID, Constants.CATEGORIA_MEDICO_UUID);
 		            break;
-		        case "TECNICO DE MEDICINA GERAL":
+		        case "TMG":
 		            obsBuilder.addCodedObs(Constants.CLINICO_CATEGORIA_UUID, Constants.CATEGORIA_TECNICO_GERAL_UUID);
 		            break;
-		        case "ENFERMEIRO/A DE SMI":
+		        case "ESMI":
 		            obsBuilder.addCodedObs(Constants.CLINICO_CATEGORIA_UUID, Constants.CATEGORIA_ENFERMEIRO_SMI_UUID);
 		            break;
-		        case "TECNICO FARMACEUTICO":
+		        case "FARMACEUTICO":
 		            obsBuilder.addCodedObs(Constants.CLINICO_CATEGORIA_UUID, Constants.CATEGORIA_FARMACEUTICO_UUID);
 		            break;
 		        default:
