@@ -8,6 +8,8 @@ public class RespostaDTO {
 	public RespostaDTO() {
 	}
 	
+	private String uuid;
+	
 	private String pedidoId;
 	
 	private MetadadosRespostaDTO metadados;
@@ -46,6 +48,14 @@ public class RespostaDTO {
 	
 	public void setNotificacoes(NotificacoesDTO notificacoes) {
 		this.notificacoes = notificacoes;
+	}
+	
+	public String getUuid() {
+		return this.uuid;
+	}
+	
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 	
 }

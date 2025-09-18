@@ -8,6 +8,8 @@ public class MiddlewarePedidoDTO {
 	
 	private String payload;
 	
+	private String uuid;
+	
 	public MiddlewarePedidoDTO() {
 	}
 	
@@ -17,5 +19,13 @@ public class MiddlewarePedidoDTO {
 	
 	public void setPayload(String payload) {
 		this.payload = payload;
+	}
+	
+	public String getUuid() {
+		return uuid;
+	}
+	
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 }

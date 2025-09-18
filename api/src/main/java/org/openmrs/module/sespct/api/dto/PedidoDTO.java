@@ -12,6 +12,8 @@ public class PedidoDTO {
 	
 	private String id;
 	
+	private String uuid;
+	
 	@JsonProperty("metadados")
 	private MetadadosPedidoDTO metadadosPedidoDTO;
 	
@@ -100,6 +102,14 @@ public class PedidoDTO {
 	
 	public void setDadosLaboratorioCargaViral(List<DadosLaboratorioCargaViralDTO> dadosLaboratorioCargaViral) {
 		this.dadosLaboratorioCargaViral = dadosLaboratorioCargaViral;
+	}
+	
+	public String getUuid() {
+		return this.uuid;
+	}
+	
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 	
 }

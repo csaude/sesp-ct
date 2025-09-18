@@ -32,7 +32,7 @@ public class SespctMapper {
 
         // 1. Create the main Pedido entity and set OpenMRS base fields
         Pedido pedido = new Pedido();
-        pedido.setUuid(dto.getId().toString()); // Use the UUID from the API
+        pedido.setUuid(dto.getUuid()); // Use the UUID from the API
         pedido.setCreator(Context.getAuthenticatedUser());
         pedido.setDateCreated(new Date());
 
@@ -189,6 +189,7 @@ public class SespctMapper {
 		resposta.setCreator(Context.getAuthenticatedUser());
 		resposta.setDateCreated(new Date());
 		resposta.setPedido(parentPedido);
+		resposta.setUuid(dto.getUuid());
 		
 		// 3. Map the nested objects
 		resposta.setMetadados(toMetadadosRespostaEntity(dto.getMetadados(), resposta));

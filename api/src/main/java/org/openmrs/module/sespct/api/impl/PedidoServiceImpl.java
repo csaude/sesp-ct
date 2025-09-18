@@ -371,7 +371,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	
 	private List<String> processPedidos(List<PedidoDTO> dtos) {
 		log.info("Processing " + dtos.size() + " fetched pedidos...");
-		List<String> newlySavedPedidoIds = new ArrayList<>();
+		List<String> newlySavedPedidoUUIds = new ArrayList<>();
 
 		for (PedidoDTO dto : dtos) {
 			// 1. Get the metadata object into a variable first
@@ -389,18 +389,18 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 				if (newPedido != null) {
 					pedidoDao.savePedido(newPedido);
 					log.info("Saved new pedido with ID: " + newPedido.getPedidoId());
-					newlySavedPedidoIds.add(dto.getId());
+					newlySavedPedidoUUIds.add(dto.getUuid());
 				}
 			} else {
 				log.warn("Skipping already existing pedido with ID: " + meta.getPedidoId());
 			}
 		}
-		return newlySavedPedidoIds;
+		return newlySavedPedidoUUIds;
 	}
 	
 	private List<String> processRespostas(List<RespostaDTO> dtos) {
 		log.info("Processing " + dtos.size() + " fetched respostas...");
-		List<String> newlySavedRespostaIds = new ArrayList<>();
+		List<String> newlySavedRespostaUUIds = new ArrayList<>();
 
 		for (RespostaDTO dto : dtos) {
 			String externalPedidoId = dto.getMetadados().getPedidoId();
@@ -430,7 +430,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 					}
 
 					pedidoDao.savePedido(parentPedido); // Save the parent to cascade the save to the new Resposta
-					newlySavedRespostaIds.add(externalRespostaId);
+					newlySavedRespostaUUIds.add(dto.getUuid());
 					log.info("Saved new resposta " + externalRespostaId + " for pedido " + externalPedidoId);
 				} else {
 					log.warn("Could not find parent pedido with ID: " + externalPedidoId + ". Cannot save resposta "
@@ -440,6 +440,6 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 				log.warn("Skipping already existing resposta with ID: " + externalRespostaId);
 			}
 		}
-		return newlySavedRespostaIds;
+		return newlySavedRespostaUUIds;
 	}
 }

@@ -216,7 +216,6 @@ public class MiddlewareApiServiceImpl extends BaseOpenmrsService implements Midd
 		String url = baseUrl + "/pedidos/?facilityCode=" + this.usCode;
 		try {
 			String decryptedJson = fetchAndDecrypt(url, authToken);
-
 			JsonNode rootNode = objectMapper.readTree(decryptedJson);
 			JsonNode contentArrayNode = rootNode.path("content");
 
@@ -232,9 +231,7 @@ public class MiddlewareApiServiceImpl extends BaseOpenmrsService implements Midd
 				JsonNode dadosPedidoNode = payloadRootNode.path("dadosPedido");
 				PedidoDTO pedido = objectMapper.treeToValue(dadosPedidoNode, PedidoDTO.class);
 
-				if (payloadRootNode.has("id")) {
-					pedido.setId(payloadRootNode.get("id").asText());
-				}
+				pedido.setUuid(middlewarePedido.getUuid());
 
 				finalPedidos.add(pedido);
 			}
@@ -274,6 +271,8 @@ public class MiddlewareApiServiceImpl extends BaseOpenmrsService implements Midd
 
 				// Convert the "dadosResposta" object into your final RespostaDTO
 				RespostaDTO resposta = objectMapper.treeToValue(dadosRespostaNode, RespostaDTO.class);
+
+				resposta.setUuid(middlewareResposta.getUuid());
 				finalRespostas.add(resposta);
 			}
 
@@ -355,6 +354,8 @@ public class MiddlewareApiServiceImpl extends BaseOpenmrsService implements Midd
         // 1. Convert payload object to JSON string
         String clearJsonPayload = objectMapper.writeValueAsString(payload);
 
+		log.info(">>>>>> Clear Text Payload to Mark Consumed: " + clearJsonPayload);
+
         // 2. Encrypt the JSON payload using the server's public key
         String encryptedDataB64 = MiddlewareCryptoUtil.encryptCompact(clearJsonPayload, this.serverPublicKey);
 
@@ -364,6 +365,8 @@ public class MiddlewareApiServiceImpl extends BaseOpenmrsService implements Midd
         // 4. Build the final DTO
         EncryptedRequestDTO finalPayload = new EncryptedRequestDTO(encryptedDataB64, signatureB64);
         String finalJson = objectMapper.writeValueAsString(finalPayload);
+
+		log.info(">>>>>> Final Encrypted JSON to be sent: " + finalJson);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpPost post = new HttpPost(url);
