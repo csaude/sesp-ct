@@ -768,5 +768,19 @@
 	        </column>
 	    </addColumn>
 	</changeSet>
+	
+	<changeSet id="sespct-1.0.0-14" author="sespct">
+	    <preConditions onFail="MARK_RAN">
+	        <columnExists tableName="sespct_linha_solicitada" columnName="linha"/>
+	    </preConditions>
+	    <comment>Aumenta o tamanho da coluna linha para VARCHAR(50)</comment>
+	
+	    <sql>
+	        ALTER TABLE sespct_linha_solicitada 
+	        MODIFY COLUMN linha VARCHAR(50);
+	    </sql>
+</changeSet>
+	
+	
     
 </databaseChangeLog>
