@@ -7,6 +7,7 @@ import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.sespct.api.util.Constants;
+import org.openmrs.module.sespct.api.util.StringHelper;
 import org.openmrs.module.sespct.api.util.TarvUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,7 +189,7 @@ public class ObsBuilder {
 		Obs group = createBaseObs(Constants.LINHA_SOLICITADA_GROUP_UUID);
 		Obs linhaObs = createBaseObs(Constants.LINHA_SOLICITADA_UUID);
 		
-		switch (linha.trim().toUpperCase()) {
+		switch (StringHelper.removeAcentos(linha.trim()).toUpperCase()) {
 			case "2 LINHA":
 				linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.SEGUNDA_LINHA_UUID));
 				break;
@@ -214,7 +215,7 @@ public class ObsBuilder {
 		
 		if (estado != null) {
 			Obs estadoObs = createBaseObs(Constants.RESPOSTA_ESTADO_UUID);
-			switch (estado.trim().toUpperCase()) {
+			switch (StringHelper.removeAcentos(estado.trim()).toUpperCase()) {
 				case "SEM_RESPOSTA":
 					estadoObs
 					        .setValueCoded(Context.getConceptService().getConceptByUuid(Constants.ESTADO_SEM_RESPOSTA_UUID));
@@ -233,7 +234,7 @@ public class ObsBuilder {
 		
 		if (linha != null) {
 			Obs linhaObs = createBaseObs(Constants.RESPOSTA_LINHA_UUID);
-			switch (linha.trim().toUpperCase()) {
+			switch (StringHelper.removeAcentos(linha.trim()).toUpperCase()) {
 				case "SEGUNDA LINHA":
 					linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.SEGUNDA_LINHA_UUID));
 					break;
@@ -273,7 +274,7 @@ public class ObsBuilder {
 	}
 	
 	private String mapEstadioToUuid(String estadioOms) {
-		switch (estadioOms.toUpperCase()) {
+		switch (StringHelper.removeAcentos(estadioOms).trim().toUpperCase()) {
 			case "ESTADIO I":
 				return Constants.ESTADIO_I_UUID;
 			case "ESTADIO II":

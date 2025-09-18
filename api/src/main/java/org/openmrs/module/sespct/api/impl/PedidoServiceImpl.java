@@ -140,14 +140,14 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 		String[] FIRST_NAMES = {"João", "Maria", "Pedro", "Ana", "Carlos", "Luisa", "António", "Isabel", "Manuel", "Rosa", "Francisco", "Teresa", "José", "Catarina", "Miguel"};
 		String[] LAST_NAMES = {"Silva", "Santos", "Oliveira", "Pereira", "Costa", "Rodrigues", "Martins", "Jesus", "Soares", "Ferreira", "Alves", "Monteiro", "Ribeiro", "Rocha", "Nunes"};
 		// FIXED: Simplified statuses to make response generation logic work correctly
-		String[] REQUEST_STATUSES = {"Aprovado", "Nao Processado", "Adiado", "Sem resposta"};
+		String[] REQUEST_STATUSES = {"Aprovado", "Adiado", "Sem_resposta"};
 		String[] REJECTION_CAUSES = {"NID nao encontrado", "NID duplicado",};
 		String[] WHO_STAGES = {"Estadio I", "Estadio II", "Estadio III", "Estadio IV"};
 		String[] PROVINCES = {"Maputo", "Gaza", "Inhambane", "Sofala", "Manica", "Tete", "Zambézia", "Nampula", "Cabo Delgado", "Niassa"};
 		String[] DISTRICTS = {"Maputo", "Matola", "Boane", "Marracuene", "Manhiça", "Magude", "Moamba", "Namaacha", "Xai-Xai", "Chibuto"};
 		String[] US_NAMES = {"Hospital Central de Maputo", "Hospital Geral de Mavalane", "Centro de Saúde da Polana", "Hospital Rural de Manhiça", "Centro de Saúde de Marracuene"};
 		String[] YES_NO = {"Sim", "Nao"};
-		String[] PROFESSIONAL_CATEGORIES = {"Médico", "Enfermeiro", "Técnico de Medicina", "Farmacêutico"};
+		String[] PROFESSIONAL_CATEGORIES = {"Médico", "TMG", "ESMI", "Farmacêutico"};
 		String[] ART_REGIMENS = {"TDF+3TC+EFV", "AZT+3TC+NVP", "ABC+3TC+EFV", "TDF+3TC+DTG", "AZT+3TC+EFV"};
 		String[] APPROVED_REGIMENS = {"ATV/r+TDF+3TC", "LPV/r+AZT+3TC", "DTG+ABC+3TC", "DRV/r+TDF+FTC"};
 		String[] RESPONSE_TEXTS = {"Aprovado", "Rejeitado", "Aprovado com condições"};

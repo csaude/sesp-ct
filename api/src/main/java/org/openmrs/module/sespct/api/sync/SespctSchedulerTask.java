@@ -21,6 +21,7 @@ import org.openmrs.module.sespct.api.model.Pedido;
 import org.openmrs.module.sespct.api.util.Constants;
 import org.openmrs.module.sespct.api.util.DateTimeUtils;
 import org.openmrs.module.sespct.api.util.EncounterUtils;
+import org.openmrs.module.sespct.api.util.StringHelper;
 import org.openmrs.scheduler.tasks.AbstractTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -295,7 +296,7 @@ public class SespctSchedulerTask extends AbstractTask {
 		obsBuilder.addTextObs(Constants.CLINICO_EMAIL_UUID, pedido.getDadosClinico().getEmail());
 		
 		if (pedido.getDadosClinico().getCategoriaProfissional() != null) {
-		    String categoria = pedido.getDadosClinico().getCategoriaProfissional().trim().toUpperCase();
+		    String categoria = StringHelper.removeAcentos(pedido.getDadosClinico().getCategoriaProfissional().trim()).toUpperCase();
 		    switch (categoria) {
 		        case "MEDICO":
 		            obsBuilder.addCodedObs(Constants.CLINICO_CATEGORIA_UUID, Constants.CATEGORIA_MEDICO_UUID);
