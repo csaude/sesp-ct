@@ -1,5 +1,6 @@
 package org.openmrs.module.sespct.web.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.FlashMap;
@@ -87,14 +89,15 @@ public class MapUnprocessedFtController {
 		// Input validation
 		if (pedidoId == null) {
 			log.error("Pedido ID cannot be null");
-			model.addAttribute("flashMessage",
+			// Store flash message in session instead of model
+			session.setAttribute("flashMessage",
 			    messageSourceService.getMessage("sespct.error.invalid.pedido", null, Context.getLocale()));
 			return "redirect:/module/sespct/sespct.form" + query;
 		}
 		
 		if (StringUtils.isBlank(patientUuid)) {
 			log.error("Patient UUID cannot be null or empty");
-			model.addAttribute("flashMessage",
+			session.setAttribute("flashMessage",
 			    messageSourceService.getMessage("sespct.error.invalid.patient", null, Context.getLocale()));
 			return "redirect:/module/sespct/sespct.form" + query;
 		}
@@ -103,7 +106,7 @@ public class MapUnprocessedFtController {
 			Pedido pedido = pedidoService.getPedidoById(pedidoId);
 			if (pedido == null) {
 				log.error("Pedido not found with ID: {}", pedidoId);
-				model.addAttribute("flashMessage",
+				session.setAttribute("flashMessage",
 				    messageSourceService.getMessage("sespct.error.pedido.not.found", null, Context.getLocale()));
 				return "redirect:/module/sespct/sespct.form" + query;
 			}
@@ -114,34 +117,35 @@ public class MapUnprocessedFtController {
 			String nid = pedido.getDadosUtente() != null ? pedido.getDadosUtente().getNid() : "Unknown";
 			String patientIdentifier = mappedPatient.getPatientIdentifier() != null ? mappedPatient.getPatientIdentifier()
 			        .getIdentifier() : "Unknown";
-			
 			String[] args = new String[] { nid, patientIdentifier };
+			
 			String successMessage = messageSourceService.getMessage("sespct.map.successful", args, Context.getLocale());
 			
-			// Use model attribute for success message with URL parameter approach
-			model.addAttribute("flashMessage", successMessage);
+			// Store success message in session
+			session.setAttribute("flashMessage", successMessage);
 			
 			log.info("Successfully mapped NID {} to patient UUID {}", nid, patientUuid);
+			
 			return "redirect:/module/sespct/sespct.form" + query;
 			
 		}
 		catch (IllegalArgumentException e) {
 			log.error("Invalid argument for mapping: {}", e.getMessage());
-			model.addAttribute("flashMessage",
+			session.setAttribute("flashMessage",
 			    messageSourceService.getMessage("sespct.error.invalid.argument", null, Context.getLocale()));
 			return "redirect:/module/sespct/sespct.form" + query;
 			
 		}
 		catch (IllegalStateException e) {
 			log.error("Invalid state for mapping: {}", e.getMessage());
-			model.addAttribute("flashMessage",
+			session.setAttribute("flashMessage",
 			    messageSourceService.getMessage("sespct.error.invalid.state", null, Context.getLocale()));
 			return "redirect:/module/sespct/sespct.form" + query;
+			
 		}
-		
 		catch (Exception e) {
 			log.error("Unexpected error during NID mapping", e);
-			model.addAttribute("flashMessage",
+			session.setAttribute("flashMessage",
 			    messageSourceService.getMessage("sespct.error.unexpected", null, Context.getLocale()));
 			return "redirect:/module/sespct/sespct.form" + query;
 		}

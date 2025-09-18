@@ -50,7 +50,7 @@
 			<label for="us"><openmrs:message code="sespct.search.us" /></label>
 			<select id="us" name="usCode">
 				<option value="ALL" ${selectedUsCode == 'ALL' || empty selectedUsCode ? 'selected' : ''}><openmrs:message code="sespct.search.us.ALL" /></option>
-				<option value=${unidadesSanitaria} ${selectedUsCode == unidadesSanitaria ? 'selected' : ''}>${unidadesSanitaria}</option>
+				<option value=${unidadesSanitaria} ${selectedUsCode == unidadesSanitaria ? 'selected' : ''}>${unidadesSanitariaNome} (${unidadesSanitaria})</option>
 
 <%--				<c:forEach var="us" items="${unidadesSanitarias}">--%>
 <%--					<option value="${us.code}" ${selectedUsCode == us.code ? 'selected' : ''}>${us.name} (${us.code})</option>--%>

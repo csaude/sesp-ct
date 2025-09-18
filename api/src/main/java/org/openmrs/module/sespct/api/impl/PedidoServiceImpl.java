@@ -34,11 +34,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	
 	private static final Logger log = LoggerFactory.getLogger(PedidoServiceImpl.class);
 	
-	private static final String ESTADO_NAO_PROCESSADO = "Não Processado";
-	
 	private static final String CAUSA_NID_NAO_ENCONTRADO = "NID não encontrado";
-	
-	private static final String ESTADO_SEM_RESPOSTA = "Sem resposta";
 	
 	@Autowired
 	private PedidoDao pedidoDao;
@@ -186,7 +182,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 		
 		log.debug("Validating pedido state - Estado: {}, Causa: {}", estado, causa);
 		
-		if (!ESTADO_NAO_PROCESSADO.equals(estado) || !CAUSA_NID_NAO_ENCONTRADO.equals(causa)) {
+		if (!Pedido.ESTADO_NAO_PROCESSADO.equals(estado) || !Pedido.CAUSA_NID_NAO_ENCONTRADO.equals(causa)) {
 			String labResultStatus = messageSourceService.getMessage("sespct.status." + estado);
 			throw new IllegalStateException(String.format(
 			    "Pedido is not in a valid state for mapping. Current state: %s, Cause: %s", estado, causa));
@@ -314,7 +310,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 		try {
 			Pedido pedido = getPedidoById(pedidoId);
 			if (pedido != null) {
-				pedido.setEstado(ESTADO_SEM_RESPOSTA);
+				pedido.setEstado(Pedido.ESTADO_NAO_PROCESSADO);
 				pedido.setCausa(null);
 				savePedido(pedido);
 				log.debug("Pedido {} rescheduled successfully", pedidoId);

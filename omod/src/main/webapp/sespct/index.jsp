@@ -113,6 +113,9 @@
                                 <c:when test="${pedido.estado == Pedido.ESTADO_APROVADO}">
                                     <span class="status-not-processed"><openmrs:message code="sespct.search.status.APROVADO"/></span>
                                 </c:when>
+                                <c:when test="${pedido.estado == Pedido.ESTADO_ADIADO}">
+                                    <span class="status-not-processed"><openmrs:message code="sespct.search.status.ADIADO"/></span>
+                                </c:when>
                                 <c:otherwise>
                                     ${pedido.estado}
                                 </c:otherwise>
@@ -131,7 +134,7 @@
                         </td>
                         <td>
                             <c:choose>
-                            <c:when test="${pedido.causa == 'NID não encontrado'}">
+                            <c:when test="${pedido.causa == Pedido.CAUSA_NID_NAO_ENCONTRADO}">
                                 <a href="manageftcases/${pedido.id}/map.form" onclick="mapNid('${pedido.dadosUtente.nid}')">
                                     <openmrs:message code="sespct.mapNid"/>
                                 </a>
