@@ -1,8 +1,6 @@
 package org.openmrs.module.sespct.api.impl;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
@@ -12,9 +10,14 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.messagesource.MessageSourceService;
+import org.openmrs.module.sespct.api.MiddlewareApiService;
 import org.openmrs.module.sespct.api.PedidoService;
 import org.openmrs.module.sespct.api.dao.PedidoDao;
+import org.openmrs.module.sespct.api.dto.MetadadosPedidoDTO;
+import org.openmrs.module.sespct.api.dto.PedidoDTO;
+import org.openmrs.module.sespct.api.dto.RespostaDTO;
 import org.openmrs.module.sespct.api.model.*;
+import org.openmrs.module.sespct.api.util.SespctMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +28,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoService {
 	
@@ -39,6 +43,9 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	@Autowired
 	private PedidoDao pedidoDao;
 	
+	@Autowired
+	private MiddlewareApiService middlewareApiService;
+	
 	private MessageSourceService messageSourceService;
 	
 	public static final String NID_SCT = "ac75ec91-bc27-4681-97d0-7db08937b2d7";
@@ -52,6 +59,12 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	public Pedido savePedido(Pedido pedido) {
 		return pedidoDao.savePedido(pedido);
 	}
+	
+	@Override
+	@Transactional
+	public Resposta saveResposta(Resposta resposta) {
+		return pedidoDao.saveResposta(resposta);
+	};
 	
 	@Override
 	@Transactional(readOnly = true)
@@ -105,264 +118,6 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 		// The date range adjustment is now handled in the controller.
 		// This method becomes a clean, direct pass-through to the DAO.
 		return pedidoDao.getPedidosByDateTimeRange(startDateTime, endDateTime);
-	}
-	
-	/**
-	 * Creates and persists a set of dummy Pedido objects with their related entities. Generates 50
-	 * records with submissions from 2020 to 2025. Includes special cases for NID mapping as per
-	 * business rules.
-	 */
-	/**
-	 * Creates and persists a set of dummy Pedido objects with their related entities. Generates 50
-	 * records with submissions from 2020 to 2025. Includes special cases for NID mapping as per
-	 * business rules.
-	 */
-	@Transactional
-	public void createDummyData() {
-		ZoneId maputoZone = ZoneId.of("Africa/Maputo");
-		log.info("Starting dummy data creation for SESPCT module...");
-		Random rand = new Random();
-		int numberOfPedidos = 50; // Generate 50 dummy requests
-
-		// Arrays for realistic dummy data
-		String[] FIRST_NAMES = {"João", "Maria", "Pedro", "Ana", "Carlos", "Luisa", "António", "Isabel", "Manuel", "Rosa", "Francisco", "Teresa", "José", "Catarina", "Miguel"};
-		String[] LAST_NAMES = {"Silva", "Santos", "Oliveira", "Pereira", "Costa", "Rodrigues", "Martins", "Jesus", "Soares", "Ferreira", "Alves", "Monteiro", "Ribeiro", "Rocha", "Nunes"};
-		// FIXED: Simplified statuses to make response generation logic work correctly
-		String[] REQUEST_STATUSES = {"Aprovado", "Não Processado", "Adiado", "Sem resposta"};
-		String[] REJECTION_CAUSES = {"NID não encontrado", "NID duplicado",};
-		String[] WHO_STAGES = {"Estadio I", "Estadio II", "Estadio III", "Estadio IV"};
-		String[] PROVINCES = {"Maputo", "Gaza", "Inhambane", "Sofala", "Manica", "Tete", "Zambézia", "Nampula", "Cabo Delgado", "Niassa"};
-		String[] DISTRICTS = {"Maputo", "Matola", "Boane", "Marracuene", "Manhiça", "Magude", "Moamba", "Namaacha", "Xai-Xai", "Chibuto"};
-		String[] US_NAMES = {"Hospital Central de Maputo", "Hospital Geral de Mavalane", "Centro de Saúde da Polana", "Hospital Rural de Manhiça", "Centro de Saúde de Marracuene"};
-		String[] YES_NO = {"Sim", "Não"};
-		String[] PROFESSIONAL_CATEGORIES = {"Médico", "Enfermeiro", "Técnico de Medicina", "Farmacêutico"};
-		String[] ART_REGIMENS = {"TDF+3TC+EFV", "AZT+3TC+NVP", "ABC+3TC+EFV", "TDF+3TC+DTG", "AZT+3TC+EFV"};
-		String[] APPROVED_REGIMENS = {"ATV/r+TDF+3TC", "LPV/r+AZT+3TC", "DTG+ABC+3TC", "DRV/r+TDF+FTC"};
-		String[] RESPONSE_TEXTS = {"Aprovado", "Rejeitado", "Aprovado com condições"};
-
-		// Calculate how many records should have "NID não encontrado" status (about 20%)
-		int nidNotFoundCount = (int) (numberOfPedidos * 0.2);
-
-		for (int i = 0; i < numberOfPedidos; i++) {
-			try {
-				Pedido pedido = new Pedido();
-
-				// FIXED: Set all standard OpenMRS audit fields, including the creator
-//				pedido.setUuid(UUID.randomUUID().toString());
-				// Use Context.getAuthenticatedUser() if in a logged-in session, or a default user ID.
-				// Using '1' for the admin user as a fallback for dummy data scripts.
-				pedido.setCreator(Context.getAuthenticatedUser());
-				pedido.setDateCreated(new Date());
-				pedido.setVoided(false);
-
-				// --- 1. Populate Pedido (the main request entity) ---
-				pedido.setPedidoId((1515 + i + 1)+""); // Use UUID for unique external ID
-				pedido.setDataSubmissao(getRandomLocalDateTime(rand, 2020, 2025));
-				pedido.setVersao("1.0");
-				pedido.setOrigem("OpenMRS");
-				pedido.setTipoFormulario("Falencia Terapeutica");
-				pedido.setSolicitadoPor("admin");
-
-				// --- Special Case Logic for NID mapping ---
-				if (i < nidNotFoundCount) {
-					pedido.setEstado("Não Processado");
-					pedido.setCausa("NID não encontrado");
-				} else {
-					pedido.setEstado(getRandomElement(REQUEST_STATUSES, rand));
-					if ("Não Processado".equals(pedido.getEstado())) {
-						// Ensure a cause is set if "Não Processado" but not the special NID case
-						String cause = getRandomElement(REJECTION_CAUSES, rand);
-						pedido.setCausa(cause);
-					} else {
-						pedido.setCausa(null);
-					}
-				}
-
-				// --- 2. Populate DadosUtente (One-to-One) ---
-				DadosUtente utente = new DadosUtente();
-				utente.setPedido(pedido);
-
-				String firstName = getRandomElement(FIRST_NAMES, rand);
-				String lastName = getRandomElement(LAST_NAMES, rand);
-				utente.setNomeCompleto(firstName + " " + lastName);
-				utente.setIniciais(String.valueOf(firstName.charAt(0)) + String.valueOf(lastName.charAt(0)));
-
-				String facilityCode = "0109010701";  // or pick from predefined list
-				int year = 2007 + rand.nextInt(19);  // 2007–2025
-				String sequence = String.format("%05d", i + 1); // ensures uniqueness per dummy data batch
-				utente.setNid(facilityCode + "/" + year + "/" + sequence);
-
-				utente.setIdade((double) (rand.nextInt(50) + 18));
-				utente.setEstadioOms(getRandomElement(WHO_STAGES, rand));
-				utente.setEstadioOmsMotivo("Motivo de teste para estadio " + utente.getEstadioOms());
-				utente.setProvincia(getRandomElement(PROVINCES, rand));
-				utente.setDistrito(getRandomElement(DISTRICTS, rand));
-				utente.setUnidadeSanitaria(getRandomElement(US_NAMES, rand));
-				utente.setCodigoUnidadeSanitaria(String.valueOf(101150 + rand.nextInt(100)));
-				utente.setPeso((double) (rand.nextInt(40) + 50));
-				utente.setSexo(rand.nextBoolean() ? "Masculino" : "Feminino");
-
-				if ("Feminino".equals(utente.getSexo())) {
-					boolean isGestante = rand.nextBoolean();
-					if (isGestante) {
-						utente.setGestante("Sim");
-						utente.setDataProvavelParto(getRandomLocalDateTime(rand, 2025, 2026));
-						utente.setLactante("Não");
-					} else {
-						utente.setGestante("Não");
-						boolean isLactante = rand.nextBoolean();
-						utente.setLactante(isLactante ? "Sim" : "Não");
-						if (isLactante) {
-							utente.setDataParto(getRandomLocalDateTime(rand, 2024, 2025));
-						}
-					}
-				} else {
-					utente.setGestante("Não");
-					utente.setLactante("Não");
-				}
-				pedido.setDadosUtente(utente);
-
-				// --- 3. Populate DadosClinico (One-to-One) ---
-				DadosClinico clinico = new DadosClinico();
-				clinico.setPedido(pedido);
-				clinico.setNome("Dr. " + getRandomElement(FIRST_NAMES, rand) + " " + getRandomElement(LAST_NAMES, rand));
-				clinico.setCategoriaProfissional(getRandomElement(PROFESSIONAL_CATEGORIES, rand));
-				clinico.setTelefone("84" + String.format("%07d", rand.nextInt(10_000_000)));
-				clinico.setEmail("clinico" + i + "@mail.com");
-				pedido.setDadosClinico(clinico);
-
-				// --- 4. Populate ReportarFalencia (One-to-One) ---
-				ReportarFalencia falencia = new ReportarFalencia();
-				falencia.setPedido(pedido);
-				falencia.setHistoriaClinica("Paciente com historial de má adesão, apresentando sinais de falha virológica.");
-				falencia.setHistoriaAdesao("Adesão reportada como inconsistente nos últimos meses.");
-				falencia.setTratamentoTbAtivo(getRandomElement(YES_NO, rand));
-				pedido.setReportarFalencia(falencia);
-
-				// --- 5. Populate LinhaSolicitada (One-to-One) ---
-				LinhaSolicitada linha = new LinhaSolicitada();
-				linha.setPedido(pedido);
-				linha.setLinha(rand.nextBoolean() ? "Segunda Linha" : "Terceira Linha");
-				pedido.setLinhaSolicitada(linha);
-
-				// --- 6. Populate HistoriaTarv (One-to-Many) ---
-				// FIXED: Changed Set to List and HashSet to ArrayList
-				List<HistoriaTarv> historiaTarvList = new ArrayList<>();
-				int numTarvHistory = rand.nextInt(3) + 1;
-				for (int j = 0; j < numTarvHistory; j++) {
-					HistoriaTarv hist = new HistoriaTarv();
-//					hist.setUuid(UUID.randomUUID().toString());
-					hist.setCreator(Context.getAuthenticatedUser()); // Default to admin user
-					hist.setDateCreated(new Date());
-					hist.setVoided(false);
-					hist.setPedido(pedido);
-					hist.setDataInicio(getRandomLocalDateTime(rand, 2018 - j * 2, 2020 - j * 2));
-					hist.setDataTermino(getRandomLocalDateTime(rand, 2020 - j * 2, 2022 - j * 2));
-					hist.setEsquemaTarv(getRandomElement(ART_REGIMENS, rand));
-					historiaTarvList.add(hist);
-				}
-				pedido.setHistoriaTarv(historiaTarvList);
-
-				// --- 7. Populate DadosLaboratorioCargaViral (One-to-Many) ---
-				// FIXED: Changed Set to List and HashSet to ArrayList
-				List<DadosLaboratorioCargaViral> cargaViralList = new ArrayList<>();
-				int numViralLoads = rand.nextInt(4) + 2;
-				for (int j = 0; j < numViralLoads; j++) {
-					DadosLaboratorioCargaViral cv = new DadosLaboratorioCargaViral();
-//					cv.setUuid(UUID.randomUUID().toString());
-					cv.setCreator(Context.getAuthenticatedUser());
-					cv.setDateCreated(new Date());
-					cv.setVoided(false);
-					cv.setPedido(pedido);
-					cv.setData(getRandomLocalDateTime(rand, 2022, 2024));
-					cv.setCargaViral((long) (1000 + rand.nextInt(50000)));
-					cargaViralList.add(cv);
-				}
-				pedido.setDadosLaboratorioCargaViral(cargaViralList);
-
-				// --- 8. Populate DadosLaboratorioCD4 (One-to-Many) ---
-				// FIXED: Changed Set to List and HashSet to ArrayList
-				List<DadosLaboratorioCD4> cd4List = new ArrayList<>();
-				int numCd4 = rand.nextInt(4) + 2;
-				for (int j = 0; j < numCd4; j++) {
-					DadosLaboratorioCD4 cd4 = new DadosLaboratorioCD4();
-//					cd4.setUuid(UUID.randomUUID().toString());
-					cd4.setCreator(Context.getAuthenticatedUser());
-					cd4.setDateCreated(new Date());
-					cd4.setVoided(false);
-					cd4.setPedido(pedido);
-					cd4.setData(getRandomLocalDateTime(rand, 2022, 2024));
-					cd4.setCd4(100 + rand.nextInt(400));
-					cd4.setCd4Percentagem(rand.nextDouble() * 15 + 5);
-					cd4List.add(cd4);
-				}
-				pedido.setDadosLaboratorioCD4(cd4List);
-
-				// --- 9. Populate Resposta (One-to-Many) - Conditionally ---
-				// FIXED: Changed Set to List and HashSet to ArrayList
-				List<Resposta> respostasList = new ArrayList<>();
-				// FIXED: Corrected logic to generate responses for "Aprovado" or "Não Processado" statuses
-				if ("Aprovado".equals(pedido.getEstado()) || "Não Processado".equals(pedido.getEstado())) {
-					Resposta resposta = new Resposta();
-//					resposta.setUuid(UUID.randomUUID().toString());
-					resposta.setCreator(Context.getAuthenticatedUser());
-					resposta.setDateCreated(new Date());
-					resposta.setVoided(false);
-					resposta.setPedido(pedido);
-
-					MetadadosResposta meta = new MetadadosResposta();
-					meta.setResposta(resposta);
-					meta.setRespostaId("RESP-" + (i + 1));
-					meta.setPedidoId(pedido.getPedidoId());
-					meta.setVersao("1.0");
-					meta.setTimestamp(LocalDateTime.now(maputoZone));
-					meta.setProcessadoPor("Comite Nacional");
-					meta.setUltimaSincronizacao(LocalDateTime.now(maputoZone));
-					resposta.setMetadados(meta);
-
-					RespostaComite comite = new RespostaComite();
-					comite.setResposta(resposta);
-					// Base response on the Pedido's state
-					String responseText = "Aprovado".equals(pedido.getEstado()) ? "Aprovado" : "Rejeitado";
-					comite.setRespostaTexto(responseText);
-
-					if ("Aprovado".equals(responseText)) {
-						comite.setLinhaTerapeutica(linha.getLinha());
-						comite.setEsquemaAprovado(getRandomElement(APPROVED_REGIMENS, rand));
-					}
-					comite.setDataResposta(LocalDateTime.now(maputoZone));
-					comite.setComentario("Comentário automático de teste gerado para pedido " + pedido.getPedidoId());
-					comite.setAutorizante("Dr. Responsável Virtual");
-					comite.setEmail("responsavel.comite@sis.gov.mz");
-					comite.setContacto("82" + String.format("%07d", rand.nextInt(10_000_000)));
-					comite.setNivelAutorizacao("Nacional");
-					comite.setDataAprovacao(LocalDateTime.now(maputoZone));
-					resposta.setRespostaComite(comite);
-
-					Notificacoes notificacoes = new Notificacoes();
-					notificacoes.setResposta(resposta);
-					notificacoes.setWebhookEntregue(rand.nextBoolean());
-					notificacoes.setEmailEnviado(true);
-					notificacoes.setSmsEnviado(rand.nextBoolean());
-					notificacoes.setDataNotificacao(LocalDateTime.now(maputoZone));
-					resposta.setNotificacoes(notificacoes);
-
-					respostasList.add(resposta);
-				}
-				pedido.setRespostas(respostasList);
-
-				// --- 10. Save the Pedido ---
-				pedidoDao.savePedido(pedido);
-
-				if ((i + 1) % 10 == 0) {
-					log.info("Created " + (i + 1) + " dummy pedidos...");
-				}
-
-			} catch (Exception e) {
-				log.error("Error saving dummy pedido " + (i + 1), e);
-			}
-		}
-		log.info("Finished creating " + numberOfPedidos + " dummy SESPCT pedidos with " + nidNotFoundCount + " NID mapping cases.");
 	}
 	
 	private String getRandomElement(String[] array, Random rand) {
@@ -487,7 +242,6 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 		
 		for (PatientIdentifier identifier : activeIdentifiers) {
 			if (nidIdentifierType.equals(identifier.getIdentifierType())) {
-				log.debug("Patient already has NID identifier: {}", identifier.getIdentifier());
 				return true;
 			}
 		}
@@ -508,8 +262,6 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 		patientIdentifier.setIdentifier(nid);
 		patientIdentifier.setIdentifierType(nidIdentifierType);
 		patientIdentifier.setLocation(location);
-		
-		log.debug("Creating new PatientIdentifier with NID: {}", nid);
 		patientService.savePatientIdentifier(patientIdentifier);
 		log.debug("PatientIdentifier saved successfully");
 	}
@@ -573,5 +325,121 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 		catch (Exception e) {
 			log.error("Error rescheduling pedido {}", pedidoId, e);
 		}
+	}
+	
+	@Override
+	@Transactional
+	public void synchronizeMiddlewareData() {
+		log.info("Starting SESP-CT middleware synchronization...");
+		
+		// Step 1: Login to the API to get an auth token
+		String authToken = middlewareApiService.login();
+		if (authToken == null) {
+			log.error("Synchronization failed: Could not log in to the middleware.");
+			// You could throw an exception here to notify the controller
+			throw new RuntimeException("Authentication with middleware failed.");
+		}
+		
+		// Step 2: Fetch and process new Pedidos
+		List<PedidoDTO> pedidoDtos = middlewareApiService.fetchPedidos(authToken);
+		if (!pedidoDtos.isEmpty()) {
+			List<String> newPedidoUuids = processPedidos(pedidoDtos);
+			
+			//			 Step 2b: Mark Pedidos as consumed
+			if (!newPedidoUuids.isEmpty()) {
+				middlewareApiService.markPedidosAsConsumed(newPedidoUuids, authToken);
+			}
+		} else {
+			log.info("No new pedidos to synchronize.");
+		}
+		
+		// Step 3: Fetch and process new Respostas
+		List<RespostaDTO> respostaDtos = middlewareApiService.fetchRespostas(authToken);
+		if (!respostaDtos.isEmpty()) {
+			List<String> newRespostaIds = processRespostas(respostaDtos);
+			
+			// Step 3b: Mark Respostas as consumed
+			if (!newRespostaIds.isEmpty()) {
+				middlewareApiService.markRespostasAsConsumed(newRespostaIds, authToken);
+			}
+		} else {
+			log.info("No new respostas to synchronize.");
+		}
+		
+		log.info("Middleware synchronization finished.");
+	}
+	
+	private List<String> processPedidos(List<PedidoDTO> dtos) {
+		log.info("Processing " + dtos.size() + " fetched pedidos...");
+		List<String> newlySavedPedidoUUIds = new ArrayList<>();
+
+		for (PedidoDTO dto : dtos) {
+			// 1. Get the metadata object into a variable first
+			MetadadosPedidoDTO meta = dto.getMetadadosPedidoDTO();
+			// 2. Add a null check to ensure the metadata and its ID exist
+			if (meta == null || meta.getPedidoId() == null) {
+				log.error("Skipping a PedidoDTO because its metadata or pedidoId is missing. DTO: " + dto);
+				continue; // This skips the current loop iteration and moves to the next DTO
+			}
+			
+			// 3. Now that we know 'meta' and 'meta.getPedidoId()' are not null, the rest of the code is safe.
+			// IDEMPOTENCY CHECK: Only save if it's a new pedido
+			if (!pedidoDao.doesPedidoExist(meta.getPedidoId())) {
+				Pedido newPedido = SespctMapper.toPedidoEntity(dto);
+				if (newPedido != null) {
+					pedidoDao.savePedido(newPedido);
+					log.info("Saved new pedido with ID: " + newPedido.getPedidoId());
+					newlySavedPedidoUUIds.add(dto.getUuid());
+				}
+			} else {
+				log.warn("Skipping already existing pedido with ID: " + meta.getPedidoId());
+			}
+		}
+		return newlySavedPedidoUUIds;
+	}
+	
+	private List<String> processRespostas(List<RespostaDTO> dtos) {
+		log.info("Processing " + dtos.size() + " fetched respostas...");
+		List<String> newlySavedRespostaUUIds = new ArrayList<>();
+
+		for (RespostaDTO dto : dtos) {
+			String externalPedidoId = dto.getMetadados().getPedidoId();
+			String externalRespostaId = dto.getMetadados().getRespostaId();
+
+			// IDEMPOTENCY CHECK: Only save if it's a new resposta
+			if (!pedidoDao.doesRespostaExist(externalRespostaId)) {
+				Pedido parentPedido = pedidoDao.getPedidoByExternalId(externalPedidoId);
+
+				if (parentPedido != null) {
+					Resposta newResposta = SespctMapper.toRespostaEntity(dto, parentPedido);
+					pedidoDao.saveResposta(newResposta);
+					parentPedido.getRespostas().add(newResposta);
+
+					RespostaComite respostaComite = newResposta.getRespostaComite();
+					if (respostaComite != null) {
+						String respostaTexto = respostaComite.getRespostaTexto(); // P.S. double-check if your getter is named getResposta_texto() instead!
+
+						// Log the actual value to see what you're getting from the API
+						log.info("Attempting to update status based on resposta text: '" + respostaTexto + "'");
+
+						if ("Aprovado".equalsIgnoreCase(respostaTexto)) {
+							parentPedido.setEstado(Pedido.ESTADO_APROVADO);
+						} else if ("Adiado".equalsIgnoreCase(respostaTexto)) {
+							parentPedido.setEstado(Pedido.ESTADO_ADIADO);
+						}
+					}
+
+					pedidoDao.savePedido(parentPedido); // Save the parent to cascade the save to the new Resposta
+					newlySavedRespostaUUIds.add(dto.getUuid());
+					log.info("Saved new resposta " + externalRespostaId + " for pedido " + externalPedidoId);
+				} else {
+					log.warn("Could not find parent pedido with ID: " + externalPedidoId + ". Cannot save resposta "
+					        + externalRespostaId);
+				}
+			} else {
+				log.warn("Skipping already existing resposta with ID: " + externalRespostaId);
+			}
+		}
+		return newlySavedRespostaUUIds;
 	}
 }

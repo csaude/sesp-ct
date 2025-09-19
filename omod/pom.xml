@@ -68,12 +68,6 @@
 			<artifactId>commons-lang3</artifactId>
 			<version>3.4</version>
 		</dependency>
-
-		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging</artifactId>
-			<version>1.1.1</version>
-		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>
@@ -86,7 +80,6 @@
 			<version>1.0.0.GA</version>
 			<scope>provided</scope>
 		</dependency>
-
 	</dependencies>
 
 	<build>
@@ -107,10 +100,26 @@
 						<goal>shade</goal>
 					</goals>
 					<configuration>
+						<artifactSet>
+							<includes>
+								<include>org.apache.poi:poi</include>
+								<include>org.apache.poi:poi-ooxml</include>
+								<include>org.apache.httpcomponents:httpclient</include>
+								<include>org.apache.httpcomponents:httpcore</include>
+							</includes>
+						</artifactSet>
 						<relocations>
 							<relocation>
 								<pattern>org.apache.poi</pattern>
 								<shadedPattern>org.openmrs.module.sespct.shaded.poi</shadedPattern>
+							</relocation>
+							<relocation>
+								<pattern>org.apache.http</pattern>
+								<shadedPattern>org.openmrs.module.sespct.shaded.http</shadedPattern>
+							</relocation>
+							<relocation>
+								<pattern>org.apache.commons.codec</pattern>
+								<shadedPattern>org.openmrs.module.sespct.shaded.codec</shadedPattern>
 							</relocation>
 						</relocations>
 					</configuration>

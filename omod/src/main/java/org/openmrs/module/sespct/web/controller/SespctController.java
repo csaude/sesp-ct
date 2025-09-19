@@ -1,15 +1,14 @@
 package org.openmrs.module.sespct.web.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.sespct.api.ExportService;
 import org.openmrs.module.sespct.api.PedidoService;
 import org.openmrs.module.sespct.api.model.Pedido;
-import org.openmrs.module.sespct.api.util.DateRange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,18 +19,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
-
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/module/sespct/")
@@ -60,6 +52,15 @@ public class SespctController {
 		
 		LocalDate startDate = null;
 		LocalDate endDate = null;
+		
+		try {
+			// Call the main sync method every time the page is loaded
+			pedidoService.synchronizeMiddlewareData();
+		}
+		catch (Exception e) {
+			log.error("An error occurred during middleware synchronization.", e);
+			model.addAttribute("errorMessage", "Ocorreu um erro durante a sincronização: " + e.getMessage());
+		}
 		
 		try {
 			if (flashMessage != null && !flashMessage.trim().isEmpty()) {
@@ -100,7 +101,6 @@ public class SespctController {
 			String trimmedNcft = (ncft != null) ? ncft.trim() : null;
 			String trimmedNid = (nid != null) ? nid.trim() : null;
 			
-			// Call our new, powerful search method!
 			List<Pedido> requests = pedidoService.searchPedidos(startDate, endDate, estado, trimmedNcft, trimmedNid, usCode);
 			
 			// Add all results and search parameters back to the model

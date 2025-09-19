@@ -26,10 +26,26 @@
               <goal>shade</goal>
             </goals>
             <configuration>
+              <artifactSet>
+                <includes>
+                  <include>org.apache.poi:poi</include>
+                  <include>org.apache.poi:poi-ooxml</include>
+                  <include>org.apache.httpcomponents:httpclient</include>
+                  <include>org.apache.httpcomponents:httpcore</include>
+                </includes>
+              </artifactSet>
               <relocations>
                 <relocation>
                   <pattern>org.apache.poi</pattern>
                   <shadedPattern>org.openmrs.module.sespct.shaded.poi</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.apache.http</pattern>
+                  <shadedPattern>org.openmrs.module.sespct.shaded.http</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.apache.commons.codec</pattern>
+                  <shadedPattern>org.openmrs.module.sespct.shaded.codec</shadedPattern>
                 </relocation>
               </relocations>
             </configuration>
@@ -39,6 +55,12 @@
     </plugins>
   </build>
   <dependencies>
+    <dependency>
+      <groupId>org.openmrs.module</groupId>
+      <artifactId>sespct-api</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
     <dependency>
       <groupId>org.openmrs.web</groupId>
       <artifactId>openmrs-web</artifactId>
@@ -63,6 +85,18 @@
       <artifactId>legacyui-omod</artifactId>
       <version>1.8.2</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.11.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.4</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>

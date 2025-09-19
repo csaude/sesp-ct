@@ -1,7 +1,8 @@
 package org.openmrs.module.sespct.api.dao.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.openmrs.module.sespct.api.model.Resposta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.hibernate.Query;
 import org.openmrs.api.db.hibernate.DbSession;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
@@ -13,7 +14,7 @@ import java.util.*;
 
 public class PedidoDaoImpl implements PedidoDao {
 	
-	protected final Log log = LogFactory.getLog(this.getClass());
+	private static final Logger log = LoggerFactory.getLogger(PedidoDaoImpl.class);
 	
 	private DbSessionFactory dbSessionFactory;
 	
@@ -36,6 +37,12 @@ public class PedidoDaoImpl implements PedidoDao {
 	}
 	
 	@Override
+	public Resposta saveResposta(Resposta resposta) {
+		this.getCurrentSession().saveOrUpdate(resposta);
+		return resposta;
+	}
+	
+	@Override
 	public Pedido getPedidoById(Integer id) {
 		return (Pedido) this.getCurrentSession().get(Pedido.class, id);
 	}
@@ -52,7 +59,7 @@ public class PedidoDaoImpl implements PedidoDao {
 	
 	@Override
 	public Pedido getPedidoByExternalId(String externalId) {
-		final String hql = "FROM Pedido WHERE pedidoExternalId = :externalId AND voided = 0";
+		final String hql = "FROM Pedido WHERE pedidoId = :externalId AND voided = 0";
 		final Query query = this.getCurrentSession().createQuery(hql).setParameter("externalId", externalId);
 		
 		@SuppressWarnings("unchecked")
@@ -151,5 +158,24 @@ public class PedidoDaoImpl implements PedidoDao {
 		}
 
 		return query.list();
+	}
+	
+	@Override
+	public boolean doesPedidoExist(String externalPedidoId) {
+		// We can reuse your existing method. If it returns a non-null object, it exists.
+		return getPedidoByExternalId(externalPedidoId) != null;
+	}
+	
+	@Override
+	public boolean doesRespostaExist(String externalRespostaId) {
+		// For this, we need a specific query to check the Resposta's external ID.
+		// I'm assuming your Resposta has a field 'respostaId' in its 'metadados' object.
+		String hql = "SELECT count(r.id) FROM Resposta r WHERE r.metadados.respostaId = :externalId";
+		
+		final Query query = this.getCurrentSession().createQuery(hql).setParameter("externalId", externalRespostaId);
+		
+		Long count = (Long) query.uniqueResult();
+		
+		return count != null && count > 0;
 	}
 }

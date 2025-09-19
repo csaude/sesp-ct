@@ -95,12 +95,12 @@
                             <c:choose>
                                 <c:when test="${pedido.estado == Pedido.ESTADO_SEM_RESPOSTA}">-</c:when>
                                 <c:otherwise>
-                                    ${pedido.formattedDataSubmissao}
+                                    ${pedido.respostas[fn:length(pedido.respostas) - 1].metadados.formattedTimestamp}
                                 </c:otherwise>
                             </c:choose>
                         </td>
                         <td>
-                                ${pedido.respostas[fn:length(pedido.respostas) - 1].respostaComite.formattedDataResposta}
+                                ${pedido.respostas[fn:length(pedido.respostas) - 1].metadados.formattedUltimaSincronizacao}
                         </td>
                         <td>
                             <c:choose>
