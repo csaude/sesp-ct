@@ -1,14 +1,13 @@
 package org.openmrs.module.sespct.api;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.openmrs.Patient;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.sespct.api.model.Pedido;
 import org.openmrs.module.sespct.api.model.Resposta;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 public interface PedidoService extends OpenmrsService {
 	
@@ -22,13 +21,15 @@ public interface PedidoService extends OpenmrsService {
 	
 	List<Pedido> getAllPedidos();
 	
-	List<Pedido> getPedidosByEstado(String estado);
+	List<Pedido> getPedidosByEstado(List<String> estado);
 	
 	List<Pedido> getPedidosByDateTimeRange(LocalDateTime startDateTime, LocalDateTime endDateTime);
 	
 	void deletePedido(Pedido pedido);
 	
 	Patient mapIdentifier(String patientUuid, Pedido pedido);
+	
+	List<Resposta> getRespostasPendentes();
 	
 	/**
 	 * Searches for Pedidos based on a set of filter criteria.

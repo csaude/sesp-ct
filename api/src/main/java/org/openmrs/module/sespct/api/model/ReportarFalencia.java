@@ -4,6 +4,8 @@ import org.openmrs.BaseOpenmrsData;
 
 import javax.persistence.*;
 
+import org.openmrs.module.sespct.api.util.Constants;
+
 @Entity
 @Table(name = "sespct_reportar_falencia")
 public class ReportarFalencia extends BaseOpenmrsData {
@@ -27,6 +29,10 @@ public class ReportarFalencia extends BaseOpenmrsData {
 	private String tratamentoTbAtivo;
 	
 	// --- Getters and Setters ---
+	@Transient
+	public Boolean isEmTratamentoTb() {
+		return tratamentoTbAtivo != null && tratamentoTbAtivo.equalsIgnoreCase(Constants.SIM);
+	}
 	
 	@Override
 	public Integer getId() {

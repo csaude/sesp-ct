@@ -1,5 +1,11 @@
 package org.openmrs.module.sespct.api.impl;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.Patient;
@@ -13,10 +19,13 @@ import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.sespct.api.MiddlewareApiService;
 import org.openmrs.module.sespct.api.PedidoService;
 import org.openmrs.module.sespct.api.dao.PedidoDao;
+import org.openmrs.module.sespct.api.dao.RespostaDao;
 import org.openmrs.module.sespct.api.dto.MetadadosPedidoDTO;
 import org.openmrs.module.sespct.api.dto.PedidoDTO;
 import org.openmrs.module.sespct.api.dto.RespostaDTO;
-import org.openmrs.module.sespct.api.model.*;
+import org.openmrs.module.sespct.api.model.Pedido;
+import org.openmrs.module.sespct.api.model.Resposta;
+import org.openmrs.module.sespct.api.model.RespostaComite;
 import org.openmrs.module.sespct.api.util.SespctMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,22 +33,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.*;
-import java.util.stream.Collectors;
-
 public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoService {
 	
 	private static final Logger log = LoggerFactory.getLogger(PedidoServiceImpl.class);
-	
-	private static final String CAUSA_NID_NAO_ENCONTRADO = "NID não encontrado";
 	
 	@Autowired
 	private PedidoDao pedidoDao;
 	
 	@Autowired
+	private RespostaDao respostaDao;
+	
 	private MiddlewareApiService middlewareApiService;
 	
 	private MessageSourceService messageSourceService;
@@ -48,6 +51,10 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	
 	public void setPedidoDao(PedidoDao pedidoDao) {
 		this.pedidoDao = pedidoDao;
+	}
+	
+	public void setRespostaDao(RespostaDao respostaDao) {
+		this.respostaDao = respostaDao;
 	}
 	
 	@Override
@@ -82,7 +89,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	
 	@Override
 	@Transactional(readOnly = true)
-	public List<Pedido> getPedidosByEstado(String estado) {
+	public List<Pedido> getPedidosByEstado(List<String> estado) {
 		return pedidoDao.getPedidosByEstado(estado);
 	}
 	
@@ -114,6 +121,11 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 		// The date range adjustment is now handled in the controller.
 		// This method becomes a clean, direct pass-through to the DAO.
 		return pedidoDao.getPedidosByDateTimeRange(startDateTime, endDateTime);
+	}
+	
+	@Override
+	public List<Resposta> getRespostasPendentes() {
+		return respostaDao.getRespostasPendentes();
 	}
 	
 	private String getRandomElement(String[] array, Random rand) {

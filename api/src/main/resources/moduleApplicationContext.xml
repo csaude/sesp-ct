@@ -6,7 +6,7 @@
                            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
                            http://www.springframework.org/schema/context
                            http://www.springframework.org/schema/context/spring-context-3.0.xsd">
-
+                           
     <!-- Enable annotation-based configuration -->
     <context:component-scan base-package="org.openmrs.module.sespct" />
 
@@ -14,17 +14,22 @@
     <bean id="pedidoDao" class="org.openmrs.module.sespct.api.dao.impl.PedidoDaoImpl">
         <property name="dbSessionFactory" ref="dbSessionFactory" />
     </bean>
+    
+    <bean id="respostaDao" class="org.openmrs.module.sespct.api.dao.impl.RespostaDaoImpl"> 
+    	<property name="dbSessionFactory" ref="dbSessionFactory" />
+    </bean>
 
     <!-- Define the service implementation -->
-    <bean id="pedidoServiceImpl"
-          class="org.openmrs.module.sespct.api.impl.PedidoServiceImpl">
+    <bean id="pedidoServiceImpl" class="org.openmrs.module.sespct.api.impl.PedidoServiceImpl">
         <property name="pedidoDao" ref="pedidoDao" />
+        <property name="respostaDao" ref="respostaDao" />
     </bean>
 
     <!-- Register the service with OpenMRS Context -->
-    <bean parent="serviceContext">
+ 	<bean parent="serviceContext">
         <property name="moduleService">
             <list>
+                <!-- PedidoService Registration -->
                 <value>org.openmrs.module.sespct.api.PedidoService</value>
                 <ref bean="pedidoServiceImpl" />
             </list>

@@ -12,6 +12,8 @@ import java.util.Date;
 @Table(name = "sespct_resposta_comite")
 public class RespostaComite extends BaseOpenmrsData {
 	
+	private static final long serialVersionUID = 1L;
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "resposta_comite_id")

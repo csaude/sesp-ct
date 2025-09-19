@@ -1,16 +1,30 @@
 package org.openmrs.module.sespct.api.model;
 
-import org.openmrs.BaseOpenmrsData;
-import org.openmrs.module.sespct.api.util.LocalDateTimeAttributeConverter;
-
-import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.openmrs.BaseOpenmrsData;
+import org.openmrs.module.sespct.api.util.LocalDateTimeAttributeConverter;
+
 @Entity
 @Table(name = "sespct_pedido")
 public class Pedido extends BaseOpenmrsData {
+	
+	private static final long serialVersionUID = 1L;
 	
 	public static final String ESTADO_NAO_PROCESSADO = "NOT_PROCESSED";
 	
