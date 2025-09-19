@@ -1,15 +1,14 @@
 package org.openmrs.module.sespct.web.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.sespct.api.ExportService;
 import org.openmrs.module.sespct.api.PedidoService;
 import org.openmrs.module.sespct.api.model.Pedido;
-import org.openmrs.module.sespct.api.util.DateRange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,18 +19,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
-
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/module/sespct/")
@@ -46,13 +40,28 @@ public class SespctController {
 	private static final Logger log = LoggerFactory.getLogger(SespctController.class);
 	
 	@RequestMapping(value = "sespct.form", method = RequestMethod.GET)
-	public String showMainPage(ModelMap model, @RequestParam(value = "startDate", required = false) String startDateStr,
+	public String showMainPage(ModelMap model, HttpServletResponse response, HttpSession session,
+	        @RequestParam(value = "startDate", required = false) String startDateStr,
 	        @RequestParam(value = "endDate", required = false) String endDateStr,
 	        @RequestParam(value = "estado", required = false) String estado,
 	        @RequestParam(value = "ncft", required = false) String ncft,
 	        @RequestParam(value = "nid", required = false) String nid,
 	        @RequestParam(value = "usCode", required = false) String usCode,
 	        @RequestParam(value = "flashMessage", required = false) String flashMessage) {
+		
+		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+		response.setHeader("Pragma", "no-cache");
+		response.setDateHeader("Expires", 0);
+		
+		String sessionFlashMessage = (String) session.getAttribute("flashMessage");
+		if (sessionFlashMessage != null && !sessionFlashMessage.trim().isEmpty()) {
+			model.addAttribute("flashMessage", sessionFlashMessage);
+			// Remove from session after using it (flash behavior)
+			session.removeAttribute("flashMessage");
+		} else if (flashMessage != null && !flashMessage.trim().isEmpty()) {
+			// Fallback to URL parameter if no session message
+			model.addAttribute("flashMessage", flashMessage);
+		}
 		
 		DateTimeFormatter ptFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 		DateTimeFormatter enFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
@@ -62,10 +71,15 @@ public class SespctController {
 		LocalDate endDate = null;
 		
 		try {
-			if (flashMessage != null && !flashMessage.trim().isEmpty()) {
-				model.addAttribute("flashMessage", flashMessage);
-			}
-			
+			// Call the main sync method every time the page is loaded
+			pedidoService.synchronizeMiddlewareData();
+		}
+		catch (Exception e) {
+			log.error("An error occurred during middleware synchronization.", e);
+			model.addAttribute("errorMessage", "Ocorreu um erro durante a sincronização: " + e.getMessage());
+		}
+		
+		try {
 			if (startDateStr != null && !startDateStr.trim().isEmpty()) {
 				try {
 					startDate = LocalDate.parse(startDateStr, ptFormatter);
@@ -100,7 +114,6 @@ public class SespctController {
 			String trimmedNcft = (ncft != null) ? ncft.trim() : null;
 			String trimmedNid = (nid != null) ? nid.trim() : null;
 			
-			// Call our new, powerful search method!
 			List<Pedido> requests = pedidoService.searchPedidos(startDate, endDate, estado, trimmedNcft, trimmedNid, usCode);
 			
 			// Add all results and search parameters back to the model
@@ -114,8 +127,10 @@ public class SespctController {
 			model.addAttribute("selectedUsCode", usCode);
 			
 			// You'll also need to load the Unidades Sanitarias for the dropdown
-			// List<UnidadeSanitaria> unidades = someOtherService.getAllUnidadesSanitarias();
-			// model.addAttribute("unidadesSanitarias", unidades);
+			String unidadesSanitaria = Context.getAdministrationService().getGlobalProperty("sespct.api.usCode");
+			String unidadesSanitariaNome = Context.getAdministrationService().getGlobalProperty("default_location");
+			model.addAttribute("unidadesSanitaria", unidadesSanitaria);
+			model.addAttribute("unidadesSanitariaNome", unidadesSanitariaNome);
 			
 			log.info("Found " + requests.size() + " SESP-CT requests based on search criteria");
 			

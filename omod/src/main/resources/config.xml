@@ -29,8 +29,7 @@
 	<aware_of_modules>
 		<aware_of_module>org.openmrs.module.legacyui</aware_of_module>
 	</aware_of_modules>
-	
-	
+
 	<!-- AOP
 	<advice>
 		<point>org.openmrs.api.FormService</point>
@@ -44,7 +43,68 @@
 	</privilege>
 
 
-
+	<globalProperty>
+		<property>sespct.api.baseUrl</property>
+		<defaultValue>http://sctdev.csaude.org.mz/api</defaultValue>
+		<description>
+			URL base da API do middleware SESP-CT.
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>sespct.api.usCode</property>
+		<defaultValue>US001</defaultValue>
+		<description>
+			Código da Unidade Sanitária (US) usado para o registo no middleware e para filtrar os dados.
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>sespct.api.clientId</property>
+		<defaultValue>US_Username</defaultValue>
+		<description>
+			O 'clientId' ou 'username' para autenticação na API do middleware.
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>sespct.api.clientSecret</property>
+		<defaultValue>minha_senha_super_secreta</defaultValue>
+		<description>
+			A 'clientSecret' ou 'password' para autenticação na API do middleware.
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>sespct.api.publicKey</property>
+		<defaultValue>-----BEGIN PUBLIC KEY-----MIIBIjANBgkqh...-----END PUBLIC KEY-----</defaultValue>
+		<description>
+			A chave pública completa usada para o registo do cliente. Copie o valor inteiro aqui.
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>sespct.api.privateKey</property>
+		<defaultValue>-----BEGIN PRIVATE KEY-----...-----END PRIVATE KEY-----</defaultValue>
+		<description>
+			A chave privada (PKCS#8 format) da Unidade Sanitária, usada para assinar os pedidos. MANTER EM SEGREDO.
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>sespct.api.serverPublicKey</property>
+		<defaultValue></defaultValue> <description>
+		A chave pública do servidor middleware. Este valor é obtido e guardado automaticamente após o registo do cliente.
+	</description>
+	</globalProperty>
+	<globalProperty>
+		<property>sespct.api.salt</property>
+		<defaultValue>randomSalt123</defaultValue>
+		<description>
+			O valor 'salt' usado no registo do cliente no middleware.
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>sespct.api.clientRegistered</property>
+		<defaultValue>false</defaultValue>
+		<description>
+			Indica se o cliente foi registrado com sucesso no middleware.
+		</description>
+	</globalProperty>
 
 	<!-- Required Global Properties 
 	<globalProperty>

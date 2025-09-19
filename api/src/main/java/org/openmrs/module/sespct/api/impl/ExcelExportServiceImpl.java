@@ -4,17 +4,25 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openmrs.module.sespct.api.ExportService;
+import org.openmrs.module.sespct.api.dao.impl.PedidoDaoImpl;
 import org.openmrs.module.sespct.api.model.Pedido;
 import org.openmrs.module.sespct.api.model.Resposta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @Service
 public class ExcelExportServiceImpl implements ExportService {
+	
+	private static final Logger log = LoggerFactory.getLogger(PedidoDaoImpl.class);
 	
 	@Override
     public byte[] generatePedidoReport(List<Pedido> pedidos, String startDate, String endDate) throws IOException {
@@ -55,8 +63,28 @@ public class ExcelExportServiceImpl implements ExportService {
             sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 1)); // Merge A2:B2
 
             // MODIFICATION: Merged cells for the subtitle value for better alignment.
+
+			DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+			DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+			String formattedStartDate = startDate; // Default to original in case of error
+			String formattedEndDate = endDate;   // Default to original in case of error
+
+			try {
+				// 2. Parse the input strings into date objects
+				LocalDate start = LocalDate.parse(startDate, inputFormatter);
+				LocalDate end = LocalDate.parse(endDate, inputFormatter);
+
+				// 3. Format the date objects into the new string format
+				formattedStartDate = start.format(outputFormatter);
+				formattedEndDate = end.format(outputFormatter);
+			} catch (DateTimeParseException e) {
+				// Log an error if the dates are in an unexpected format, but don't crash
+				log.error("Could not parse report dates for formatting: " + startDate + ", " + endDate, e);
+			}
+
             Cell periodValueCell = periodRow.createCell(2);
-            periodValueCell.setCellValue(startDate + " - " + endDate);
+            periodValueCell.setCellValue(formattedStartDate + " - " + formattedEndDate);
             periodValueCell.setCellStyle(subtitleValueStyle);
             sheet.addMergedRegion(new CellRangeAddress(1, 1, 2, 4)); // Merge C2:E2
 
@@ -140,13 +168,13 @@ public class ExcelExportServiceImpl implements ExportService {
 		
 		// Gestante
 		String gestanteValue = pedido.getDadosUtente() != null ? pedido.getDadosUtente().getGestante() : "";
-		String gestante = "Nao".equals(gestanteValue) ? "Não" : ("Sim".equals(gestanteValue) ? "Sim" : pedido
+		String gestante = "nao".equals(gestanteValue) ? "Não" : ("sim".equals(gestanteValue) ? "Sim" : pedido
 		        .getDadosUtente().getGestante());
 		createCell(row, colNum++, gestante, centeredDataStyle);
 		
 		// Lactante
 		String lactanteValue = pedido.getDadosUtente() != null ? pedido.getDadosUtente().getLactante() : "";
-		String lactante = "Nao".equals(lactanteValue) ? "Não" : ("Sim".equals(lactanteValue) ? "Sim" : pedido
+		String lactante = "nao".equals(lactanteValue) ? "Não" : ("sim".equals(lactanteValue) ? "Sim" : pedido
 		        .getDadosUtente().getLactante());
 		
 		createCell(row, colNum++, lactante, centeredDataStyle);
@@ -156,7 +184,7 @@ public class ExcelExportServiceImpl implements ExportService {
 		
 		// Data de resposta
 		LocalDateTime dataResposta = null;
-		if (!"Sem resposta".equals(pedido.getEstado()) && !"No Response".equals(pedido.getEstado())) {
+		if (!Pedido.ESTADO_SEM_RESPOSTA.equals(pedido.getEstado()) && !"No Response".equals(pedido.getEstado())) {
 			// Get the list of responses
 			List<Resposta> respostas = pedido.getRespostas();
 			
@@ -191,16 +219,20 @@ public class ExcelExportServiceImpl implements ExportService {
 		
 		// Estado
 		String estado = pedido.getEstado() != null ? pedido.getEstado() : "";
-		if ("Sem resposta".equals(estado) || "No Response".equals(estado)) {
+		if (Pedido.ESTADO_SEM_RESPOSTA.equals(estado) || "No Response".equals(estado)) {
 			estado = "Sem resposta";
-		} else if ("Não Processado".equals(estado) || "Not Processed".equals(estado)) {
+		} else if (Pedido.ESTADO_NAO_PROCESSADO.equals(estado) || "Not Processed".equals(estado)) {
 			estado = "Não Processado";
+		} else if (Pedido.ESTADO_APROVADO.equals(estado) || "Approved".equals(estado)) {
+			estado = "Aprovado";
+		} else if (Pedido.ESTADO_ADIADO.equals(estado) || "Deferred".equals(estado)) {
+			estado = "Adiado";
 		}
 		createCell(row, colNum++, estado, dataStyle);
 		
 		// Causa de Não processamento
 		String causa = "-";
-		if ("Não Processado".equals(pedido.getEstado()) || "Not Processed".equals(pedido.getEstado())) {
+		if (Pedido.ESTADO_NAO_PROCESSADO.equals(pedido.getEstado()) || "Not Processed".equals(pedido.getEstado())) {
 			causa = " NID não encontrado";
 		}
 		createCell(row, colNum++, causa, dataStyle);

@@ -25,14 +25,16 @@ import org.openmrs.module.sespct.api.util.LocalDateTimeAttributeConverter;
 public class Pedido extends BaseOpenmrsData {
 	
 	private static final long serialVersionUID = 1L;
+
+	public static final String ESTADO_NAO_PROCESSADO = "NOT_PROCESSED";
 	
-	public static final String ESTADO_NAO_PROCESSADO = "Não Processado";
+	public static final String ESTADO_SEM_RESPOSTA = "sem_resposta";
 	
-	public static final String ESTADO_SEM_RESPOSTA = "Sem resposta";
+	public static final String ESTADO_APROVADO = "aprovado";
 	
-	public static final String ESTADO_APROVADO = "Aprovado";
+	public static final String ESTADO_ADIADO = "adiado";
 	
-	public static final String CAUSA_NID_NAO_ENCONTRADO = "NID não encontrado";
+	public static final String CAUSA_NID_NAO_ENCONTRADO = "NID_NOT_FOUND";
 	
 	public static final String CAUSA_NID_DUPLICADO = "NID duplicado";
 	
