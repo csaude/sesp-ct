@@ -225,6 +225,8 @@ public class ExcelExportServiceImpl implements ExportService {
 			estado = "Não Processado";
 		} else if (Pedido.ESTADO_APROVADO.equals(estado) || "Approved".equals(estado)) {
 			estado = "Aprovado";
+		} else if (Pedido.ESTADO_ADIADO.equals(estado) || "Deferred".equals(estado)) {
+			estado = "Adiado";
 		}
 		createCell(row, colNum++, estado, dataStyle);
 		
