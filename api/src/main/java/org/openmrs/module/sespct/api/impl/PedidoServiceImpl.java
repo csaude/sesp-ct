@@ -43,6 +43,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	@Autowired
 	private RespostaDao respostaDao;
 	
+	@Autowired
 	private MiddlewareApiService middlewareApiService;
 	
 	private MessageSourceService messageSourceService;
@@ -341,6 +342,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 		log.info("Starting SESP-CT middleware synchronization...");
 		
 		// Step 1: Login to the API to get an auth token
+		log.info("Fetching Auth token");
 		String authToken = middlewareApiService.login();
 		if (authToken == null) {
 			log.error("Synchronization failed: Could not log in to the middleware.");

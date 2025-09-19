@@ -113,6 +113,7 @@ public class MiddlewareApiServiceImpl extends BaseOpenmrsService implements Midd
 	
 	@Override
     public String login() {
+		log.debug("In Login");
 		ensureInitialized();
         String url = baseUrl + "/login";
         log.info("Attempting to login at: " + url);
