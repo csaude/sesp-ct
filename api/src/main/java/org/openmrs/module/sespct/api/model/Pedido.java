@@ -12,7 +12,7 @@ import java.util.List;
 @Table(name = "sespct_pedido")
 public class Pedido extends BaseOpenmrsData {
 	
-	public static final String ESTADO_NAO_PROCESSADO = "Não Processado";
+	public static final String ESTADO_NAO_PROCESSADO = "NOT_PROCESSED";
 	
 	public static final String ESTADO_SEM_RESPOSTA = "sem_resposta";
 	
@@ -20,7 +20,7 @@ public class Pedido extends BaseOpenmrsData {
 	
 	public static final String ESTADO_ADIADO = "adiado";
 	
-	public static final String CAUSA_NID_NAO_ENCONTRADO = "NID não encontrado";
+	public static final String CAUSA_NID_NAO_ENCONTRADO = "NID_NOT_FOUND";
 	
 	public static final String CAUSA_NID_DUPLICADO = "NID duplicado";
 	
