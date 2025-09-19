@@ -235,10 +235,10 @@ public class ObsBuilder {
 		if (linha != null) {
 			Obs linhaObs = createBaseObs(Constants.RESPOSTA_LINHA_UUID);
 			switch (StringHelper.removeAcentos(linha.trim()).toUpperCase()) {
-				case "SEGUNDA LINHA":
+				case "2 LINHA":
 					linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.SEGUNDA_LINHA_UUID));
 					break;
-				case "TERCEIRA LINHA":
+				case "3 LINHA":
 					linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.TERCEIRA_LINHA_UUID));
 					break;
 				case "REGIME INDIVIDUALIZADO":
@@ -281,7 +281,7 @@ public class ObsBuilder {
 				return Constants.ESTADIO_II_UUID;
 			case "ESTADIO III":
 				return Constants.ESTADIO_III_UUID;
-			case "ESTADIO VI":
+			case "ESTADIO IV":
 				return Constants.ESTADIO_IV_UUID;
 			default:
 				log.warn("Estádio OMS desconhecido: {}", estadioOms);

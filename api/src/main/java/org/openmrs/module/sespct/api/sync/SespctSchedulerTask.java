@@ -18,9 +18,12 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.sespct.api.PedidoService;
 import org.openmrs.module.sespct.api.builder.ObsBuilder;
 import org.openmrs.module.sespct.api.model.Pedido;
+import org.openmrs.module.sespct.api.model.Resposta;
+import org.openmrs.module.sespct.api.model.RespostaComite;
 import org.openmrs.module.sespct.api.util.Constants;
 import org.openmrs.module.sespct.api.util.DateTimeUtils;
 import org.openmrs.module.sespct.api.util.EncounterUtils;
+import org.openmrs.module.sespct.api.util.RespostaUtils;
 import org.openmrs.module.sespct.api.util.StringHelper;
 import org.openmrs.scheduler.tasks.AbstractTask;
 import org.slf4j.Logger;
@@ -51,6 +54,8 @@ public class SespctSchedulerTask extends AbstractTask {
 			}
 			
 			processPedidos();
+			
+			processRespostas();
 			
 		}
 		catch (Exception e) {
@@ -104,7 +109,6 @@ public class SespctSchedulerTask extends AbstractTask {
 	private void processPedidos() {
 		List<Pedido> pedidos = pedidoService.getPedidosByEstado(Arrays.asList(Constants.ESTADO_SEM_RESPOSTA,
 		    Constants.ESTADO_APROVADO, Constants.ESTADO_ADIADO));
-		log.info("Found {} pedidos with status '{}'", pedidos.size(), Constants.ESTADO_SEM_RESPOSTA);
 		
 		if (pedidos.isEmpty()) {
 			log.info("No pending pedidos to process");
@@ -159,7 +163,7 @@ public class SespctSchedulerTask extends AbstractTask {
 			}
 			
 			createEncounterForPedido(pedido, patient.get());
-			log.info("Successfully processed Pedido id={} for Patient NID={}", pedido.getId(), identifier);
+			log.info("Successfully processed Pedido id={} for Patient id={}", pedido.getId(), patient.get().getPatientId());
 			return true;
 			
 		}
@@ -366,6 +370,62 @@ public class SespctSchedulerTask extends AbstractTask {
 			    pedido.getPedidoId());
 		}
 		
+		// dateChanged = dateCreated na primeira vez
+		if (encounter.getDateCreated() == null) {
+			encounter.setDateCreated(new java.util.Date());
+		}
+		
+		if (encounter.getDateChanged() == null) {
+			encounter.setDateChanged(encounter.getDateCreated());
+		}
+		
 		return encounter;
 	}
+	
+	private void processRespostas() {
+		RespostaSyncService respostaSyncService = new RespostaSyncService();
+		List<Resposta> respostasPendentes = pedidoService.getRespostasPendentes();
+		log.info("Foram encontradas {} respostas pendentes", respostasPendentes.size());
+		
+		for (Resposta resposta : respostasPendentes) {
+			Pedido pedido = resposta.getPedido();
+			if (pedido == null) {
+				log.error("Resposta id={} não tem Pedido associado!", resposta.getId());
+				continue;
+			}
+			
+			Encounter encounter = EncounterUtils.findEncounterByPedidoId(pedido.getPedidoId());
+			if (encounter == null) {
+				log.warn(
+				    "Encounter não encontrado para Pedido id={} (Resposta id={}), será tentado novamente no próximo ciclo",
+				    pedido.getPedidoId(), resposta.getId());
+				pedidoService.saveResposta(resposta);
+				continue;
+			}
+			
+			try {
+				List<RespostaComite> ultimasRespostas = RespostaUtils.getUltimasDuasRespostas(pedido);
+				if (ultimasRespostas.isEmpty()) {
+					log.warn("Nenhuma RespostaComite válida encontrada para Resposta id={} (Pedido id={})",
+					    resposta.getId(), pedido.getPedidoId());
+					continue;
+				}
+				
+				respostaSyncService.updateEncounterWithRespostas(pedido, encounter, ultimasRespostas);
+				
+				// Marca como sincronizado
+				resposta.setSincronizado(true);
+				pedidoService.saveResposta(resposta);
+				
+				log.info("Resposta id={} aplicada com sucesso ao Encounter do Pedido id={}", resposta.getId(),
+				    pedido.getPedidoId());
+				
+			}
+			catch (Exception e) {
+				log.error("Erro ao aplicar Resposta id={} ao Pedido id={}", resposta.getId(), pedido.getPedidoId(), e);
+				pedidoService.saveResposta(resposta);
+			}
+		}
+	}
+	
 }

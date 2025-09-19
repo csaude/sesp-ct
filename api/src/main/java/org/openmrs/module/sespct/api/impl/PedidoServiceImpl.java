@@ -20,6 +20,7 @@ import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.sespct.api.PedidoService;
 import org.openmrs.module.sespct.api.dao.PedidoDao;
+import org.openmrs.module.sespct.api.dao.RespostaDao;
 import org.openmrs.module.sespct.api.model.DadosClinico;
 import org.openmrs.module.sespct.api.model.DadosLaboratorioCD4;
 import org.openmrs.module.sespct.api.model.DadosLaboratorioCargaViral;
@@ -51,12 +52,19 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	@Autowired
 	private PedidoDao pedidoDao;
 	
+	@Autowired
+	private RespostaDao respostaDao;
+	
 	private MessageSourceService messageSourceService;
 	
 	public static final String NID_SCT = "ac75ec91-bc27-4681-97d0-7db08937b2d7";
 	
 	public void setPedidoDao(PedidoDao pedidoDao) {
 		this.pedidoDao = pedidoDao;
+	}
+	
+	public void setRespostaDao(RespostaDao respostaDao) {
+		this.respostaDao = respostaDao;
 	}
 	
 	@Override
@@ -117,6 +125,16 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 		// The date range adjustment is now handled in the controller.
 		// This method becomes a clean, direct pass-through to the DAO.
 		return pedidoDao.getPedidosByDateTimeRange(startDateTime, endDateTime);
+	}
+	
+	@Override
+	public List<Resposta> getRespostasPendentes() {
+		return respostaDao.getRespostasPendentes();
+	}
+	
+	@Override
+	public Resposta saveResposta(Resposta resposta) {
+		return respostaDao.saveResposta(resposta);
 	}
 	
 	/**
