@@ -45,7 +45,8 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	
 	@Autowired
 	private MiddlewareApiService middlewareApiService;
-	
+
+	@Autowired
 	private MessageSourceService messageSourceService;
 	
 	public static final String NID_SCT = "ac75ec91-bc27-4681-97d0-7db08937b2d7";
@@ -323,7 +324,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 		try {
 			Pedido pedido = getPedidoById(pedidoId);
 			if (pedido != null) {
-				pedido.setEstado(Pedido.ESTADO_NAO_PROCESSADO);
+				pedido.setEstado(Pedido.ESTADO_SEM_RESPOSTA);
 				pedido.setCausa(null);
 				savePedido(pedido);
 				log.debug("Pedido {} rescheduled successfully", pedidoId);
