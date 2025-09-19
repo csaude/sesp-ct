@@ -1,11 +1,5 @@
 package org.openmrs.module.sespct.api;
 
-import org.openmrs.Patient;
-import org.openmrs.api.OpenmrsService;
-import org.openmrs.module.sespct.api.model.Pedido;
-import org.openmrs.module.sespct.api.model.Resposta;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,8 +30,6 @@ public interface PedidoService extends OpenmrsService {
 	Patient mapIdentifier(String patientUuid, Pedido pedido);
 	
 	List<Resposta> getRespostasPendentes();
-	
-	Resposta saveResposta(Resposta resposta);
 	
 	/**
 	 * Searches for Pedidos based on a set of filter criteria.

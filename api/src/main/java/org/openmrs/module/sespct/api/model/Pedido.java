@@ -25,7 +25,7 @@ import org.openmrs.module.sespct.api.util.LocalDateTimeAttributeConverter;
 public class Pedido extends BaseOpenmrsData {
 	
 	private static final long serialVersionUID = 1L;
-
+	
 	public static final String ESTADO_NAO_PROCESSADO = "NOT_PROCESSED";
 	
 	public static final String ESTADO_SEM_RESPOSTA = "sem_resposta";
