@@ -20,7 +20,7 @@ public interface PedidoDao {
 	
 	List<Pedido> getAllPedidos();
 	
-	List<Pedido> getPedidosByEstado(String estado);
+	List<Pedido> getPedidosByEstado(List<String> estados);
 	
 	void deletePedido(Pedido pedido);
 	

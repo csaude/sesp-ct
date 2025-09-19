@@ -8,6 +8,8 @@ import javax.persistence.*;
 @Table(name = "sespct_dados_clinico")
 public class DadosClinico extends BaseOpenmrsData {
 	
+	private static final long serialVersionUID = 1L;
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "dados_clinico_id")

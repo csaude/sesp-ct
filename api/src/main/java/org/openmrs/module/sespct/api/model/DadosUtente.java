@@ -1,15 +1,28 @@
 package org.openmrs.module.sespct.api.model;
 
-import org.openmrs.BaseOpenmrsData;
-import org.openmrs.module.sespct.api.util.LocalDateTimeAttributeConverter;
-
-import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.openmrs.BaseOpenmrsData;
+import org.openmrs.module.sespct.api.util.Constants;
+import org.openmrs.module.sespct.api.util.LocalDateTimeAttributeConverter;
 
 @Entity
 @Table(name = "sespct_dados_utente")
 public class DadosUtente extends BaseOpenmrsData {
+	
+	private static final long serialVersionUID = 1L;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -69,6 +82,16 @@ public class DadosUtente extends BaseOpenmrsData {
 	@Column(name = "data_parto")
 	@Convert(converter = LocalDateTimeAttributeConverter.class)
 	private LocalDateTime dataParto;
+	
+	@Transient
+	public boolean isGestante() {
+		return gestante != null && gestante.equalsIgnoreCase(Constants.SIM);
+	}
+	
+	@Transient
+	public boolean isLactante() {
+		return lactante != null && lactante.equalsIgnoreCase(Constants.SIM);
+	}
 	
 	// --- Getters and Setters ---
 	
