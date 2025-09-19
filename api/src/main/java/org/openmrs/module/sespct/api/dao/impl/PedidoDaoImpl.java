@@ -141,8 +141,7 @@ public class PedidoDaoImpl implements PedidoDao {
 
 		// Check for US code, ignoring the "ALL" value
 		if (usCode != null && !usCode.trim().isEmpty() && !"ALL".equalsIgnoreCase(usCode)) {
-			// Assuming the 'origem' field holds the US code
-			hql.append("AND p.origem = :usCode ");
+			hql.append("AND p.dadosUtente.codigoUnidadeSanitaria = :usCode ");
 			parameters.put("usCode", usCode);
 		}
 
