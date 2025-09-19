@@ -216,6 +216,7 @@ public class MiddlewareApiServiceImpl extends BaseOpenmrsService implements Midd
 		String url = baseUrl + "/pedidos/?facilityCode=" + this.usCode;
 		try {
 			String decryptedJson = fetchAndDecrypt(url, authToken);
+			log.debug(decryptedJson);
 			JsonNode rootNode = objectMapper.readTree(decryptedJson);
 			JsonNode contentArrayNode = rootNode.path("content");
 

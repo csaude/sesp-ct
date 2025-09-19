@@ -50,7 +50,7 @@ public class Pedido extends BaseOpenmrsData {
 	private Integer id;
 	
 	// Core metadata fields
-	@Column(name = "pedidoId", nullable = false, unique = true, length = 50)
+	@Column(name = "ncft", nullable = false, unique = true, length = 50)
 	private String pedidoId;
 	
 	@Column(name = "data_submissao")
