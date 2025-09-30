@@ -129,6 +129,11 @@ public class ExcelExportServiceImpl implements ExportService {
 	        CellStyle centeredDataStyle) {
 		int colNum = 0;
 		
+		Resposta ultimaResposta = null;
+		if (pedido.getRespostas() != null && !pedido.getRespostas().isEmpty()) {
+			ultimaResposta = pedido.getRespostas().get(pedido.getRespostas().size() - 1);
+		}
+		
 		// US - Health Unit
 		String us = "";
 		if (pedido.getDadosUtente() != null) {
@@ -183,22 +188,7 @@ public class ExcelExportServiceImpl implements ExportService {
 		createDateCell(row, colNum++, pedido.getDataSubmissao(), dateCellStyle);
 		
 		// Data de resposta
-		LocalDateTime dataResposta = null;
-		if (!Pedido.ESTADO_SEM_RESPOSTA.equals(pedido.getEstado()) && !"No Response".equals(pedido.getEstado())) {
-			// Get the list of responses
-			List<Resposta> respostas = pedido.getRespostas();
-			
-			// Check if the list is not null and not empty to avoid errors
-			if (respostas != null && !respostas.isEmpty()) {
-				// Get the last response from the list
-				Resposta ultimaResposta = respostas.get(respostas.size() - 1);
-				
-				// Check that the related objects are not null before getting the date
-				if (ultimaResposta != null && ultimaResposta.getRespostaComite() != null) {
-					dataResposta = ultimaResposta.getRespostaComite().getDataResposta();
-				}
-			}
-		}
+		LocalDateTime dataResposta = (ultimaResposta != null) ? ultimaResposta.getDataResposta() : null;
 		if (dataResposta != null) {
 			createDateCell(row, colNum++, dataResposta, dateCellStyle);
 		} else {
@@ -206,15 +196,7 @@ public class ExcelExportServiceImpl implements ExportService {
 		}
 		
 		// Sincronização
-		LocalDateTime dataSincronizacao = null;
-		List<Resposta> respostas = pedido.getRespostas();
-		
-		if (respostas != null && !respostas.isEmpty()) {
-			Resposta ultimaResposta = respostas.get(respostas.size() - 1);
-			if (ultimaResposta != null && ultimaResposta.getMetadados() != null) {
-				dataSincronizacao = ultimaResposta.getMetadados().getUltimaSincronizacao();
-			}
-		}
+		LocalDateTime dataSincronizacao = (ultimaResposta != null) ? ultimaResposta.getTimestamp() : null;
 		createDateCell(row, colNum++, dataSincronizacao, dateCellStyle);
 		
 		// Estado
@@ -237,15 +219,10 @@ public class ExcelExportServiceImpl implements ExportService {
 		}
 		createCell(row, colNum++, causa, dataStyle);
 		
-		Resposta ultimaResposta = null;
-		if (respostas != null && !respostas.isEmpty()) {
-			ultimaResposta = respostas.get(respostas.size() - 1);
-		}
-		
 		// Linha Terap. (resposta)
 		String linhaTerapeutica = "";
-		if (ultimaResposta != null && ultimaResposta.getRespostaComite() != null) {
-			linhaTerapeutica = ultimaResposta.getRespostaComite().getLinhaTerapeutica();
+		if (ultimaResposta != null) {
+			linhaTerapeutica = ultimaResposta.getLinhaTerapeutica().replace("_linha", " Linha");
 		}
 		createCell(row, colNum++, linhaTerapeutica, dataStyle);
 		
@@ -262,8 +239,8 @@ public class ExcelExportServiceImpl implements ExportService {
 		
 		// Email do aprovador
 		String aprovadorEmail = "";
-		if (ultimaResposta != null && ultimaResposta.getRespostaComite() != null) {
-			aprovadorEmail = ultimaResposta.getRespostaComite().getEmail();
+		if (ultimaResposta != null) {
+			aprovadorEmail = ultimaResposta.getEmailAutorizante();
 		}
 		createCell(row, colNum++, aprovadorEmail, dataStyle);
 	}

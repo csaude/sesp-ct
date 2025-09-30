@@ -793,4 +793,68 @@
 	        newColumnName="ncft"
 	        columnDataType="varchar(50)"/>
 	</changeSet>
+
+    <changeSet id="sespct-1.0.0-16-drop-obsolete-resposta-tables" author="sespct">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="sespct_metadados_resposta"/>
+            <tableExists tableName="sespct_resposta_comite"/>
+            <tableExists tableName="sespct_notificacoes"/>
+        </preConditions>
+        <comment>Drop obsolete tables related to the old Resposta structure</comment>
+
+        <dropForeignKeyConstraint baseTableName="sespct_metadados_resposta" constraintName="fk_metadados_resposta_resposta"/>
+        <dropForeignKeyConstraint baseTableName="sespct_resposta_comite" constraintName="fk_resposta_comite_resposta"/>
+        <dropForeignKeyConstraint baseTableName="sespct_notificacoes" constraintName="fk_notificacoes_resposta"/>
+
+        <dropTable tableName="sespct_metadados_resposta"/>
+        <dropTable tableName="sespct_resposta_comite"/>
+        <dropTable tableName="sespct_notificacoes"/>
+    </changeSet>
+
+    <changeSet id="sespct-1.0.0-17-flatten-resposta-table" author="sespct">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="sespct_resposta"/>
+        </preConditions>
+        <comment>Add columns to sespct_resposta to flatten the data structure</comment>
+
+        <addColumn tableName="sespct_resposta">
+            <column name="resposta_id_externo" type="int"/>
+        </addColumn>
+        <addColumn tableName="sespct_resposta">
+            <column name="processado_por" type="varchar(255)"/>
+        </addColumn>
+        <addColumn tableName="sespct_resposta">
+            <column name="timestamp" type="datetime"/>
+        </addColumn>
+        <addColumn tableName="sespct_resposta">
+            <column name="versao" type="varchar(20)"/>
+        </addColumn>
+        <addColumn tableName="sespct_resposta">
+            <column name="resposta" type="varchar(255)"/>
+        </addColumn>
+        <addColumn tableName="sespct_resposta">
+            <column name="linha_terapeutica" type="varchar(50)"/>
+        </addColumn>
+        <addColumn tableName="sespct_resposta">
+            <column name="esquema_aprovado" type="varchar(100)"/>
+        </addColumn>
+        <addColumn tableName="sespct_resposta">
+            <column name="data_resposta" type="datetime"/>
+        </addColumn>
+        <addColumn tableName="sespct_resposta">
+            <column name="comentario" type="text"/>
+        </addColumn>
+        <addColumn tableName="sespct_resposta">
+            <column name="autorizante" type="varchar(255)"/>
+        </addColumn>
+        <addColumn tableName="sespct_resposta">
+            <column name="email_autorizante" type="varchar(255)"/>
+        </addColumn>
+        <addColumn tableName="sespct_resposta">
+            <column name="contacto_autorizante" type="varchar(50)"/>
+        </addColumn>
+        <addColumn tableName="sespct_resposta">
+            <column name="nivel_autorizacao" type="varchar(50)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

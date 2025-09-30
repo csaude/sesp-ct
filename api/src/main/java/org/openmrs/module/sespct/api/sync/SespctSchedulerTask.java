@@ -19,7 +19,6 @@ import org.openmrs.module.sespct.api.PedidoService;
 import org.openmrs.module.sespct.api.builder.ObsBuilder;
 import org.openmrs.module.sespct.api.model.Pedido;
 import org.openmrs.module.sespct.api.model.Resposta;
-import org.openmrs.module.sespct.api.model.RespostaComite;
 import org.openmrs.module.sespct.api.util.Constants;
 import org.openmrs.module.sespct.api.util.DateTimeUtils;
 import org.openmrs.module.sespct.api.util.EncounterUtils;
@@ -403,28 +402,28 @@ public class SespctSchedulerTask extends AbstractTask {
 				continue;
 			}
 			
-			try {
-				List<RespostaComite> ultimasRespostas = RespostaUtils.getUltimasDuasRespostas(pedido);
-				if (ultimasRespostas.isEmpty()) {
-					log.warn("Nenhuma RespostaComite válida encontrada para Resposta id={} (Pedido id={})",
-					    resposta.getId(), pedido.getPedidoId());
-					continue;
-				}
-				
-				respostaSyncService.updateEncounterWithRespostas(pedido, encounter, ultimasRespostas);
-				
-				// Marca como sincronizado
-				resposta.setSincronizado(true);
-				pedidoService.saveResposta(resposta);
-				
-				log.info("Resposta id={} aplicada com sucesso ao Encounter do Pedido id={}", resposta.getId(),
-				    pedido.getPedidoId());
-				
-			}
-			catch (Exception e) {
-				log.error("Erro ao aplicar Resposta id={} ao Pedido id={}", resposta.getId(), pedido.getPedidoId(), e);
-				pedidoService.saveResposta(resposta);
-			}
+			//			try {
+			//				List<RespostaComite> ultimasRespostas = RespostaUtils.getUltimasDuasRespostas(pedido);
+			//				if (ultimasRespostas.isEmpty()) {
+			//					log.warn("Nenhuma RespostaComite válida encontrada para Resposta id={} (Pedido id={})",
+			//					    resposta.getId(), pedido.getPedidoId());
+			//					continue;
+			//				}
+			//
+			//				respostaSyncService.updateEncounterWithRespostas(pedido, encounter, ultimasRespostas);
+			//
+			//				// Marca como sincronizado
+			//				resposta.setSincronizado(true);
+			//				pedidoService.saveResposta(resposta);
+			//
+			//				log.info("Resposta id={} aplicada com sucesso ao Encounter do Pedido id={}", resposta.getId(),
+			//				    pedido.getPedidoId());
+			//
+			//			}
+			//			catch (Exception e) {
+			//				log.error("Erro ao aplicar Resposta id={} ao Pedido id={}", resposta.getId(), pedido.getPedidoId(), e);
+			//				pedidoService.saveResposta(resposta);
+			//			}
 		}
 	}
 	
