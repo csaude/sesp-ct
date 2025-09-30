@@ -370,7 +370,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 			
 			// Step 3b: Mark Respostas as consumed
 			if (!newRespostaIds.isEmpty()) {
-				//				middlewareApiService.markRespostasAsConsumed(newRespostaIds, authToken);
+				middlewareApiService.markRespostasAsConsumed(newRespostaIds, authToken);
 			}
 		} else {
 			log.info("No new respostas to synchronize.");
