@@ -69,13 +69,16 @@
             </c:when>
             <c:otherwise>
                 <c:forEach var="pedido" items="${pedidos}">
+                    <c:set var="ultimaResposta" value="${null}" />
+                    <c:if test="${not empty pedido.respostas}">
+                        <c:set var="ultimaResposta" value="${pedido.respostas[fn:length(pedido.respostas) - 1]}" />
+                    </c:if>
+
                     <tr>
                         <td>${pedido.dadosUtente.unidadeSanitaria} (${pedido.dadosUtente.codigoUnidadeSanitaria})</td>
                         <td>${pedido.dadosUtente.nid}</td>
                         <td>
-                            <a href="${pageContext.request.contextPath}/module/sespct/viewRequest.form?pedidoId=${pedido.pedidoId}">
                                     ${pedido.pedidoId}
-                            </a>
                         </td>
                         <td>${pedido.dadosUtente.iniciais}</td>
                         <td>
@@ -92,15 +95,11 @@
                                 ${pedido.formattedDataSubmissao}
                         </td>
                         <td>
-                            <c:choose>
-                                <c:when test="${pedido.estado == Pedido.ESTADO_SEM_RESPOSTA}">-</c:when>
-                                <c:otherwise>
-                                    ${pedido.respostas[fn:length(pedido.respostas) - 1].metadados.formattedTimestamp}
-                                </c:otherwise>
-                            </c:choose>
+                                ${ultimaResposta.formattedDataResposta}
                         </td>
+
                         <td>
-                                ${pedido.respostas[fn:length(pedido.respostas) - 1].metadados.formattedUltimaSincronizacao}
+                                ${ultimaResposta.formattedTimestamp}
                         </td>
                         <td>
                             <c:choose>

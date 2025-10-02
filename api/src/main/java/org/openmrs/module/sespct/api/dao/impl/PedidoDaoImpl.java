@@ -172,14 +172,29 @@ public class PedidoDaoImpl implements PedidoDao {
 	
 	@Override
 	public boolean doesRespostaExist(String externalRespostaId) {
-		// For this, we need a specific query to check the Resposta's external ID.
-		// I'm assuming your Resposta has a field 'respostaId' in its 'metadados' object.
-		String hql = "SELECT count(r.id) FROM Resposta r WHERE r.metadados.respostaId = :externalId";
+		// Basic validation for the input string
+		if (externalRespostaId == null || externalRespostaId.trim().isEmpty()) {
+			return false;
+		}
 		
-		final Query query = this.getCurrentSession().createQuery(hql).setParameter("externalId", externalRespostaId);
+		// CHANGED: The HQL now points directly to the 'respostaIdExterno' field.
+		String hql = "SELECT count(r.id) FROM Resposta r WHERE r.respostaIdExterno = :externalId";
 		
-		Long count = (Long) query.uniqueResult();
-		
-		return count != null && count > 0;
+		try {
+			// CHANGED: Convert the String ID to an Integer to match the entity's data type.
+			Integer idAsInteger = Integer.parseInt(externalRespostaId);
+			
+			final Query query = this.getCurrentSession().createQuery(hql).setParameter("externalId", idAsInteger);
+			
+			Long count = (Long) query.uniqueResult();
+			
+			return count != null && count > 0;
+			
+		}
+		catch (NumberFormatException e) {
+			// If the ID is not a valid integer, it can't exist in our database.
+			log.error("Invalid format for externalRespostaId: '{}'. Expected an integer.", externalRespostaId);
+			return false;
+		}
 	}
 }

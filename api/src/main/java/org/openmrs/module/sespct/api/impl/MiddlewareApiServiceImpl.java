@@ -217,7 +217,6 @@ public class MiddlewareApiServiceImpl extends BaseOpenmrsService implements Midd
 		String url = baseUrl + "/pedidos/?facilityCode=" + this.usCode;
 		try {
 			String decryptedJson = fetchAndDecrypt(url, authToken);
-			log.debug(decryptedJson);
 			JsonNode rootNode = objectMapper.readTree(decryptedJson);
 			JsonNode contentArrayNode = rootNode.path("content");
 
@@ -266,16 +265,16 @@ public class MiddlewareApiServiceImpl extends BaseOpenmrsService implements Midd
 			List<RespostaDTO> finalRespostas = new ArrayList<>();
 			for (MiddlewareRespostaDTO middlewareResposta : middlewareRespostas) {
 				String payloadJson = middlewareResposta.getPayload();
-				JsonNode payloadRootNode = objectMapper.readTree(payloadJson);
+				ApiEventDTO event = objectMapper.readValue(payloadJson, ApiEventDTO.class);
 
-				// Navigate into the "dadosResposta" object
-				JsonNode dadosRespostaNode = payloadRootNode.path("dadosResposta");
+				if (event.getResponse() != null) {
+					log.info("Event response exists!");
+					RespostaDTO respostaDto = event.getResponse();
+					// CRITICAL: Carry the outer UUID over for consumption marking
+					respostaDto.setUuid(middlewareResposta.getUuid());
 
-				// Convert the "dadosResposta" object into your final RespostaDTO
-				RespostaDTO resposta = objectMapper.treeToValue(dadosRespostaNode, RespostaDTO.class);
-
-				resposta.setUuid(middlewareResposta.getUuid());
-				finalRespostas.add(resposta);
+					finalRespostas.add(respostaDto);
+				}
 			}
 
 			return finalRespostas;

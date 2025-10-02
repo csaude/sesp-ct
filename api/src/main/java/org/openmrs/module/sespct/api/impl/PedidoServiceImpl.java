@@ -25,7 +25,6 @@ import org.openmrs.module.sespct.api.dto.PedidoDTO;
 import org.openmrs.module.sespct.api.dto.RespostaDTO;
 import org.openmrs.module.sespct.api.model.Pedido;
 import org.openmrs.module.sespct.api.model.Resposta;
-import org.openmrs.module.sespct.api.model.RespostaComite;
 import org.openmrs.module.sespct.api.util.SespctMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +44,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 	
 	@Autowired
 	private MiddlewareApiService middlewareApiService;
-
+	
 	@Autowired
 	private MessageSourceService messageSourceService;
 	
@@ -414,38 +413,43 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 		List<String> newlySavedRespostaUUIds = new ArrayList<>();
 
 		for (RespostaDTO dto : dtos) {
-			String externalPedidoId = dto.getMetadados().getPedidoId();
-			String externalRespostaId = dto.getMetadados().getRespostaId();
+			Integer externalPedidoId = dto.getPedidoId();
+			Integer externalRespostaId = dto.getRespostaId();
 
+			if (externalRespostaId == null) {
+				log.warn("Skipping a resposta with a null external ID. UUID: {}", dto.getUuid());
+				continue;
+			}
 			// IDEMPOTENCY CHECK: Only save if it's a new resposta
-			if (!pedidoDao.doesRespostaExist(externalRespostaId)) {
-				Pedido parentPedido = pedidoDao.getPedidoByExternalId(externalPedidoId);
+			if (!pedidoDao.doesRespostaExist(String.valueOf(externalRespostaId))) {
+				Pedido parentPedido = pedidoDao.getPedidoByExternalId(String.valueOf(externalPedidoId));
+
 
 				if (parentPedido != null) {
 					Resposta newResposta = SespctMapper.toRespostaEntity(dto, parentPedido);
 					pedidoDao.saveResposta(newResposta);
 					parentPedido.getRespostas().add(newResposta);
 
-					RespostaComite respostaComite = newResposta.getRespostaComite();
-					if (respostaComite != null) {
-						String respostaTexto = respostaComite.getRespostaTexto(); // P.S. double-check if your getter is named getResposta_texto() instead!
+					String respostaTexto = newResposta.getResposta();
+					log.info("Attempting to update status for pedido {} based on resposta text: '{}'", parentPedido.getPedidoId(), respostaTexto);
 
-						// Log the actual value to see what you're getting from the API
-						log.info("Attempting to update status based on resposta text: '" + respostaTexto + "'");
-
-						if ("Aprovado".equalsIgnoreCase(respostaTexto)) {
+					if (respostaTexto != null && !respostaTexto.trim().isEmpty()) {
+						String[] words = respostaTexto.trim().split(" +");
+						String firstWord = words[0];
+						// Now, compare only the first word, ignoring case
+						if ("aprovado".equalsIgnoreCase(firstWord)) {
 							parentPedido.setEstado(Pedido.ESTADO_APROVADO);
-						} else if ("Adiado".equalsIgnoreCase(respostaTexto)) {
+						} else if ("adiado".equalsIgnoreCase(firstWord)) {
 							parentPedido.setEstado(Pedido.ESTADO_ADIADO);
 						}
 					}
 
-					pedidoDao.savePedido(parentPedido); // Save the parent to cascade the save to the new Resposta
+					pedidoDao.savePedido(parentPedido);
+					// Add the outer UUID to the list to be marked as consumed
 					newlySavedRespostaUUIds.add(dto.getUuid());
-					log.info("Saved new resposta " + externalRespostaId + " for pedido " + externalPedidoId);
+					log.info("Saved new resposta {} for pedido {}", externalRespostaId, externalPedidoId);
 				} else {
-					log.warn("Could not find parent pedido with ID: " + externalPedidoId + ". Cannot save resposta "
-					        + externalRespostaId);
+					log.warn("Could not find parent pedido with ID: {}. Cannot save resposta {}", externalPedidoId, externalRespostaId);
 				}
 			} else {
 				log.warn("Skipping already existing resposta with ID: " + externalRespostaId);
