@@ -68,31 +68,38 @@
                 </tr>
             </c:when>
             <c:otherwise>
-                <c:forEach var="pedido" items="${pedidos}">
+                <c:forEach var="pedidoWrapper" items="${pedidos}">
                     <c:set var="ultimaResposta" value="${null}" />
-                    <c:if test="${not empty pedido.respostas}">
-                        <c:set var="ultimaResposta" value="${pedido.respostas[fn:length(pedido.respostas) - 1]}" />
+                    <c:if test="${not empty pedidoWrapper.pedido.respostas}">
+                        <c:set var="ultimaResposta" value="${pedidoWrapper.pedido.respostas[fn:length(pedidoWrapper.pedido.respostas) - 1]}" />
                     </c:if>
 
                     <tr>
-                        <td>${pedido.dadosUtente.unidadeSanitaria} (${pedido.dadosUtente.codigoUnidadeSanitaria})</td>
-                        <td>${pedido.dadosUtente.nid}</td>
+                        <td>${pedidoWrapper.pedido.dadosUtente.unidadeSanitaria} (${pedidoWrapper.pedido.dadosUtente.codigoUnidadeSanitaria})</td>
+                        <td>${pedidoWrapper.pedido.dadosUtente.nid}</td>
                         <td>
-                                    ${pedido.pedidoId}
+                            <c:if test="${pedidoWrapper.encounter != null}">
+                                <a target="_blank" href="/openmrs/module/htmlformentry/htmlFormEntry.form?encounterId=${pedidoWrapper.encounter.encounterId}">
+                                        ${pedidoWrapper.pedido.pedidoId}
+                                </a>
+                            </c:if>
+                            <c:if test="${pedidoWrapper.encounter == null}">
+                                ${pedidoWrapper.pedido.pedidoId}
+                            </c:if>
                         </td>
-                        <td>${pedido.dadosUtente.iniciais}</td>
+                        <td>${pedidoWrapper.pedido.dadosUtente.iniciais}</td>
                         <td>
                             <c:choose>
-                                <c:when test="${pedido.dadosUtente.sexo == Pedido.SEXO_MASCULINO}">M</c:when>
-                                <c:when test="${pedido.dadosUtente.sexo == Pedido.SEXO_FEMININO}">F</c:when>
-                                <c:otherwise>${pedido.dadosUtente.sexo}</c:otherwise>
+                                <c:when test="${pedidoWrapper.pedido.dadosUtente.sexo == Pedido.SEXO_MASCULINO}">M</c:when>
+                                <c:when test="${pedidoWrapper.pedido.dadosUtente.sexo == Pedido.SEXO_FEMININO}">F</c:when>
+                                <c:otherwise>${pedidoWrapper.pedido.dadosUtente.sexo}</c:otherwise>
                             </c:choose>
                         </td>
                         <td>
-                            <fmt:formatNumber value="${pedido.dadosUtente.idade}" maxFractionDigits="0" />
+                            <fmt:formatNumber value="${pedidoWrapper.pedido.dadosUtente.idade}" maxFractionDigits="0" />
                         </td>
                         <td>
-                                ${pedido.formattedDataSubmissao}
+                                ${pedidoWrapper.pedido.formattedDataSubmissao}
                         </td>
                         <td>
                                 ${ultimaResposta.formattedDataResposta}
@@ -103,29 +110,29 @@
                         </td>
                         <td>
                             <c:choose>
-                                <c:when test="${pedido.estado == Pedido.ESTADO_SEM_RESPOSTA}">
+                                <c:when test="${pedidoWrapper.pedido.estado == Pedido.ESTADO_SEM_RESPOSTA}">
                                     <span class="status-no-response"><openmrs:message code="sespct.search.status.SEM_RESPOSTA"/></span>
                                 </c:when>
-                                <c:when test="${pedido.estado == Pedido.ESTADO_NAO_PROCESSADO}">
+                                <c:when test="${pedidoWrapper.pedido.estado == Pedido.ESTADO_NAO_PROCESSADO}">
                                     <span class="status-not-processed"><openmrs:message code="sespct.search.status.NAO_PROCESSADO"/></span>
                                 </c:when>
-                                <c:when test="${pedido.estado == Pedido.ESTADO_APROVADO}">
+                                <c:when test="${pedidoWrapper.pedido.estado == Pedido.ESTADO_APROVADO}">
                                     <span class="status-not-processed"><openmrs:message code="sespct.search.status.APROVADO"/></span>
                                 </c:when>
-                                <c:when test="${pedido.estado == Pedido.ESTADO_ADIADO}">
+                                <c:when test="${pedidoWrapper.pedido.estado == Pedido.ESTADO_ADIADO}">
                                     <span class="status-not-processed"><openmrs:message code="sespct.search.status.ADIADO"/></span>
                                 </c:when>
                                 <c:otherwise>
-                                    ${pedido.estado}
+                                    ${pedidoWrapper.pedido.estado}
                                 </c:otherwise>
                             </c:choose>
                         </td>
                         <td>
                             <c:choose>
-                                <c:when test="${pedido.causa == Pedido.CAUSA_NID_NAO_ENCONTRADO}">
+                                <c:when test="${pedidoWrapper.pedido.causa == Pedido.CAUSA_NID_NAO_ENCONTRADO}">
                                     <openmrs:message code="sespct.error.NOT_FOUND"/>
                                 </c:when>
-                                <c:when test="${pedido.causa == Pedido.CAUSA_NID_DUPLICADO}">
+                                <c:when test="${pedidoWrapper.pedido.causa == Pedido.CAUSA_NID_DUPLICADO}">
                                     <openmrs:message code="sespct.error.DUPLICATED"/>
                                 </c:when>
                                 <c:otherwise>-</c:otherwise>
@@ -133,8 +140,8 @@
                         </td>
                         <td>
                             <c:choose>
-                            <c:when test="${pedido.causa == Pedido.CAUSA_NID_NAO_ENCONTRADO}">
-                                <a href="manageftcases/${pedido.id}/map.form" onclick="mapNid('${pedido.dadosUtente.nid}')">
+                            <c:when test="${pedidoWrapper.pedido.causa == Pedido.CAUSA_NID_NAO_ENCONTRADO}">
+                                <a href="manageftcases/${pedidoWrapper.pedido.id}/map.form" onclick="mapNid('${pedidoWrapper.pedido.dadosUtente.nid}')">
                                     <openmrs:message code="sespct.mapNid"/>
                                 </a>
                             </c:when>

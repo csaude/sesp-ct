@@ -50,6 +50,13 @@ public class MapUnprocessedFtController {
 	public String patientIdentifierMapping(@PathVariable Integer id, ModelMap model, HttpSession session,
 	        HttpServletRequest request) {
 		
+		String sessionFlashMessage = (String) session.getAttribute("flashMessage");
+		if (sessionFlashMessage != null && !sessionFlashMessage.trim().isEmpty()) {
+			model.addAttribute("flashMessage", sessionFlashMessage);
+			// Remove from session after using it (flash behavior)
+			session.removeAttribute("flashMessage");
+		}
+		
 		Pedido pedido = pedidoService.getPedidoById(id);
 		
 		// Load suggestions
@@ -71,8 +78,23 @@ public class MapUnprocessedFtController {
 	}
 	
 	@RequestMapping(value = "manageftcases/{pedidoId}/map.form", method = RequestMethod.POST)
-	public String mapPatientIdentifier(@PathVariable("pedidoId") Integer pedidoId, @RequestParam String patientUuid,
-	        @RequestParam(required = false) String search, ModelMap model, HttpServletRequest request, HttpSession session) {
+	public String mapPatientIdentifier(@PathVariable("pedidoId") Integer pedidoId,
+	        @RequestParam(required = false) String patientUuid, @RequestParam(required = false) String search,
+	        ModelMap model, HttpServletRequest request, HttpSession session) {
+		
+		// Check if a patient was actually selected.
+		if (StringUtils.isBlank(patientUuid)) {
+			log.error("Map button clicked but no patient was selected.");
+			
+			// The message you want to display
+			String errorMessage = "Por favor pesquise e seleccione o utente na secção de SESP para mapear.";
+			
+			// Use your existing flash message system
+			session.setAttribute("flashMessage", errorMessage);
+			
+			// Redirect back TO THE SAME MAPPING PAGE
+			return "redirect:/module/sespct/manageftcases/" + pedidoId + "/map.form";
+		}
 		
 		// Get last search parameters from session for redirect
 		@SuppressWarnings("unchecked")
