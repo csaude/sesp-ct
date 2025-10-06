@@ -101,13 +101,14 @@
                         <td>
                                 ${pedidoWrapper.pedido.formattedDataSubmissao}
                         </td>
+
                         <td>
                                 ${ultimaResposta.formattedDataResposta}
                         </td>
-
                         <td>
-                                ${ultimaResposta.formattedTimestamp}
+                                ${not empty ultimaResposta.formattedTimestamp ? ultimaResposta.formattedTimestamp : pedidoWrapper.pedido.formattedDateCreated}
                         </td>
+
                         <td>
                             <c:choose>
                                 <c:when test="${pedidoWrapper.pedido.estado == Pedido.ESTADO_SEM_RESPOSTA}">
@@ -164,6 +165,8 @@
 </c:if>
 
 <openmrs:htmlInclude file="${pageContext.request.contextPath}/moduleResources/sespct/js/datatables.net/1.13.2/jquery.dataTables.min.js" />
+<openmrs:htmlInclude file="${pageContext.request.contextPath}/moduleResources/sespct/js/momentjs.2.29.4/moment.min.js" />
+<openmrs:htmlInclude file="${pageContext.request.contextPath}/moduleResources/sespct/js/datatables.net/1.13.2/datetime-moment.js" />
 <openmrs:htmlInclude file="${pageContext.request.contextPath}/moduleResources/sespct/js/buttons/2.3.4/dataTables.buttons.min.js" />
 <openmrs:htmlInclude file="${pageContext.request.contextPath}/moduleResources/sespct/js/buttons/2.3.4/buttons.html5.min.js" />
 
@@ -195,6 +198,7 @@
                 }
             };
 
+            $.fn.dataTable.moment('DD/MM/YYYY');
             $("#ftResultsTable").DataTable({
                 pageLength: 20,
                 lengthMenu: [20, 50, 75, 100],
