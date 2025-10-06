@@ -1,10 +1,13 @@
 package org.openmrs.module.sespct.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.openmrs.Encounter;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.sespct.api.ExportService;
 import org.openmrs.module.sespct.api.PedidoService;
+import org.openmrs.module.sespct.api.dto.PedidoEncounterWrapper;
 import org.openmrs.module.sespct.api.model.Pedido;
+import org.openmrs.module.sespct.api.util.EncounterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,7 @@ import javax.servlet.http.HttpSession;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -115,10 +119,24 @@ public class SespctController {
 			String trimmedNid = (nid != null) ? nid.trim() : null;
 			
 			List<Pedido> requests = pedidoService.searchPedidos(startDate, endDate, estado, trimmedNcft, trimmedNid, usCode);
-			
+			List<PedidoEncounterWrapper> pedidoWrappers = new ArrayList<>();
+
+			for (Pedido pedido : requests) {
+				Encounter encounter = null; // Default to null
+				try {
+					// Your logic to find the encounter
+					encounter = EncounterUtils.findEncounterByPedidoId(pedido.getPedidoId());
+				} catch (Exception e) {
+					// It's good practice to log if a specific lookup fails but you don't want to stop the whole page
+					log.error("Could not find or check for an encounter for Pedido ID: " + pedido.getPedidoId(), e);
+				}
+				// Add the wrapper (with pedido and either the found encounter or null) to the list
+				pedidoWrappers.add(new PedidoEncounterWrapper(pedido, encounter));
+			}
+
 			// Add all results and search parameters back to the model
 			// This is important to re-populate the form fields after submission
-			model.addAttribute("pedidos", requests);
+			model.addAttribute("pedidos", pedidoWrappers);
 			model.addAttribute("startDate", startDateStr);
 			model.addAttribute("endDate", endDateStr);
 			model.addAttribute("selectedEstado", estado);

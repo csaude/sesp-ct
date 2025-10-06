@@ -20,7 +20,7 @@
 <div>
     <div class="boxHeader disaHeader">
         <b>
-            <spring:message code="sespct.patient" />
+            <spring:message code="sespct.sct" />
         </b>
     </div>
     <div class="box disaBox">
