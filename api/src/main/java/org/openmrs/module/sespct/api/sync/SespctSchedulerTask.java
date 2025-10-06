@@ -150,7 +150,6 @@ public class SespctSchedulerTask extends AbstractTask {
 			Optional<Patient> patient = findPatientByIdentifier(pedido, identifier);
 			
 			if (!patient.isPresent()) {
-				handlePatientNotFound(pedido, identifier);
 				return false;
 			}
 			
@@ -216,20 +215,6 @@ public class SespctSchedulerTask extends AbstractTask {
 		log.debug("Found Patient id={} for Pedido id={}", patient.getPatientId(), pedido.getId());
 		
 		return Optional.of(patient);
-	}
-	
-	private void handlePatientNotFound(Pedido pedido, String identifier) {
-		log.warn("No patient found for Pedido id={}", pedido.getId());
-		
-		try {
-			pedido.setEstado(Constants.PEDIDO_STATUS_NOT_PROCESSED);
-			pedido.setCausa(Constants.PEDIDO_STATUS_PATIENT_NOT_FOUND);
-			pedidoService.savePedido(pedido);
-			log.info("Marked Pedido id={} as patient not found", pedido.getId());
-		}
-		catch (Exception e) {
-			log.error("Failed to update status for Pedido id={}", pedido.getId(), e);
-		}
 	}
 	
 	private void createEncounterForPedido(Pedido pedido, Patient patient) {
@@ -402,28 +387,28 @@ public class SespctSchedulerTask extends AbstractTask {
 				continue;
 			}
 			
-			//			try {
-			//				List<RespostaComite> ultimasRespostas = RespostaUtils.getUltimasDuasRespostas(pedido);
-			//				if (ultimasRespostas.isEmpty()) {
-			//					log.warn("Nenhuma RespostaComite válida encontrada para Resposta id={} (Pedido id={})",
-			//					    resposta.getId(), pedido.getPedidoId());
-			//					continue;
-			//				}
-			//
-			//				respostaSyncService.updateEncounterWithRespostas(pedido, encounter, ultimasRespostas);
-			//
-			//				// Marca como sincronizado
-			//				resposta.setSincronizado(true);
-			//				pedidoService.saveResposta(resposta);
-			//
-			//				log.info("Resposta id={} aplicada com sucesso ao Encounter do Pedido id={}", resposta.getId(),
-			//				    pedido.getPedidoId());
-			//
-			//			}
-			//			catch (Exception e) {
-			//				log.error("Erro ao aplicar Resposta id={} ao Pedido id={}", resposta.getId(), pedido.getPedidoId(), e);
-			//				pedidoService.saveResposta(resposta);
-			//			}
+			try {
+				List<Resposta> ultimasRespostas = RespostaUtils.getUltimasDuasRespostas(pedido);
+				if (ultimasRespostas.isEmpty()) {
+					log.warn("Nenhuma RespostaComite válida encontrada para Resposta id={} (Pedido id={})",
+					    resposta.getId(), pedido.getPedidoId());
+					continue;
+				}
+				
+				respostaSyncService.updateEncounterWithRespostas(pedido, encounter, ultimasRespostas);
+				
+				// Marca como sincronizado
+				resposta.setSincronizado(true);
+				pedidoService.saveResposta(resposta);
+				
+				log.info("Resposta id={} aplicada com sucesso ao Encounter do Pedido id={}", resposta.getId(),
+				    pedido.getPedidoId());
+				
+			}
+			catch (Exception e) {
+				log.error("Erro ao aplicar Resposta id={} ao Pedido id={}", resposta.getId(), pedido.getPedidoId(), e);
+				pedidoService.saveResposta(resposta);
+			}
 		}
 	}
 	
