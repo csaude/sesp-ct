@@ -1,6 +1,8 @@
 package org.openmrs.module.sespct.api.model;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -263,6 +265,18 @@ public class Pedido extends BaseOpenmrsData {
 		// This formatter will produce "04/09/2025"
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 		return dataSubmissao.format(formatter);
+	}
+	
+	@Transient
+	public String getFormattedDateCreated() {
+		if (getDateCreated() == null) {
+			return "";
+		}
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		// 1. Convert Date to Instant
+		// 2. Specify the time-zone (important!)
+		// 3. Convert to LocalDate and then format
+		return getDateCreated().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().format(formatter);
 	}
 	
 }
