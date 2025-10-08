@@ -195,8 +195,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 		
 		log.debug("Validating pedido state - Estado: {}, Causa: {}", estado, causa);
 		
-		if (!Pedido.ESTADO_NAO_PROCESSADO.equals(estado) || !Pedido.CAUSA_NID_NAO_ENCONTRADO.equals(causa)) {
-			String labResultStatus = messageSourceService.getMessage("sespct.status." + estado);
+		if (!Pedido.ESTADO_NAO_PROCESSADO.equals(estado)) {
 			throw new IllegalStateException(String.format(
 			    "Pedido is not in a valid state for mapping. Current state: %s, Cause: %s", estado, causa));
 		}
@@ -324,7 +323,6 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 			Pedido pedido = getPedidoById(pedidoId);
 			if (pedido != null) {
 				pedido.setEstado(Pedido.ESTADO_SEM_RESPOSTA);
-				pedido.setCausa(null);
 				savePedido(pedido);
 				log.debug("Pedido {} rescheduled successfully", pedidoId);
 			} else {

@@ -18,6 +18,8 @@ public class Constants {
 	
 	public static final String PEDIDO_STATUS_DUPLICATE_NID = "DUPLICATE_NID";
 	
+	public static final String PEDIDO_STATUS_PROCESSED = "PROCESSED";
+	
 	public static final String SIM_UUID = "1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	public static final String NAO_UUID = "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";

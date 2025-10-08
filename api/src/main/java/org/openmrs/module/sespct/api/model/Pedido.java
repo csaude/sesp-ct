@@ -1,6 +1,5 @@
 package org.openmrs.module.sespct.api.model;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -30,6 +29,8 @@ public class Pedido extends BaseOpenmrsData {
 	
 	public static final String ESTADO_NAO_PROCESSADO = "NOT_PROCESSED";
 	
+	public static final String ESTADO_PROCESSADO = "PROCESSED";
+	
 	public static final String ESTADO_SEM_RESPOSTA = "sem_resposta";
 	
 	public static final String ESTADO_APROVADO = "aprovado";
@@ -38,7 +39,7 @@ public class Pedido extends BaseOpenmrsData {
 	
 	public static final String CAUSA_NID_NAO_ENCONTRADO = "NID_NOT_FOUND";
 	
-	public static final String CAUSA_NID_DUPLICADO = "NID duplicado";
+	public static final String CAUSA_NID_DUPLICADO = "DUPLICATE_NID";
 	
 	public static final String SEXO_MASCULINO = "masculino";
 	

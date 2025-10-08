@@ -162,8 +162,13 @@ public class SespctSchedulerTask extends AbstractTask {
 			
 			createEncounterForPedido(pedido, patient.get());
 			log.info("Successfully processed Pedido id={} for Patient id={}", pedido.getId(), patient.get().getPatientId());
-			return true;
 			
+			pedido.setEstado(Constants.PEDIDO_STATUS_PROCESSED);
+			pedidoService.savePedido(pedido);
+			log.info("Pedido id={} marcado como TERMINADO após criação do Encounter", pedido.getId());
+			log.info("Successfully processed Pedido id={} for Patient id={}", pedido.getId(), patient.get().getPatientId());
+			
+			return true;
 		}
 		catch (APIException e) {
 			log.error("API error processing Pedido id={}", pedido.getId(), e);
