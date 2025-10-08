@@ -353,7 +353,7 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 		if (!pedidoDtos.isEmpty()) {
 			List<String> newPedidoUuids = processPedidos(pedidoDtos);
 			
-			//			 Step 2b: Mark Pedidos as consumed
+			//Step 2b: Mark Pedidos as consumed
 			if (!newPedidoUuids.isEmpty()) {
 				middlewareApiService.markPedidosAsConsumed(newPedidoUuids, authToken);
 			}

@@ -224,6 +224,7 @@ public class SespctMapper {
 		entity.setEmailAutorizante(dto.getEmailAutorizante());
 		entity.setContactoAutorizante(dto.getContactoAutorizante());
 		entity.setNivelAutorizacao(dto.getNivelAutorizacao());
+		entity.setSincronizado(Boolean.FALSE);
 		
 		// Handle LocalDateTime parsing safely using a helper
 		if (dto.getTimestamp() != null) {
