@@ -210,35 +210,39 @@ public class ObsBuilder {
 		return this;
 	}
 	
-	public ObsBuilder addRespostaComiteObs(String estado, String linha, String comentario, Date dataResposta, String autor) {
-		Obs group = createBaseObs(Constants.RESPOSTA_COMITE_GROUP_UUID);
+	public ObsBuilder addRespostaComiteObs(String groupUuid, String estado, String linha, String comentario,
+	        Date dataResposta, String autor) {
+		
+		Obs group = new Obs();
+		group.setConcept(Context.getConceptService().getConceptByUuid(groupUuid));
+		group.setObsDatetime(dataResposta != null ? dataResposta : new Date());
+		group.setPerson(encounter.getPatient());
+		group.setEncounter(encounter);
 		
 		if (estado != null) {
 			Obs estadoObs = createBaseObs(Constants.RESPOSTA_ESTADO_UUID);
-			switch (StringHelper.removeAcentos(estado.trim()).toUpperCase()) {
-				case "SEM_RESPOSTA":
-					estadoObs
-					        .setValueCoded(Context.getConceptService().getConceptByUuid(Constants.ESTADO_SEM_RESPOSTA_UUID));
-					break;
-				case "APROVADO":
-					estadoObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.ESTADO_APROVADO_UUID));
-					break;
-				case "ADIADO":
-					estadoObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.ESTADO_ADIADO_UUID));
-					break;
-				default:
-					log.warn("Estado do comité desconhecido: {}", estado);
+			String normalizedEstado = StringHelper.removeAcentos(estado.trim()).toUpperCase();
+			
+			if (normalizedEstado.contains("SEM_RESPOSTA")) {
+				estadoObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.ESTADO_SEM_RESPOSTA_UUID));
+			} else if (normalizedEstado.contains("APROVADO")) {
+				estadoObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.ESTADO_APROVADO_UUID));
+			} else if (normalizedEstado.contains("ADIADO")) {
+				estadoObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.ESTADO_ADIADO_UUID));
+			} else {
+				log.warn("Estado do comité desconhecido: {}", estado);
 			}
+			
 			group.addGroupMember(estadoObs);
 		}
 		
 		if (linha != null) {
 			Obs linhaObs = createBaseObs(Constants.RESPOSTA_LINHA_UUID);
 			switch (StringHelper.removeAcentos(linha.trim()).toUpperCase()) {
-				case "2 LINHA":
+				case "2_LINHA":
 					linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.SEGUNDA_LINHA_UUID));
 					break;
-				case "3 LINHA":
+				case "3_LINHA":
 					linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.TERCEIRA_LINHA_UUID));
 					break;
 				case "REGIME INDIVIDUALIZADO":

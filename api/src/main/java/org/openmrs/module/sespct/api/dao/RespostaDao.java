@@ -9,4 +9,6 @@ public interface RespostaDao {
 	List<Resposta> getRespostasPendentes();
 	
 	Resposta saveResposta(Resposta resposta);
+	
+	List<Resposta> getRespostasByPedidoId(Integer pedidoId);
 }

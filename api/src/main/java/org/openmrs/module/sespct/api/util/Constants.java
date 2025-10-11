@@ -134,6 +134,8 @@ public class Constants {
 	// Resposta do Comite Terapeutico 
 	public static final String RESPOSTA_COMITE_GROUP_UUID = "bb25dc01-ea37-42a7-ae51-ecce1bdd7d3c";
 	
+	public static final String RESPOSTA_HISTORICO_GROUP_UUID = "2ed04aec-b1a9-4eb9-b54c-73f8d6ca340e";
+	
 	public static final String RESPOSTA_ESTADO_UUID = "3dba5068-fc4d-46f5-a338-78548761a21c";
 	
 	public static final String RESPOSTA_LINHA_UUID = "fdff0637-b36f-4dce-90c7-fe9f1ec586f0";
@@ -147,4 +149,10 @@ public class Constants {
 	public static final String ESTADO_APROVADO_UUID = "1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	public static final String ESTADO_ADIADO_UUID = "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	// Grupo de resposta: Atual e Histórico
+	public static final String RESPOSTA_COMITE_ATUAL_GROUP_UUID = "8e111777-bb32-4a81-9e11-cd7a54a12f77";
+	
+	public static final String RESPOSTA_COMITE_HISTORICO_GROUP_UUID = "a219da18-d4f2-49f5-9a92-64341af9329a";
+	
 }

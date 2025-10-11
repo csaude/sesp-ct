@@ -23,7 +23,9 @@ public class RespostaDaoImpl implements RespostaDao {
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Resposta> getRespostasPendentes() {
-		final String hql = "from Resposta r where r.sincronizado = false";
+		final String hql = "SELECT r FROM Resposta r " + "JOIN FETCH r.pedido p " + "WHERE r.sincronizado = false "
+		        + "AND r.voided = false " + "ORDER BY r.dataResposta DESC";
+		
 		Query query = getCurrentSession().createQuery(hql);
 		return query.list();
 	}
@@ -32,5 +34,11 @@ public class RespostaDaoImpl implements RespostaDao {
 	public Resposta saveResposta(Resposta resposta) {
 		getCurrentSession().saveOrUpdate(resposta);
 		return resposta;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Resposta> getRespostasByPedidoId(Integer pedidoId) {
+		final String hql = "from Resposta r where r.pedido.id = :pedidoId order by r.dataResposta desc";
+		return getCurrentSession().createQuery(hql).setParameter("pedidoId", pedidoId).list();
 	}
 }

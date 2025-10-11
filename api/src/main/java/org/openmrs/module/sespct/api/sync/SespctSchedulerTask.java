@@ -2,8 +2,10 @@ package org.openmrs.module.sespct.api.sync;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.openmrs.Encounter;
 import org.openmrs.EncounterRole;
@@ -22,7 +24,6 @@ import org.openmrs.module.sespct.api.model.Resposta;
 import org.openmrs.module.sespct.api.util.Constants;
 import org.openmrs.module.sespct.api.util.DateTimeUtils;
 import org.openmrs.module.sespct.api.util.EncounterUtils;
-import org.openmrs.module.sespct.api.util.RespostaUtils;
 import org.openmrs.module.sespct.api.util.StringHelper;
 import org.openmrs.scheduler.tasks.AbstractTask;
 import org.slf4j.Logger;
@@ -312,7 +313,9 @@ public class SespctSchedulerTask extends AbstractTask {
 		obsBuilder.addLinhaSolicitadaObs(pedido.getLinhaSolicitada().getLinha());
 		
 		// Resposta do Comité (estado inicial do Pedido)
-		obsBuilder.addRespostaComiteObs(pedido.getEstado(), // SEM_RESPOSTA
+		obsBuilder.addRespostaComiteObs(
+			null,
+			pedido.getEstado(), // SEM_RESPOSTA
 		    null, // sem linha ainda
 		    null, // sem comentário
 		    null, // data submissão
@@ -393,12 +396,17 @@ public class SespctSchedulerTask extends AbstractTask {
 			}
 			
 			try {
-				List<Resposta> ultimasRespostas = RespostaUtils.getUltimasDuasRespostas(pedido);
-				if (ultimasRespostas.isEmpty()) {
-					log.warn("Nenhuma RespostaComite válida encontrada para Resposta id={} (Pedido id={})",
-					    resposta.getId(), pedido.getPedidoId());
-					continue;
-				}
+				List<Resposta> todasRespostas = pedidoService.getRespostasByPedidoId(pedido.getId());
+				
+	            List<Resposta> ultimasRespostas = todasRespostas.stream()
+	                    .sorted(Comparator.comparing(Resposta::getDataResposta,Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+	                    .limit(2)
+	                    .collect(Collectors.toList());
+				
+	            if (ultimasRespostas.isEmpty()) {
+	                log.warn("Nenhuma resposta válida encontrada para Pedido id={}", pedido.getPedidoId());
+	                continue;
+	            }
 				
 				respostaSyncService.updateEncounterWithRespostas(pedido, encounter, ultimasRespostas);
 				
@@ -416,5 +424,4 @@ public class SespctSchedulerTask extends AbstractTask {
 			}
 		}
 	}
-	
 }

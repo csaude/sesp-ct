@@ -7,6 +7,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.sespct.api.builder.ObsBuilder;
 import org.openmrs.module.sespct.api.model.Pedido;
 import org.openmrs.module.sespct.api.model.Resposta;
+import org.openmrs.module.sespct.api.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,9 +26,40 @@ public class RespostaSyncService {
 		
 		ObsBuilder obsBuilder = new ObsBuilder(encounter, encounter.getPatient());
 		
-		for (Resposta rc : respostas) {
-			obsBuilder.addRespostaComiteObs(rc.getResposta(), rc.getLinhaTerapeutica(), rc.getComentario(),
-			    rc.getDataResposta() != null ? java.sql.Timestamp.valueOf(rc.getDataResposta()) : null, rc.getAutorizante());
+		// Processar respostas de acordo com a posição
+		for (int i = 0; i < respostas.size() && i < 2; i++) {
+			Resposta resposta = respostas.get(i);
+			
+			// Determinar qual grupo usar
+			String groupUuid;
+			String tipoResposta;
+			
+			if (i == 0) {
+				// Primeira resposta (mais recente) → Grupo principal
+				groupUuid = Constants.RESPOSTA_COMITE_GROUP_UUID;
+				tipoResposta = "atual";
+			} else {
+				// Segunda resposta (anterior) → Grupo histórico
+				groupUuid = Constants.RESPOSTA_HISTORICO_GROUP_UUID;
+				tipoResposta = "histórico";
+			}
+			
+			log.debug("Adicionando resposta {} para Pedido id={} no grupo {}", tipoResposta, pedido.getPedidoId(), groupUuid);
+			
+			// Converter data para java.util.Date se necessário
+			java.util.Date dataResposta = null;
+			if (resposta.getDataResposta() != null) {
+				dataResposta = java.sql.Timestamp.valueOf(resposta.getDataResposta());
+			}
+			
+			// Adicionar resposta ao grupo correto
+			obsBuilder.addRespostaComiteObs(groupUuid, // UUID do grupo (atual ou histórico)
+			    resposta.getResposta(), // Estado (Aprovado/Adiado/Sem resposta)
+			    resposta.getLinhaTerapeutica(), // Linha terapêutica
+			    resposta.getComentario(), // Comentário
+			    dataResposta, // Data da resposta
+			    resposta.getAutorizante() // Autor
+			        );
 		}
 		
 		Context.getEncounterService().saveEncounter(encounter);

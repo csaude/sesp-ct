@@ -455,4 +455,9 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 		}
 		return newlySavedRespostaUUIds;
 	}
+	
+	@Override
+	public List<Resposta> getRespostasByPedidoId(Integer pedidoId) {
+		return respostaDao.getRespostasByPedidoId(pedidoId);
+	}
 }
