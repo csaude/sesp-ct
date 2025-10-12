@@ -314,7 +314,7 @@ public class SespctSchedulerTask extends AbstractTask {
 		
 		// Resposta do Comité (estado inicial do Pedido)
 		obsBuilder.addRespostaComiteObs(
-			null,
+			Constants.RESPOSTA_COMITE_GROUP_UUID,
 			pedido.getEstado(), // SEM_RESPOSTA
 		    null, // sem linha ainda
 		    null, // sem comentário
