@@ -1,6 +1,5 @@
 package org.openmrs.module.sespct.extension.html;
 
-import org.openmrs.module.Extension.MEDIA_TYPE;
 import org.openmrs.module.web.extension.LinkExt;
 
 public class GutterListExt extends LinkExt {
@@ -17,7 +16,7 @@ public class GutterListExt extends LinkExt {
 	
 	@Override
 	public String getRequiredPrivilege() {
-		return "App: sespct.app";
+		return "Permite acesso à aplicação SESP-CT";
 	}
 	
 	@Override

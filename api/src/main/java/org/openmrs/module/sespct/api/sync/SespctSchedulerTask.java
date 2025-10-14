@@ -107,6 +107,9 @@ public class SespctSchedulerTask extends AbstractTask {
 	}
 	
 	private void processPedidos() {
+		
+		reprocessarPedidosComNidResolvido();
+		
 		List<Pedido> pedidos = pedidoService.getPedidosByEstado(Arrays.asList(Constants.ESTADO_SEM_RESPOSTA,
 		    Constants.ESTADO_APROVADO, Constants.ESTADO_ADIADO));
 		
@@ -421,6 +424,33 @@ public class SespctSchedulerTask extends AbstractTask {
 			catch (Exception e) {
 				log.error("Erro ao aplicar Resposta id={} ao Pedido id={}", resposta.getId(), pedido.getPedidoId(), e);
 				pedidoService.saveResposta(resposta);
+			}
+		}
+	}
+	
+	private void reprocessarPedidosComNidResolvido() {
+		List<Pedido> pedidosDuplicados = pedidoService.getPedidosByCausa(Constants.PEDIDO_STATUS_DUPLICATE_NID);
+		log.info("Verificando {} pedidos marcados como DUPLICATE_NID...", pedidosDuplicados.size());
+		
+		for (Pedido pedido : pedidosDuplicados) {
+			try {
+				String nid = pedido.getDadosUtente().getNid();
+				if (nid == null || nid.trim().isEmpty())
+					continue;
+				
+				List<Patient> pacientes = Context.getPatientService().getPatients(null, nid, null, true);
+				if (pacientes.size() == 1) {
+					pedido.setEstado(Constants.ESTADO_SEM_RESPOSTA);
+					pedido.setCausa(null);
+					pedidoService.savePedido(pedido);
+					
+					log.info("Pedido id={} reativado (duplicação resolvida, NID={})", pedido.getId(), nid);
+				} else {
+					log.debug("Pedido id={} ainda tem {} pacientes com mesmo NID={}", pedido.getId(), pacientes.size(), nid);
+				}
+			}
+			catch (Exception e) {
+				log.error("Erro ao verificar NID duplicado para Pedido id={}", pedido.getId(), e);
 			}
 		}
 	}

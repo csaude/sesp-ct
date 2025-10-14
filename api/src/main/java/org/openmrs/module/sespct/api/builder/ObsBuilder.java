@@ -189,24 +189,21 @@ public class ObsBuilder {
 		Obs group = createBaseObs(Constants.LINHA_SOLICITADA_GROUP_UUID);
 		Obs linhaObs = createBaseObs(Constants.LINHA_SOLICITADA_UUID);
 		
-		switch (StringHelper.removeAcentos(linha.trim()).toUpperCase()) {
-			case "2 LINHA":
-				linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.SEGUNDA_LINHA_UUID));
-				break;
-			case "3 LINHA":
-				linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.TERCEIRA_LINHA_UUID));
-				break;
-			case "REGIME INDIVIDUALIZADO":
-				linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.REGIME_INDIVIDUALIZADO_UUID));
-				break;
-			default:
-				log.warn("Linha solicitada desconhecida: {}", linha);
-				return this;
+		String normalized = StringHelper.removeAcentos(linha.trim()).toUpperCase();
+		
+		if (normalized.contains("2") || normalized.contains("SEGUNDA")) {
+			linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.SEGUNDA_LINHA_UUID));
+		} else if (normalized.contains("3") || normalized.contains("TERCEIRA")) {
+			linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.TERCEIRA_LINHA_UUID));
+		} else if (normalized.contains("REGIME") || normalized.contains("INDIVIDUALIZADO")) {
+			linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.REGIME_INDIVIDUALIZADO_UUID));
+		} else {
+			log.warn("Linha solicitada desconhecida: {}", linha);
+			return this;
 		}
 		
 		group.addGroupMember(linhaObs);
 		encounter.addObs(group);
-		
 		return this;
 	}
 	
@@ -223,7 +220,7 @@ public class ObsBuilder {
 			Obs estadoObs = createBaseObs(Constants.RESPOSTA_ESTADO_UUID);
 			String normalizedEstado = StringHelper.removeAcentos(estado.trim()).toUpperCase();
 			
-			if (normalizedEstado.contains("SEM_RESPOSTA")) {
+			if (normalizedEstado.contains("SEM")) {
 				estadoObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.ESTADO_SEM_RESPOSTA_UUID));
 			} else if (normalizedEstado.contains("APROVADO")) {
 				estadoObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.ESTADO_APROVADO_UUID));
@@ -238,20 +235,18 @@ public class ObsBuilder {
 		
 		if (linha != null) {
 			Obs linhaObs = createBaseObs(Constants.RESPOSTA_LINHA_UUID);
-			switch (StringHelper.removeAcentos(linha.trim()).toUpperCase()) {
-				case "2_LINHA":
-					linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.SEGUNDA_LINHA_UUID));
-					break;
-				case "3_LINHA":
-					linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.TERCEIRA_LINHA_UUID));
-					break;
-				case "REGIME INDIVIDUALIZADO":
-					linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(
-					    Constants.REGIME_INDIVIDUALIZADO_UUID));
-					break;
-				default:
-					log.warn("Linha terapêutica da resposta do comité desconhecida: {}", linha);
+			String normalizedLinha = StringHelper.removeAcentos(linha.trim()).toUpperCase();
+			
+			if (normalizedLinha.contains("2") || normalizedLinha.contains("SEGUNDA")) {
+				linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.SEGUNDA_LINHA_UUID));
+			} else if (normalizedLinha.contains("3") || normalizedLinha.contains("TERCEIRA")) {
+				linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.TERCEIRA_LINHA_UUID));
+			} else if (normalizedLinha.contains("REGIME") || normalizedLinha.contains("INDIVIDUALIZADO")) {
+				linhaObs.setValueCoded(Context.getConceptService().getConceptByUuid(Constants.REGIME_INDIVIDUALIZADO_UUID));
+			} else {
+				log.warn("Linha terapêutica da resposta do comité desconhecida: {}", linha);
 			}
+			
 			group.addGroupMember(linhaObs);
 		}
 		
@@ -278,18 +273,26 @@ public class ObsBuilder {
 	}
 	
 	private String mapEstadioToUuid(String estadioOms) {
-		switch (StringHelper.removeAcentos(estadioOms).trim().toUpperCase()) {
-			case "ESTADIO I":
-				return Constants.ESTADIO_I_UUID;
-			case "ESTADIO II":
-				return Constants.ESTADIO_II_UUID;
-			case "ESTADIO III":
-				return Constants.ESTADIO_III_UUID;
-			case "ESTADIO IV":
-				return Constants.ESTADIO_IV_UUID;
-			default:
-				log.warn("Estádio OMS desconhecido: {}", estadioOms);
-				return null;
+		if (estadioOms == null || estadioOms.trim().isEmpty()) {
+			return null;
+		}
+		
+		// Normaliza o texto: remove acentos, underscores, hífens e espaços extras
+		String normalized = StringHelper.removeAcentos(estadioOms).replace("_", "").replace("-", "").replace(" ", "").trim()
+		        .toUpperCase();
+		
+		if (normalized.contains("ESTADIOI") && !normalized.contains("ESTADIOII")) {
+			return Constants.ESTADIO_I_UUID;
+		} else if (normalized.contains("ESTADIOII") && !normalized.contains("ESTADIOIII")) {
+			return Constants.ESTADIO_II_UUID;
+		} else if (normalized.contains("ESTADIOIII") && !normalized.contains("ESTADIOIV")) {
+			return Constants.ESTADIO_III_UUID;
+		} else if (normalized.contains("ESTADIOIV")) {
+			return Constants.ESTADIO_IV_UUID;
+		} else {
+			log.warn("Estádio OMS desconhecido: {}", estadioOms);
+			return null;
 		}
 	}
+	
 }

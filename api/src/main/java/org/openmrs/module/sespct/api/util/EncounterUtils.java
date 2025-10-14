@@ -2,12 +2,12 @@ package org.openmrs.module.sespct.api.util;
 
 import java.util.List;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.openmrs.Encounter;
 import org.openmrs.api.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 
 public class EncounterUtils {
 	
@@ -24,7 +24,7 @@ public class EncounterUtils {
 		}
 		
 		String hql = "select o.encounter " + "from Obs o " + "where o.concept.uuid = :conceptUuid "
-		        + "and o.valueNumeric = :pedidoId";
+		        + "and o.valueNumeric = :pedidoId " + "and o.voided = false";
 		
 		SessionFactory sessionFactory = Context.getRegisteredComponent("sessionFactory", SessionFactory.class);
 		Session session = sessionFactory.getCurrentSession();

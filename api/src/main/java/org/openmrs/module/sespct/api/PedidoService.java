@@ -13,6 +13,8 @@ public interface PedidoService extends OpenmrsService {
 	
 	Pedido savePedido(Pedido pedido);
 	
+	List<Pedido> getPedidosByCausa(String causa);
+	
 	Resposta saveResposta(Resposta resposta);
 	
 	List<Resposta> getRespostasByPedidoId(Integer pedidoId);

@@ -24,6 +24,8 @@ public interface PedidoDao {
 	
 	void deletePedido(Pedido pedido);
 	
+	List<Pedido> getPedidosByCausa(String causa);
+	
 	List<Pedido> getPedidosByDateTimeRange(LocalDateTime startDateTime, LocalDateTime endDateTime);
 	
 	/**

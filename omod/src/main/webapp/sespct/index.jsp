@@ -144,7 +144,7 @@
                         </td>
                         <td>
                             <c:choose>
-                            <c:when test="${pedidoWrapper.pedido.estado == Pedido.ESTADO_NAO_PROCESSADO}">
+                            <c:when test="${pedidoWrapper.pedido.estado == Pedido.ESTADO_NAO_PROCESSADO  and pedidoWrapper.pedido.causa == Pedido.CAUSA_NID_NAO_ENCONTRADO}">
                                 <a href="manageftcases/${pedidoWrapper.pedido.id}/map.form" onclick="mapNid('${pedidoWrapper.pedido.dadosUtente.nid}')">
                                     <openmrs:message code="sespct.mapNid"/>
                                 </a>

@@ -37,10 +37,10 @@
 	</advice>
 	 /AOP -->
 	
-	<privilege>
-			<name>App: sespct.app</name>
-			<description>Permite acesso à aplicação SESP-CT</description>
-	</privilege>
+<!-- 	<privilege>
+    	<name>Pesquisar resultados no CT-Interoperabilidade</name>
+    	<description>Permite pesquisar resultados no CT-Interoperabilidade</description>
+	</privilege> -->
 
 
 	<globalProperty>

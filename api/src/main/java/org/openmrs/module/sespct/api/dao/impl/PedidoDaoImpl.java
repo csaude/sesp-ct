@@ -197,4 +197,11 @@ public class PedidoDaoImpl implements PedidoDao {
 			return false;
 		}
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Pedido> getPedidosByCausa(String causa) {
+		String hql = "FROM Pedido WHERE causa = :causa AND voided = 0 ORDER BY dateCreated DESC";
+		return getCurrentSession().createQuery(hql).setParameter("causa", causa).list();
+	}
 }
