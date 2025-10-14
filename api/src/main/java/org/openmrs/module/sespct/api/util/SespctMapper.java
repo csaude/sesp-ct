@@ -237,7 +237,7 @@ public class SespctMapper {
 			entity.setDataResposta(zdt.toLocalDateTime());
 		}
 		
-		entity.setSincronizado(true); // Mark as processed
+		entity.setSincronizado(false); // Mark as processed
 		
 		return entity;
 	}

@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.openmrs.Patient;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.api.context.Context;
 import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.sespct.api.PedidoService;
@@ -77,6 +78,7 @@ public class MapUnprocessedFtController {
 		return "/module/sespct/sespct/map";
 	}
 	
+	@Authorized("Mapear pacientes no SESP-CT Interoperabilidade")
 	@RequestMapping(value = "manageftcases/{pedidoId}/map.form", method = RequestMethod.POST)
 	public String mapPatientIdentifier(@PathVariable("pedidoId") Integer pedidoId,
 	        @RequestParam(required = false) String patientUuid, @RequestParam(required = false) String search,

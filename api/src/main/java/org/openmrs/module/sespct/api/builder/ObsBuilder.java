@@ -281,13 +281,13 @@ public class ObsBuilder {
 		String normalized = StringHelper.removeAcentos(estadioOms).replace("_", "").replace("-", "").replace(" ", "").trim()
 		        .toUpperCase();
 		
-		if (normalized.contains("ESTADIOI") && !normalized.contains("ESTADIOII")) {
+		if (normalized.equals("ESTADIOI")) {
 			return Constants.ESTADIO_I_UUID;
-		} else if (normalized.contains("ESTADIOII") && !normalized.contains("ESTADIOIII")) {
+		} else if (normalized.equals("ESTADIOII")) {
 			return Constants.ESTADIO_II_UUID;
-		} else if (normalized.contains("ESTADIOIII") && !normalized.contains("ESTADIOIV")) {
+		} else if (normalized.equals("ESTADIOIII")) {
 			return Constants.ESTADIO_III_UUID;
-		} else if (normalized.contains("ESTADIOIV")) {
+		} else if (normalized.equals("ESTADIOIV")) {
 			return Constants.ESTADIO_IV_UUID;
 		} else {
 			log.warn("Estádio OMS desconhecido: {}", estadioOms);

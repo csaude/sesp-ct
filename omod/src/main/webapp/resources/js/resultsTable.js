@@ -374,7 +374,7 @@ async function ResultsTable(el, { locale, totalResults }) {
               if (
                 hasPrivilege(
                   user,
-                  "Mapear pacientes no Disa Interoperabilidade"
+                  "Mapear pacientes no SESP-CT Interoperabilidade"
                 )
               ) {
                 const map = document.createElement("li");
