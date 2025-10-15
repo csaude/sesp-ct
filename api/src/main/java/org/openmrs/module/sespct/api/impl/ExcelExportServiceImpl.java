@@ -93,7 +93,7 @@ public class ExcelExportServiceImpl implements ExportService {
             Row headerRow = sheet.createRow(rowNum++);
             headerRow.setHeightInPoints(20); // MODIFICATION: Increased header row height for wrapped text.
             String[] headers = {"US", "NID", "NCFT", "Iniciais", "Sexo", "Idade", "Gestante", "Lactante", "Submissão", "Data de resposta",
-                    "Sincronização", "Estado", "Causa de Não processamento", "Linha Terap. (resposta)", "Solicitante email",
+                    "Sincronização", "Estado", "Causa de Não processamento", "Linha Terap. (resposta)", "Esquema (resposta)", "Solicitante email",
                     "Solicitante Tel.", "Email do aprovador"};
 
             for (int i = 0; i < headers.length; i++) {
@@ -225,6 +225,13 @@ public class ExcelExportServiceImpl implements ExportService {
 			linhaTerapeutica = ultimaResposta.getLinhaTerapeutica().replace("_linha", " Linha");
 		}
 		createCell(row, colNum++, linhaTerapeutica, dataStyle);
+
+		// Esquema (resposta)
+		String esquema = "";
+		if (ultimaResposta != null) {
+			esquema = ultimaResposta.getEsquemaAprovado();
+		}
+		createCell(row, colNum++, esquema, dataStyle);
 		
 		// Solicitante email
 		String solicitanteEmail = pedido.getDadosClinico() != null ? pedido.getDadosClinico().getEmail() : "";
