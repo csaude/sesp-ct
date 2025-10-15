@@ -225,7 +225,7 @@ public class ExcelExportServiceImpl implements ExportService {
 			linhaTerapeutica = ultimaResposta.getLinhaTerapeutica().replace("_linha", " Linha");
 		}
 		createCell(row, colNum++, linhaTerapeutica, dataStyle);
-
+		
 		// Esquema (resposta)
 		String esquema = "";
 		if (ultimaResposta != null) {
