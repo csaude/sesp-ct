@@ -167,7 +167,7 @@ public class SespctSchedulerTask extends AbstractTask {
 			createEncounterForPedido(pedido, patient.get());
 			log.info("Successfully processed Pedido id={} for Patient id={}", pedido.getId(), patient.get().getPatientId());
 			
-			pedido.setEstado(Constants.PEDIDO_STATUS_PROCESSED);
+			//pedido.setEstado(Constants.PEDIDO_STATUS_PROCESSED);
 			pedidoService.savePedido(pedido);
 			log.info("Pedido id={} marcado como TERMINADO após criação do Encounter", pedido.getId());
 			log.info("Successfully processed Pedido id={} for Patient id={}", pedido.getId(), patient.get().getPatientId());
@@ -412,6 +412,22 @@ public class SespctSchedulerTask extends AbstractTask {
 	            }
 				
 				respostaSyncService.updateEncounterWithRespostas(pedido, encounter, ultimasRespostas);
+				
+				// Atualiza o estado do pedido com o estado da resposta
+	            if (resposta.getResposta() != null && !resposta.getResposta().trim().isEmpty()) {
+	                String estado = resposta.getResposta().trim().toUpperCase();
+
+	                if (estado.contains("APROVADO")) {
+	                    pedido.setEstado(Constants.ESTADO_APROVADO);
+	                } else if (estado.contains("ADIADO")) {
+	                    pedido.setEstado(Constants.ESTADO_ADIADO);
+	                } else {
+	                    pedido.setEstado(Constants.ESTADO_SEM_RESPOSTA);
+	                }
+
+	                pedidoService.savePedido(pedido);
+	                log.info("Pedido id={} atualizado com novo estado: {}", pedido.getPedidoId(), pedido.getEstado());
+	            }
 				
 				// Marca como sincronizado
 				resposta.setSincronizado(true);
