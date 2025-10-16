@@ -123,9 +123,6 @@
                                 <c:when test="${pedidoWrapper.pedido.estado == Pedido.ESTADO_ADIADO}">
                                     <span class="status-not-processed"><openmrs:message code="sespct.search.status.ADIADO"/></span>
                                 </c:when>
-                                <c:when test="${pedidoWrapper.pedido.estado == Pedido.ESTADO_PROCESSADO}">
-                                    <span class="status-not-processed"><openmrs:message code="sespct.search.status.PROCESSADO"/></span>
-                                </c:when>
                                 <c:otherwise>
                                     ${pedidoWrapper.pedido.estado}
                                 </c:otherwise>
