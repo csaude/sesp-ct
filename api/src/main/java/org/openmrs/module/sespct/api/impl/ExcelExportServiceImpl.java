@@ -196,7 +196,8 @@ public class ExcelExportServiceImpl implements ExportService {
 		}
 		
 		// Sincronização
-		LocalDateTime dataSincronizacao = (ultimaResposta != null) ? ultimaResposta.getTimestamp() : null;
+		LocalDateTime dataSincronizacao = (ultimaResposta != null) ? ultimaResposta.getTimestamp() : pedido
+		        .getDataSubmissao();
 		createDateCell(row, colNum++, dataSincronizacao, dateCellStyle);
 		
 		// Estado
@@ -222,7 +223,10 @@ public class ExcelExportServiceImpl implements ExportService {
 		// Linha Terap. (resposta)
 		String linhaTerapeutica = "";
 		if (ultimaResposta != null) {
-			linhaTerapeutica = ultimaResposta.getLinhaTerapeutica().replace("_linha", " Linha");
+			String valor = ultimaResposta.getLinhaTerapeutica();
+			if (valor != null && !valor.isEmpty()) {
+				linhaTerapeutica = valor.replace("_linha", " Linha");
+			}
 		}
 		createCell(row, colNum++, linhaTerapeutica, dataStyle);
 		
