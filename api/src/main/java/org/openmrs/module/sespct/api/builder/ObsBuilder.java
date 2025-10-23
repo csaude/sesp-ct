@@ -208,7 +208,7 @@ public class ObsBuilder {
 	}
 	
 	public ObsBuilder addRespostaComiteObs(String groupUuid, String estado, String linha, String comentario,
-	        Date dataResposta, String autor) {
+	        Date dataResposta, String autor, String esquemaAprovado) {
 		
 		Obs group = new Obs();
 		group.setConcept(Context.getConceptService().getConceptByUuid(groupUuid));
@@ -252,13 +252,24 @@ public class ObsBuilder {
 		
 		// Comentario + Data da Resposta
 		if ((comentario != null && !comentario.trim().isEmpty()) || dataResposta != null) {
+			
 			Obs comentarioObs = createBaseObs(Constants.RESPOSTA_COMENTARIO_UUID);
+			
+			StringBuilder valor = new StringBuilder();
+			
+			// comentário primeiro
 			if (comentario != null && !comentario.trim().isEmpty()) {
-				comentarioObs.setValueText(comentario.trim());
+				valor.append(comentario.trim());
 			}
-			if (dataResposta != null) {
-				comentarioObs.setObsDatetime(dataResposta);
+			
+			if (esquemaAprovado != null && !esquemaAprovado.trim().isEmpty()) {
+				if (valor.length() > 0)
+					valor.append("  ");
+				valor.append("Esquema: ").append(esquemaAprovado.trim());
 			}
+			
+			comentarioObs.setValueText(valor.toString());
+			comentarioObs.setObsDatetime(dataResposta != null ? dataResposta : new Date());
 			group.addGroupMember(comentarioObs);
 		}
 		

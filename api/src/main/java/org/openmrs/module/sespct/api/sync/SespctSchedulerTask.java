@@ -322,7 +322,8 @@ public class SespctSchedulerTask extends AbstractTask {
 		    null, // sem linha ainda
 		    null, // sem comentário
 		    null, // data submissão
-		    null // sem autor
+		    null, // sem autor
+		    null // esquema aprovado
 				);
 	}
 	

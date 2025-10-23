@@ -58,7 +58,8 @@ public class RespostaSyncService {
 			    resposta.getLinhaTerapeutica(), // Linha terapêutica
 			    resposta.getComentario(), // Comentário
 			    dataResposta, // Data da resposta
-			    resposta.getAutorizante() // Autor
+			    resposta.getAutorizante(), // Autor
+			    resposta.getEsquemaAprovado() // Esquema aprovado
 			        );
 		}
 		
