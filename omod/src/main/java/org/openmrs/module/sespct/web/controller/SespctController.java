@@ -43,6 +43,25 @@ public class SespctController {
 	
 	private static final Logger log = LoggerFactory.getLogger(SespctController.class);
 	
+	private static final List<DateTimeFormatter> DATE_FORMATTERS = Arrays.asList(
+	// --- High Priority / Unambiguous ---
+	    DateTimeFormatter.ISO_LOCAL_DATE, // yyyy-MM-dd (Standard)
+	    
+	    // --- Day-First Formats (Europe, S. America, etc.) ---
+	    DateTimeFormatter.ofPattern("dd-MM-yyyy"), // dd-MM-yyyy
+	    DateTimeFormatter.ofPattern("dd/MM/yyyy"), // dd/MM/yyyy
+	    DateTimeFormatter.ofPattern("dd.MM.yyyy"), // dd.MM.yyyy (Dot separator)
+	    
+	    // --- Month-First Formats (US) ---
+	    DateTimeFormatter.ofPattern("MM/dd/yyyy"), // MM/dd/yyyy
+	    DateTimeFormatter.ofPattern("MM-dd-yyyy"), // MM-dd-yyyy
+	    DateTimeFormatter.ofPattern("MM.dd.yyyy"), // MM.dd.yyyy (Dot separator)
+	    
+	    // --- Lower Priority / 2-Digit Year Formats ---
+	    DateTimeFormatter.ofPattern("dd/MM/yy"), // dd/MM/yy
+	    DateTimeFormatter.ofPattern("MM/dd/yy") // MM/dd/yy
+	        );
+	
 	@RequestMapping(value = "sespct.form", method = RequestMethod.GET)
 	public String showMainPage(ModelMap model, HttpServletResponse response, HttpSession session,
 	        @RequestParam(value = "startDate", required = false) String startDateStr,
@@ -67,10 +86,6 @@ public class SespctController {
 			model.addAttribute("flashMessage", flashMessage);
 		}
 		
-		DateTimeFormatter ptFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-		DateTimeFormatter enFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-		DateTimeFormatter isoFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-		
 		LocalDate startDate = null;
 		LocalDate endDate = null;
 		
@@ -84,36 +99,9 @@ public class SespctController {
 		}
 		
 		try {
-			if (startDateStr != null && !startDateStr.trim().isEmpty()) {
-				try {
-					startDate = LocalDate.parse(startDateStr, ptFormatter);
-				}
-				catch (DateTimeParseException e1) {
-					try {
-						startDate = LocalDate.parse(startDateStr, enFormatter);
-					}
-					catch (DateTimeParseException e2) {
-						// Fallback to the ISO standard format
-						startDate = LocalDate.parse(startDateStr, isoFormatter);
-					}
-				}
-			}
-			
-			if (endDateStr != null && !endDateStr.trim().isEmpty()) {
-				try {
-					endDate = LocalDate.parse(endDateStr, ptFormatter);
-				}
-				catch (DateTimeParseException e1) {
-					try {
-						endDate = LocalDate.parse(endDateStr, enFormatter);
-					}
-					catch (DateTimeParseException e2) {
-						// Fallback to the ISO standard format
-						endDate = LocalDate.parse(endDateStr, isoFormatter);
-					}
-				}
-			}
-			
+			startDate = parseLocalDateMultiFormat(startDateStr);
+			endDate = parseLocalDateMultiFormat(endDateStr);
+
 			// Remove spaces from free text fields as per requirements
 			String trimmedNcft = (ncft != null) ? ncft.trim() : null;
 			String trimmedNid = (nid != null) ? nid.trim() : null;
@@ -258,21 +246,26 @@ public class SespctController {
 	 * @throws DateTimeParseException if the string cannot be parsed by any known format.
 	 */
 	private LocalDate parseLocalDateMultiFormat(String dateString) {
-		// 4. Use the immutable and thread-safe DateTimeFormatter
-		List<DateTimeFormatter> knownFormatters = Arrays.asList(DateTimeFormatter.ofPattern("MM/dd/yyyy"), // English format
-		    DateTimeFormatter.ofPattern("dd-MM-yyyy") // Portuguese format
-		        );
+		// 1. Handle null or empty input gracefully
+		if (dateString == null || dateString.trim().isEmpty()) {
+			return null;
+		}
 		
-		for (DateTimeFormatter formatter : knownFormatters) {
+		String trimmedDateString = dateString.trim();
+		
+		// 2. Loop through all our defined formatters
+		for (DateTimeFormatter formatter : DATE_FORMATTERS) {
 			try {
-				return LocalDate.parse(dateString, formatter);
+				return LocalDate.parse(trimmedDateString, formatter);
 			}
 			catch (DateTimeParseException e) {
 				// Ignore and try the next format
 			}
 		}
-		// If no format matches, throw a specific exception
-		throw new DateTimeParseException("Invalid date format for value: \"" + dateString + "\"", dateString, 0);
+		
+		// 3. If no format matches, throw a specific exception
+		throw new DateTimeParseException("Formato de data inválido. Não foi possível analisar: \"" + trimmedDateString
+		        + "\"", trimmedDateString, 0);
 	}
 	
 	/**
