@@ -28,17 +28,31 @@
             <configuration>
               <artifactSet>
                 <includes>
-                  <include>org.apache.poi:poi</include>
-                  <include>org.apache.poi:poi-ooxml</include>
                   <include>org.apache.httpcomponents:httpclient</include>
                   <include>org.apache.httpcomponents:httpcore</include>
+                  <include>org.apache.poi:*</include>
+                  <include>org.apache.commons:commons-compress</include>
+                  <include>org.apache.commons:commons-collections4</include>
+                  <include>org.apache.xmlbeans:xmlbeans</include>
+                  <include>commons-io:commons-io</include>
                 </includes>
+                <excludes>
+                  <exclude>org.slf4j:*</exclude>
+                  <exclude>commons-logging:*</exclude>
+                </excludes>
               </artifactSet>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/maven/**</exclude>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
               <relocations>
-                <relocation>
-                  <pattern>org.apache.poi</pattern>
-                  <shadedPattern>org.openmrs.module.sespct.shaded.poi</shadedPattern>
-                </relocation>
                 <relocation>
                   <pattern>org.apache.http</pattern>
                   <shadedPattern>org.openmrs.module.sespct.shaded.http</shadedPattern>
@@ -48,6 +62,13 @@
                   <shadedPattern>org.openmrs.module.sespct.shaded.codec</shadedPattern>
                 </relocation>
               </relocations>
+              <transformers>
+                <transformer>
+                  <manifestEntries>
+                    <Multi-Release>true</Multi-Release>
+                  </manifestEntries>
+                </transformer>
+              </transformers>
             </configuration>
           </execution>
         </executions>
@@ -85,12 +106,6 @@
       <artifactId>legacyui-omod</artifactId>
       <version>1.8.2</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>2.11.0</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>

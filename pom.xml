@@ -219,6 +219,6 @@
 
 	<properties>
 		<openmrsPlatformVersion>2.3.3</openmrsPlatformVersion>
-		<my.poi.version>5.2.3</my.poi.version>
+		<my.poi.version>4.1.2</my.poi.version>
 	</properties>
 </project>

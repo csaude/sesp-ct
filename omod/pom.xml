@@ -44,6 +44,16 @@
 		</dependency>
 		
 		<!-- Apache POI dependencies -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.poi</groupId>
@@ -53,14 +63,74 @@
 					<groupId>xml-apis</groupId>
 					<artifactId>xml-apis</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- POI OOXML Schemas - IMPORTANT! -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml-schemas</artifactId>
+			<version>${my.poi.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- POI dependencies that might be missing -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>1.19</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>4.4</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.xmlbeans</groupId>
+			<artifactId>xmlbeans</artifactId>
+			<version>3.1.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 	    
 	    <!-- Commons IO - necessário para POI -->
-	    <dependency>
+		<dependency>
 	        <groupId>commons-io</groupId>
 	        <artifactId>commons-io</artifactId>
 	        <version>2.11.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
     	</dependency>
     	
 		<dependency>
@@ -93,38 +163,60 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.2.4</version> <executions>
-				<execution>
-					<phase>package</phase>
-					<goals>
-						<goal>shade</goal>
-					</goals>
-					<configuration>
-						<artifactSet>
-							<includes>
-								<include>org.apache.poi:poi</include>
-								<include>org.apache.poi:poi-ooxml</include>
-								<include>org.apache.httpcomponents:httpclient</include>
-								<include>org.apache.httpcomponents:httpcore</include>
-							</includes>
-						</artifactSet>
-						<relocations>
-							<relocation>
-								<pattern>org.apache.poi</pattern>
-								<shadedPattern>org.openmrs.module.sespct.shaded.poi</shadedPattern>
-							</relocation>
-							<relocation>
-								<pattern>org.apache.http</pattern>
-								<shadedPattern>org.openmrs.module.sespct.shaded.http</shadedPattern>
-							</relocation>
-							<relocation>
-								<pattern>org.apache.commons.codec</pattern>
-								<shadedPattern>org.openmrs.module.sespct.shaded.codec</shadedPattern>
-							</relocation>
-						</relocations>
-					</configuration>
-				</execution>
-			</executions>
+				<version>3.2.4</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<artifactSet>
+								<includes>
+									<include>org.apache.httpcomponents:httpclient</include>
+									<include>org.apache.httpcomponents:httpcore</include>
+									<include>org.apache.poi:*</include>
+									<include>org.apache.commons:commons-compress</include>
+									<include>org.apache.commons:commons-collections4</include>
+									<include>org.apache.xmlbeans:xmlbeans</include>
+									<include>commons-io:commons-io</include>
+								</includes>
+								<excludes>
+									<exclude>org.slf4j:*</exclude>
+									<exclude>commons-logging:*</exclude>
+								</excludes>
+							</artifactSet>
+							<filters>
+								<filter>
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>META-INF/maven/**</exclude>
+										<exclude>META-INF/*.SF</exclude>
+										<exclude>META-INF/*.DSA</exclude>
+										<exclude>META-INF/*.RSA</exclude>
+									</excludes>
+								</filter>
+							</filters>
+							<relocations>
+								<relocation>
+									<pattern>org.apache.http</pattern>
+									<shadedPattern>org.openmrs.module.sespct.shaded.http</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.apache.commons.codec</pattern>
+									<shadedPattern>org.openmrs.module.sespct.shaded.codec</shadedPattern>
+								</relocation>
+							</relocations>
+							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<manifestEntries>
+										<Multi-Release>true</Multi-Release>
+									</manifestEntries>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
