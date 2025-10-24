@@ -8,7 +8,7 @@ Este módulo OpenMRS estende a plataforma SESP (Sistema Electrónico de Seguimen
 
 Antes de instalar este módulo, certifique‑se de que o seu ambiente cumpre os seguintes requisitos:
 
-- **Plataforma OpenMRS:** Versão 2.3.3 (referida como SESP).
+- **Plataforma OpenMRS:** Versão 2.3.3 ou ou 2.6.11 (referidas como SESP).
 - **Java:** Versão 8 (JDK 8 / JRE 8).
 - **Servidor de Aplicação:** Apache Tomcat 8 ou 9.
 - **Base de Dados:** MySQL 5.6 ou superior.
