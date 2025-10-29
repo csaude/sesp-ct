@@ -215,8 +215,11 @@ public class ExcelExportServiceImpl implements ExportService {
 		
 		// Causa de Não processamento
 		String causa = "-";
-		if (Pedido.ESTADO_NAO_PROCESSADO.equals(pedido.getEstado()) || "Not Processed".equals(pedido.getEstado())) {
-			causa = " NID não encontrado";
+		
+		if (Pedido.CAUSA_NID_NAO_ENCONTRADO.equals(pedido.getCausa())) {
+			causa = "NID não encontrado";
+		} else if (Pedido.CAUSA_NID_DUPLICADO.equals(pedido.getCausa())) {
+			causa = "NID duplicado";
 		}
 		createCell(row, colNum++, causa, dataStyle);
 		

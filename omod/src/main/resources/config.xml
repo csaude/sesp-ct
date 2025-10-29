@@ -45,7 +45,7 @@
 
 	<globalProperty>
 		<property>sespct.api.baseUrl</property>
-		<defaultValue>http://sctdev.csaude.org.mz/api</defaultValue>
+		<defaultValue>https://sctdev.csaude.org.mz/api</defaultValue>
 		<description>
 			URL base da API do middleware SESP-CT.
 		</description>
