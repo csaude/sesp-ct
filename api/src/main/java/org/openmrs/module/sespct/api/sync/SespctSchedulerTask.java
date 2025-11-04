@@ -183,10 +183,10 @@ public class SespctSchedulerTask extends AbstractTask {
 			return false;
 		}
 	}
-
+	
 	private Optional<Patient> findPatientByIdentifier(Pedido pedido, String identifier) {
 		List<Patient> patients = Context.getPatientService().getPatients(null, identifier, null, true);
-
+		
 		if (patients == null || patients.isEmpty()) {
 			log.warn("No patient found with NID={} for Pedido id={}", identifier, pedido.getId());
 			try {
@@ -200,7 +200,7 @@ public class SespctSchedulerTask extends AbstractTask {
 			}
 			return Optional.empty();
 		}
-
+		
 		if (patients.size() > 1) {
 			log.warn("Duplicate NID detected ({} patients) for Pedido id={}", patients.size(), pedido.getId());
 			try {
@@ -214,14 +214,14 @@ public class SespctSchedulerTask extends AbstractTask {
 			}
 			return Optional.empty();
 		}
-
+		
 		// Caso normal: apenas 1 paciente encontrado
 		Patient patient = patients.get(0);
 		log.debug("Found Patient id={} for Pedido id={}", patient.getPatientId(), pedido.getId());
-
+		
 		return Optional.of(patient);
 	}
-
+	
 	private void createEncounterForPedido(Pedido pedido, Patient patient) {
 		log.debug("Creating encounter for Patient id={}, Pedido id={}", patient.getPatientId(), pedido.getId());
 		
@@ -466,7 +466,6 @@ public class SespctSchedulerTask extends AbstractTask {
 				if (pacientes.size() == 1) {
 					String novoEstado = determineEstadoFromRespostas(pedido);
 					pedido.setEstado(novoEstado);
-					pedido.setCausa(null);
 					pedidoService.savePedido(pedido);
 					
 					log.info("Pedido id={} reativado (duplicação resolvida, NID={})", pedido.getId(), nid);
