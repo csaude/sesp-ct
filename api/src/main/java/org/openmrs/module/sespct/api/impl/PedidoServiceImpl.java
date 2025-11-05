@@ -2,9 +2,7 @@ package org.openmrs.module.sespct.api.impl;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.Location;
@@ -410,6 +408,9 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 		log.info("Processing " + dtos.size() + " fetched respostas...");
 		List<String> newlySavedRespostaUUIds = new ArrayList<>();
 
+		// Track which pedidos we've updated so we can update their estado at the end
+		Set<Integer> updatedPedidoIds = new HashSet<>();
+
 		for (RespostaDTO dto : dtos) {
 			Integer externalPedidoId = dto.getPedidoId();
 			Integer externalRespostaId = dto.getRespostaId();
@@ -418,34 +419,22 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 				log.warn("Skipping a resposta with a null external ID. UUID: {}", dto.getUuid());
 				continue;
 			}
+
 			// IDEMPOTENCY CHECK: Only save if it's a new resposta
 			if (!pedidoDao.doesRespostaExist(String.valueOf(externalRespostaId))) {
 				Pedido parentPedido = pedidoDao.getPedidoByExternalId(String.valueOf(externalPedidoId));
-
 
 				if (parentPedido != null) {
 					Resposta newResposta = SespctMapper.toRespostaEntity(dto, parentPedido);
 					pedidoDao.saveResposta(newResposta);
 					parentPedido.getRespostas().add(newResposta);
 
-					String respostaTexto = newResposta.getResposta();
-					log.info("Attempting to update status for pedido {} based on resposta text: '{}'", parentPedido.getPedidoId(), respostaTexto);
-
-					if (respostaTexto != null && !respostaTexto.trim().isEmpty()) {
-						String[] words = respostaTexto.trim().split(" +");
-						String firstWord = words[0];
-						// Now, compare only the first word, ignoring case
-						if ("aprovado".equalsIgnoreCase(firstWord)) {
-							parentPedido.setEstado(Pedido.ESTADO_APROVADO);
-						} else if ("adiado".equalsIgnoreCase(firstWord)) {
-							parentPedido.setEstado(Pedido.ESTADO_ADIADO);
-						}
-					}
-
-					pedidoDao.savePedido(parentPedido);
 					// Add the outer UUID to the list to be marked as consumed
 					newlySavedRespostaUUIds.add(dto.getUuid());
 					log.info("Saved new resposta {} for pedido {}", externalRespostaId, externalPedidoId);
+
+					// Track that this pedido needs estado update
+					updatedPedidoIds.add(parentPedido.getId());
 				} else {
 					log.warn("Could not find parent pedido with ID: {}. Cannot save resposta {}", externalPedidoId, externalRespostaId);
 				}
@@ -453,7 +442,55 @@ public class PedidoServiceImpl extends BaseOpenmrsService implements PedidoServi
 				log.warn("Skipping already existing resposta with ID: " + externalRespostaId);
 			}
 		}
+
+		// Now update the estado for all affected pedidos based on their LATEST resposta
+		for (Integer pedidoId : updatedPedidoIds) {
+			Pedido pedido = pedidoDao.getPedidoById(pedidoId);
+			if (pedido != null) {
+				updatePedidoEstadoFromLatestResposta(pedido);
+				pedidoDao.savePedido(pedido);
+			}
+		}
+
 		return newlySavedRespostaUUIds;
+	}
+	
+	// Helper method to update pedido estado based on the latest resposta
+	private void updatePedidoEstadoFromLatestResposta(Pedido pedido) {
+		List<Resposta> allRespostas = pedido.getRespostas();
+
+		if (allRespostas == null || allRespostas.isEmpty()) {
+			return;
+		}
+
+		// Find the resposta with the latest timestamp
+		Resposta latestResposta = allRespostas.stream()
+				.filter(r -> r.getTimestamp() != null)
+				.max(Comparator.comparing(Resposta::getTimestamp))
+				.orElse(null);
+
+		if (latestResposta == null) {
+			log.warn("No respostas with timestamps found for pedido {}", pedido.getPedidoId());
+			return;
+		}
+
+		String respostaTexto = latestResposta.getResposta();
+		log.info("Updating pedido {} estado based on latest resposta (timestamp: {}): '{}'",
+				pedido.getPedidoId(), latestResposta.getFormattedTimestamp(), respostaTexto);
+
+		if (respostaTexto != null && !respostaTexto.trim().isEmpty()) {
+			String[] words = respostaTexto.trim().split(" +");
+			String firstWord = words[0];
+
+			// Compare only the first word, ignoring case
+			if ("aprovado".equalsIgnoreCase(firstWord)) {
+				pedido.setEstado(Pedido.ESTADO_APROVADO);
+				log.info("Set pedido {} estado to APROVADO", pedido.getPedidoId());
+			} else if ("adiado".equalsIgnoreCase(firstWord)) {
+				pedido.setEstado(Pedido.ESTADO_ADIADO);
+				log.info("Set pedido {} estado to ADIADO", pedido.getPedidoId());
+			}
+		}
 	}
 	
 	@Override

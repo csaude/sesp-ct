@@ -95,7 +95,7 @@ public class SespctController {
 		}
 		catch (Exception e) {
 			log.error("An error occurred during middleware synchronization.", e);
-			model.addAttribute("errorMessage", "Ocorreu um erro durante a sincronização: " + e.getMessage());
+			model.addAttribute("errorMessage", "O sistema está temporariamente indisponível.  Tente novamente dentro de alguns minutos. Se o problema continuar, contacte o administrador." );
 		}
 		
 		try {

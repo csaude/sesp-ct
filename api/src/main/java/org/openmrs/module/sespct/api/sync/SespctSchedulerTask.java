@@ -1,10 +1,6 @@
 package org.openmrs.module.sespct.api.sync;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.openmrs.Encounter;
@@ -382,65 +378,76 @@ public class SespctSchedulerTask extends AbstractTask {
 		RespostaSyncService respostaSyncService = new RespostaSyncService();
 		List<Resposta> respostasPendentes = pedidoService.getRespostasPendentes();
 		log.info("Foram encontradas {} respostas pendentes", respostasPendentes.size());
-		
-		for (Resposta resposta : respostasPendentes) {
-			Pedido pedido = resposta.getPedido();
+
+		// Group respostas by pedido to avoid processing the same pedido multiple times
+		Map<Integer, List<Resposta>> respostasPorPedido = respostasPendentes.stream()
+				.filter(r -> r.getPedido() != null)
+				.collect(Collectors.groupingBy(r -> r.getPedido().getId()));
+
+		for (Map.Entry<Integer, List<Resposta>> entry : respostasPorPedido.entrySet()) {
+			Integer pedidoId = entry.getKey();
+			List<Resposta> respostasParaEssePedido = entry.getValue();
+
+			Pedido pedido = pedidoService.getPedidoById(pedidoId);
 			if (pedido == null) {
-				log.error("Resposta id={} não tem Pedido associado!", resposta.getId());
+				log.error("Pedido id={} não encontrado!", pedidoId);
 				continue;
 			}
-			
+
 			Encounter encounter = EncounterUtils.findEncounterByPedidoId(pedido.getPedidoId());
 			if (encounter == null) {
 				log.warn(
-				    "Encounter não encontrado para Pedido id={} (Resposta id={}), será tentado novamente no próximo ciclo",
-				    pedido.getPedidoId(), resposta.getId());
-				pedidoService.saveResposta(resposta);
+						"Encounter não encontrado para Pedido id={}, será tentado novamente no próximo ciclo",
+						pedido.getPedidoId());
 				continue;
 			}
-			
+
 			try {
+				// Get all respostas for this pedido and sort by date
 				List<Resposta> todasRespostas = pedidoService.getRespostasByPedidoId(pedido.getId());
-				
-	            List<Resposta> ultimasRespostas = todasRespostas.stream()
-	                    .sorted(Comparator.comparing(Resposta::getDataResposta,Comparator.nullsLast(Comparator.naturalOrder())).reversed())
-	                    .limit(2)
-	                    .collect(Collectors.toList());
-				
-	            if (ultimasRespostas.isEmpty()) {
-	                log.warn("Nenhuma resposta válida encontrada para Pedido id={}", pedido.getPedidoId());
-	                continue;
-	            }
-				
+
+				List<Resposta> ultimasRespostas = todasRespostas.stream()
+						.sorted(Comparator.comparing(Resposta::getDataResposta,
+								Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+						.limit(2)
+						.collect(Collectors.toList());
+
+				if (ultimasRespostas.isEmpty()) {
+					log.warn("Nenhuma resposta válida encontrada para Pedido id={}", pedido.getPedidoId());
+					continue;
+				}
+
 				respostaSyncService.updateEncounterWithRespostas(pedido, encounter, ultimasRespostas);
-				
-				// Atualiza o estado do pedido com o estado da resposta
-	            if (resposta.getResposta() != null && !resposta.getResposta().trim().isEmpty()) {
-	                String estado = resposta.getResposta().trim().toUpperCase();
 
-	                if (estado.contains("APROVADO")) {
-	                    pedido.setEstado(Constants.ESTADO_APROVADO);
-	                } else if (estado.contains("ADIADO")) {
-	                    pedido.setEstado(Constants.ESTADO_ADIADO);
-	                } else {
-	                    pedido.setEstado(Constants.ESTADO_SEM_RESPOSTA);
-	                }
+				// CRITICAL FIX: Update estado based on the LATEST resposta, not the current loop resposta
+				Resposta respostaRecente = ultimasRespostas.get(0); // This is the most recent one
+				if (respostaRecente.getResposta() != null && !respostaRecente.getResposta().trim().isEmpty()) {
+					String estado = respostaRecente.getResposta().trim().toUpperCase();
 
-	                pedidoService.savePedido(pedido);
-	                log.info("Pedido id={} atualizado com novo estado: {}", pedido.getPedidoId(), pedido.getEstado());
-	            }
-				
-				// Marca como sincronizado
-				resposta.setSincronizado(true);
-				pedidoService.saveResposta(resposta);
-				
-				log.info("Resposta id={} aplicada com sucesso ao Encounter do Pedido id={}", resposta.getId(),
-				    pedido.getPedidoId());
-				
+					if (estado.contains("APROVADO")) {
+						pedido.setEstado(Constants.ESTADO_APROVADO);
+					} else if (estado.contains("ADIADO")) {
+						pedido.setEstado(Constants.ESTADO_ADIADO);
+					} else {
+						pedido.setEstado(Constants.ESTADO_SEM_RESPOSTA);
+					}
+
+					pedidoService.savePedido(pedido);
+					log.info("Pedido id={} atualizado com novo estado baseado na resposta mais recente id={}: {}",
+							pedido.getPedidoId(), respostaRecente.getId(), pedido.getEstado());
+				}
+
+				// Mark ALL pending respostas for this pedido as synchronized
+				for (Resposta r : respostasParaEssePedido) {
+					r.setSincronizado(true);
+					pedidoService.saveResposta(r);
+					log.info("Resposta id={} marcada como sincronizada para Pedido id={}",
+							r.getId(), pedido.getPedidoId());
+				}
+
 			}
 			catch (Exception e) {
-				log.error("Erro ao aplicar Resposta id={} ao Pedido id={}", resposta.getId(), pedido.getPedidoId(), e);
-				pedidoService.saveResposta(resposta);
+				log.error("Erro ao processar respostas para Pedido id={}", pedido.getPedidoId(), e);
 			}
 		}
 	}
@@ -457,8 +464,8 @@ public class SespctSchedulerTask extends AbstractTask {
 				
 				List<Patient> pacientes = Context.getPatientService().getPatients(null, nid, null, true);
 				if (pacientes.size() == 1) {
-					pedido.setEstado(Constants.ESTADO_SEM_RESPOSTA);
-					pedido.setCausa(null);
+					String novoEstado = determineEstadoFromRespostas(pedido);
+					pedido.setEstado(novoEstado);
 					pedidoService.savePedido(pedido);
 					
 					log.info("Pedido id={} reativado (duplicação resolvida, NID={})", pedido.getId(), nid);
@@ -469,6 +476,56 @@ public class SespctSchedulerTask extends AbstractTask {
 			catch (Exception e) {
 				log.error("Erro ao verificar NID duplicado para Pedido id={}", pedido.getId(), e);
 			}
+		}
+	}
+	
+	/**
+	 * Determines the appropriate estado for a pedido based on its respostas. If respostas exist,
+	 * uses the latest one to determine estado. If no respostas exist, returns ESTADO_SEM_RESPOSTA.
+	 * 
+	 * @param pedido The pedido to analyze
+	 * @return The appropriate estado string
+	 */
+	private String determineEstadoFromRespostas(Pedido pedido) {
+		List<Resposta> todasRespostas = pedidoService.getRespostasByPedidoId(pedido.getId());
+
+		if (todasRespostas == null || todasRespostas.isEmpty()) {
+			log.debug("Pedido id={} não tem respostas, usando ESTADO_SEM_RESPOSTA", pedido.getId());
+			return Constants.ESTADO_SEM_RESPOSTA;
+		}
+
+		// Find the most recent resposta
+		Optional<Resposta> respostaRecente = todasRespostas.stream()
+				.filter(r -> r.getDataResposta() != null)
+				.max(Comparator.comparing(Resposta::getDataResposta));
+
+		if (!respostaRecente.isPresent()) {
+			log.warn("Pedido id={} tem respostas mas nenhuma com dataResposta válida, usando ESTADO_SEM_RESPOSTA",
+					pedido.getId());
+			return Constants.ESTADO_SEM_RESPOSTA;
+		}
+
+		String respostaTexto = respostaRecente.get().getResposta();
+		if (respostaTexto == null || respostaTexto.trim().isEmpty()) {
+			log.warn("Pedido id={} tem resposta recente mas sem texto, usando ESTADO_SEM_RESPOSTA",
+					pedido.getId());
+			return Constants.ESTADO_SEM_RESPOSTA;
+		}
+
+		String estadoUpper = respostaTexto.trim().toUpperCase();
+
+		if (estadoUpper.contains("APROVADO")) {
+			log.debug("Pedido id={} definido como APROVADO baseado na resposta id={}",
+					pedido.getId(), respostaRecente.get().getId());
+			return Constants.ESTADO_APROVADO;
+		} else if (estadoUpper.contains("ADIADO")) {
+			log.debug("Pedido id={} definido como ADIADO baseado na resposta id={}",
+					pedido.getId(), respostaRecente.get().getId());
+			return Constants.ESTADO_ADIADO;
+		} else {
+			log.debug("Pedido id={} tem resposta '{}' que não corresponde a APROVADO/ADIADO, usando ESTADO_SEM_RESPOSTA",
+					pedido.getId(), respostaTexto);
+			return Constants.ESTADO_SEM_RESPOSTA;
 		}
 	}
 }
